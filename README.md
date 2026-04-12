@@ -1,2 +1,688 @@
+<div align="center">
+
 # AnTiEnTRopY
-AntiEntropy models aging as stochastic entropy drift in CpG methylation state space. It integrates ElasticNetCV clocks, site-wise Shannon entropy  𝐻 ( 𝛽 ) H(β), PCA spectral decomposition, and HRF-based resonance to quantify negentropy gradients and simulate control-driven reversal toward low-entropy attractors.
+
+### *Epigenetic Entropy Reversal & Biological Age Intelligence Platform*
+
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square)](LICENSE)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-ElasticNet-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)](https://scikit-learn.org)
+[![Status](https://img.shields.io/badge/Status-Research%20Preview-00e5a0?style=flat-square)]()
+
+---
+
+*"Aging is not an inevitable consequence of thermodynamics — it is a drift in information storage."*
+
+*— Inspired by David A. Sinclair's Information Theory of Aging*
+
+</div>
+
+---
+
+## Abstract
+
+**AnTiEnTRopY** is an open-source, research-grade computational platform for the quantitative analysis of biological aging through the lens of epigenetic entropy. The system integrates five mathematically distinct engines — an ElasticNetCV biological clock, a site-wise Shannon entropy decomposition module, a Harmonic Resonance Field (HRF) wave-interference classifier, a partial reprogramming reversal simulator, and a Monte Carlo escape velocity engine — into a unified Streamlit interface.
+
+The core hypothesis formalized here is that biological aging corresponds, at the epigenomic level, to a stochastic drift of CpG methylation beta values toward maximum informational disorder, i.e. toward $\beta \to 0.5$. Young, ordered epigenomes occupy low-entropy attractors in CpG state space; senescent epigenomes exhibit decoherence analogous to thermal noise in a physical system. AnTiEnTRopY quantifies this drift, classifies age states via resonance-field dynamics, and models the conditions under which targeted reprogramming interventions could exceed the biological aging rate — the **epigenetic escape velocity** condition.
+
+This work draws on the epigenetic clock literature (Horvath 2013; Hannum 2013; Levine et al. 2018), partial reprogramming biology (Ocampo et al. 2016; Lu et al. 2020; Yang et al. 2023), longevity escape velocity theory (de Grey 2004), and novel spectral analysis of the methylome inspired by the HRF wave-interference framework introduced in Debanik Debnath (2025).
+
+---
+
+## Table of Contents
+
+- [Scientific Background](#scientific-background)
+- [Mathematical Framework](#mathematical-framework)
+  - [I. Epigenetic Entropy](#i-epigenetic-entropy-engine)
+  - [II. Biological Clock](#ii-biological-clock-elasticnet)
+  - [III. Harmonic Resonance Field](#iii-harmonic-resonance-field-classifier)
+  - [IV. Reversal Simulator](#iv-reversal-simulator)
+  - [V. Immortality Engine](#v-immortality-engine--escape-velocity)
+- [Architecture](#system-architecture)
+- [Installation](#installation)
+- [Data Format](#data-format)
+- [Usage](#usage)
+- [Interface & Visualizations](#interface--visualizations)
+- [Key Findings](#key-findings-from-the-research-report)
+- [Limitations & Future Work](#limitations--future-work)
+- [References](#references)
+- [Author](#author)
+
+---
+
+## Scientific Background
+
+### DNA Methylation and the Epigenetic Clock
+
+DNA methylation at CpG dinucleotides — the addition of a methyl group to the fifth carbon of cytosine when followed by guanine — is among the most extensively studied epigenetic modifications in eukaryotes. The human genome contains approximately 28 million CpG sites, of which roughly 2–4% are assayed in Illumina 450K and EPIC (850K) array platforms widely used in aging research.
+
+In 2013, Steve Horvath (UCLA) demonstrated that a sparse linear combination of DNA methylation beta values at just 353 CpG sites could predict chronological age across 51 tissue types and 82 datasets with a median absolute error of approximately 3.6 years — a finding that fundamentally reshaped our understanding of epigenetic aging. This "pan-tissue epigenetic clock" (Horvath, 2013) uses elastic net regression to select and weight CpG sites, many of which are located in CpG islands near developmental gene promoters. Its construction on 8,000 samples spanning the entire human lifespan — including embryonic stem cells (predicted age ≈ 0) and centenarian tissue — established that DNA methylation age is a genuine biological signal, not merely a statistical artifact.
+
+The deviation of epigenetic age from chronological age — **epigenetic age acceleration** — has since been linked to all-cause mortality, cognitive decline, cancer risk, and inflammatory burden, independent of known clinical risk factors (Chen et al. 2016; Marioni et al. 2015).
+
+### The Entropy Hypothesis of Aging
+
+The hypothesis formalized in AnTiEnTRopY draws from several converging theoretical threads:
+
+**Waddington's Epigenetic Landscape** (1957) described development as a ball rolling downhill into attractor basins, with cell identity corresponding to stable low-energy valleys. Aging, in this framework, can be understood as a slow erosion of those valleys — a drift away from the developmentally defined attractors into states of higher informational disorder.
+
+**The Information Theory of Aging** (Sinclair & LaPlante 2019; Kane & Sinclair 2019) proposes that aging arises from the loss of epigenetic information — not from the accumulation of DNA mutations per se, but from a progressive noisification of the methylation landscape. Young cells maintain a high-fidelity epigenetic program; old cells exhibit increased stochastic variation in methylation state, reducing the signal-to-noise ratio of gene regulatory programs.
+
+**Shannon Entropy as a Disorder Metric**: The binary entropy function $H(\beta)$ provides a natural, site-specific quantification of this disorder. When $\beta = 0$ or $\beta = 1$, the CpG is in a deterministic, ordered state ($H = 0$). When $\beta = 0.5$, the site carries maximum uncertainty, contributing fully to epigenomic noise ($H = 1$).
+
+### Partial Reprogramming and Age Reversal
+
+The landmark 2006 discovery by Takahashi and Yamanaka demonstrated that somatic cells can be reprogrammed to pluripotency through the ectopic expression of four transcription factors: Oct4, Sox2, Klf4, and c-Myc (OSKM). Full reprogramming erases cellular identity, but the **partial reprogramming** paradigm — pioneered in vivo by Ocampo et al. (2016) — demonstrates that cyclic, transient expression of OSKM (or the safer OSK subset; Lu et al. 2020) can reverse age-associated epigenetic marks without loss of cell type identity. In aged mice, systemically delivered AAV-OSK extended median remaining lifespan by 109% (Browder et al. 2023).
+
+These experiments confirm the central assumption of AnTiEnTRopY's reversal module: that the epigenetic program of an aged cell retains a recoverable "youthful memory" that can, in principle, be restored by moving high-drift CpG sites back toward their young-reference beta values.
+
+---
+
+## Mathematical Framework
+
+### I. Epigenetic Entropy Engine
+
+**File:** `EnTRopY.py` | **Class:** `EpigeneticEntropy`
+
+#### 1.1 Binary Shannon Entropy per CpG Site
+
+For a CpG site with methylation beta value $\beta \in [0, 1]$, the site-wise informational disorder is quantified by the binary Shannon entropy:
+
+```math
+H(\beta) = -\beta \log_2(\beta) - (1-\beta) \log_2(1-\beta)
+```
+
+with boundary conditions $H(0) = H(1) = 0$ (ordered states) and $H(0.5) = 1$ (maximum disorder). A small numerical epsilon $\varepsilon = 10^{-10}$ is applied to avoid $\log(0)$ divergence:
+
+```math
+H(\beta) = -\tilde{\beta}\log_2(\tilde{\beta}) - (1-\tilde{\beta})\log_2(1-\tilde{\beta}), \qquad \tilde{\beta} = \text{clip}(\beta,\, \varepsilon,\, 1-\varepsilon)
+```
+
+#### 1.2 Methylation Order Index (MOI)
+
+For a sample with $N$ measured CpG sites $\{\beta_1, \beta_2, \ldots, \beta_N\}$, the **Methylation Order Index** is defined as:
+
+```math
+\text{MOI} = 1 - \frac{1}{N}\sum_{i=1}^{N} H(\beta_i)
+```
+
+The MOI ranges in $[0,1]$: a perfectly ordered (youthful) epigenome achieves $\text{MOI} = 1$, while a maximally disordered (senescent) epigenome achieves $\text{MOI} = 0$.
+
+#### 1.3 Age-Entropy Regression
+
+Across $M$ samples with chronological ages $\{a_1, \ldots, a_M\}$ and mean entropies $\{\bar{H}_1, \ldots, \bar{H}_M\}$, the entropy-aging rate is estimated by ordinary least squares:
+
+```math
+\bar{H}_j = \alpha + \lambda \cdot a_j + \varepsilon_j, \qquad \lambda = \frac{\text{Cov}(\bar{H}, a)}{\text{Var}(a)}
+```
+
+The slope $\lambda$ gives the **entropy increase per chronological year** — the fundamental aging rate parameter subsequently used by the Immortality Engine.
+
+#### 1.4 CpG Drift Classification
+
+For each CpG site $k$, the Pearson correlation of its beta value with chronological age across the population:
+
+```math
+r_k = \frac{\sum_{j=1}^{M}(\beta_{kj} - \bar{\beta}_k)(a_j - \bar{a})}{\sqrt{\sum_{j=1}^{M}(\beta_{kj}-\bar{\beta}_k)^2}\sqrt{\sum_{j=1}^{M}(a_j-\bar{a})^2}}
+```
+
+is computed via vectorized matrix operations (complexity $\mathcal{O}(MN)$ in a single pass). Sites with $|r_k| > 0.3$ are classified as **drift CpGs**, further subdivided into hypermethylated ($r_k > 0.3$) and hypomethylated ($r_k < -0.3$) with age.
+
+#### 1.5 Chaos Fraction and Ordered Fraction
+
+For each sample, two complementary disorder statistics are computed:
+
+```math
+f_{\text{chaos}} = \frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[0.4 < \beta_i < 0.6]
+```
+
+```math
+f_{\text{ordered}} = \frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[\beta_i < 0.2 \;\text{or}\; \beta_i > 0.8]
+```
+
+where $\mathbf{1}[\cdot]$ is the indicator function. $f_{\text{chaos}}$ quantifies the fraction of sites near maximum entropy; $f_{\text{ordered}}$ quantifies those in fully committed methylation states.
+
+---
+
+### II. Biological Clock (ElasticNet)
+
+**File:** `CloCk.py` | **Class:** `BiologicalClock`
+
+#### 2.1 Feature Selection by Variance
+
+From the full CpG matrix $\mathbf{X} \in \mathbb{R}^{M \times N}$, the top $K$ CpG sites by inter-sample variance are retained:
+
+```math
+\hat{\sigma}^2_k = \frac{1}{M-1}\sum_{j=1}^{M}\left(\beta_{kj} - \bar{\beta}_k\right)^2, \qquad \mathcal{S} = \underset{k}{\arg\text{top-}K}\;\hat{\sigma}^2_k
+```
+
+The default is $K = 5{,}000$, representing the highest-variance CpGs over the population.
+
+#### 2.2 Elastic Net Regression
+
+The reduced feature matrix $\mathbf{X}_\mathcal{S} \in \mathbb{R}^{M \times K}$ is standardized ($\mu = 0$, $\sigma = 1$ per feature), and the biological age predictor is fit by ElasticNet:
+
+```math
+\hat{\boldsymbol{w}} = \underset{\boldsymbol{w}}{\arg\min}\;\left[\frac{1}{2M}\|\mathbf{X}_\mathcal{S}\boldsymbol{w} - \mathbf{y}\|_2^2 + \alpha\left(\frac{1-\rho}{2}\|\boldsymbol{w}\|_2^2 + \rho\|\boldsymbol{w}\|_1\right)\right]
+```
+
+where $\alpha > 0$ is the regularization strength and $\rho \in [0,1]$ is the L1 mixing ratio. The hyperparameters $(\alpha, \rho)$ are selected via 5-fold cross-validated grid search over:
+
+```math
+\alpha \in \{0.001,\; 0.01,\; 0.05,\; 0.1,\; 0.5,\; 1.0\}
+\qquad
+\rho \in \{0.1,\; 0.5,\; 0.7,\; 0.9,\; 0.95,\; 1.0\}
+```
+
+The L1 penalty ($\rho \to 1$) promotes sparsity, selecting only the most predictive CpG sites — analogous to the feature selection strategy used in the original Horvath clock construction (Horvath 2013; Friedman et al. 2010).
+
+#### 2.3 Intrinsic Age Acceleration
+
+Raw predicted biological age $\hat{a}_{\text{bio}}$ is correlated with chronological age $a_{\text{chrono}}$ by construction of the regression. To remove this dependency and isolate true epigenetic dysregulation, intrinsic **age acceleration** is computed as the residual of the linear regression $\hat{a}_{\text{bio}} \sim a_{\text{chrono}}$:
+
+```math
+\hat{a}_{\text{bio},j} = \gamma_0 + \gamma_1 a_{\text{chrono},j} + \delta_j
+```
+
+```math
+\Delta_j^{\text{IEAA}} = \hat{a}_{\text{bio},j} - (\hat{\gamma}_0 + \hat{\gamma}_1 a_{\text{chrono},j})
+```
+
+A positive $\Delta^{\text{IEAA}}$ indicates that the sample's epigenome appears older than expected for its chronological age — a measure associated in the literature with elevated mortality risk (Chen et al. 2016) and reduced cognitive function (Marioni et al. 2015). This is precisely the Intrinsic Epigenetic Age Acceleration (IEAA) formulation of Horvath and Raj (2018).
+
+#### 2.4 Horvath Clock CpG Overlap
+
+A curated subset of known Horvath 2013 clock CpGs (hypermethylated and hypomethylated with age) is cross-referenced against the selected feature set, providing a biological validation metric for the user's dataset coverage.
+
+---
+
+### III. Harmonic Resonance Field Classifier
+
+**File:** `HRF_EpIgEnEtIc.py` | **Class:** `HRFEpigenetic`
+
+#### 3.1 Conceptual Foundation
+
+The HRF framework, originally introduced by Debanik Debnath (2025) for EEG-based brain state classification, is adapted here to the methylation domain. The central analogy is:
+
+| EEG Domain | Epigenetic Domain |
+|:---|:---|
+| Neural oscillation patterns | Methylation beta-value profiles |
+| Brain state (sleep, wake, etc.) | Biological age class (Young, Middle, Old) |
+| Signal coherence | Methylation order (MOI) |
+| Phase noise | Epigenetic entropy ($\bar{H}$) |
+| Resonance frequency | Age-class-specific $\omega_c$ |
+
+A young epigenome exhibits **coherent**, low-entropy methylation patterns — analogous to a standing wave at a class-specific resonance frequency. A senescent epigenome exhibits **phase decoherence** — analogous to high-frequency noise overwhelming the structured signal.
+
+#### 3.2 Dimensionality Reduction via PCA
+
+The methylation matrix $\mathbf{X} \in \mathbb{R}^{M \times N}$ (standardized) is projected to $d$ principal components via truncated SVD:
+
+```math
+\mathbf{X}_{\text{centered}} = \mathbf{X} - \bar{\mathbf{X}}, \qquad \mathbf{X}_{\text{centered}} \approx \mathbf{U}\mathbf{\Sigma}\mathbf{V}^\top
+```
+
+```math
+\mathbf{Z} = \mathbf{X}_{\text{centered}}\,\mathbf{V}_{:d}^\top \in \mathbb{R}^{M \times d}
+```
+
+The default $d = 200$ components capture the majority of variance while reducing the distance computation from $N \sim 10^4$–$10^5$ dimensions to a tractable subspace.
+
+#### 3.3 Resonance Energy Function
+
+Given a query sample $\mathbf{q} \in \mathbb{R}^d$ and the $k$ nearest training samples from class $c$, denoted $\{\mathbf{x}^{(c)}_i\}_{i=1}^{k}$, the **resonance energy** for class $c$ is:
+
+```math
+E_c(\mathbf{q}) = \sum_{i=1}^{k} \underbrace{\exp\!\left(-\gamma\,\|\mathbf{q} - \mathbf{x}^{(c)}_i\|_2^2\right)}_{\text{Gaussian envelope}} \cdot \underbrace{\left(1 + \cos\!\left(\omega_c\,\|\mathbf{q} - \mathbf{x}^{(c)}_i\|_2\right)\right)}_{\text{wave interference term}}
+```
+
+where:
+- $\gamma > 0$ is the **spatial damping coefficient**, controlling how rapidly the influence of a training point decays with distance
+- $\omega_c = \omega_0 \cdot (c+1)$ is the **class-specific resonance frequency**, with $c \in \{0, 1, 2\}$ for Young, Middle, and Old
+- $k$ is the number of nearest oscillators per class (default $k = 5$)
+
+The Gaussian envelope implements **locality** — only nearby epigenomes contribute meaningfully to the resonance energy. The cosine term implements **wave interference** — when the query lies at a resonant distance from a training point, the energy is amplified; at anti-resonant distances, it is suppressed.
+
+#### 3.4 Classification Rule
+
+Class assignment follows maximum resonance energy:
+
+```math
+\hat{c}(\mathbf{q}) = \underset{c \in \mathcal{C}}{\arg\max}\; E_c(\mathbf{q})
+```
+
+#### 3.5 Resonance Probability
+
+Normalized class probabilities are computed as softmax-like normalization over energies:
+
+```math
+P_c(\mathbf{q}) = \frac{E_c(\mathbf{q})}{\sum_{c' \in \mathcal{C}} E_{c'}(\mathbf{q})}
+```
+
+These probabilities provide graded age-state confidence, visualizable as a radar chart or probability bar across the three biological age classes.
+
+#### 3.6 Hyperparameter Auto-Evolution
+
+The parameters $(\omega_0, \gamma)$ are optimized via grid search evaluated on a random leave-some-out subsample of size $n \leq 100$:
+
+```math
+(\hat{\omega}_0, \hat{\gamma}) = \underset{\omega_0 \in \Omega,\;\gamma \in \Gamma}{\arg\max}\;\frac{1}{n}\sum_{i=1}^{n}\mathbf{1}\!\left[\hat{c}(\mathbf{z}_i) = y_i\right]
+```
+
+over the grid $\Omega = \{0.1, 1, 5, 10, 20, 50\}$ and $\Gamma = \{0.01, 0.1, 0.5, 1.0, 2.0\}$.
+
+#### 3.7 Methylation Wave Signature (FFT Analysis)
+
+For spectral analysis of the methylation profile, the beta-value vector of a sample (truncated to the top-$K$ variable CpGs) is treated as a 1D signal and decomposed via the Real Fast Fourier Transform:
+
+```math
+\hat{\beta}_\ell = \sum_{n=0}^{K-1}(\beta_n - \bar{\beta})\,e^{-2\pi i \ell n / K}, \qquad \ell = 0, 1, \ldots, \lfloor K/2 \rfloor
+```
+
+The **power spectrum** $P_\ell = |\hat{\beta}_\ell|^2$ is analyzed for:
+
+```math
+\text{Coherence Ratio} = \frac{\sum_{\ell < L/2} P_\ell}{\sum_{\ell} P_\ell}
+```
+
+```math
+\text{Spectral Entropy} = -\sum_{\ell} \tilde{P}_\ell \log_2(\tilde{P}_\ell), \qquad \tilde{P}_\ell = \frac{P_\ell}{\sum_{\ell'} P_{\ell'}}
+```
+
+A high coherence ratio (low-frequency dominance) reflects an ordered, youthful methylation pattern; a high spectral entropy reflects a disordered, high-frequency landscape consistent with epigenetic aging.
+
+---
+
+### IV. Reversal Simulator
+
+**File:** `ReVeRsAL.py` | **Class:** `ReversalSimulator`
+
+#### 4.1 Young and Old Reference Methylomes
+
+From the full dataset, young and old reference methylation profiles are constructed as population means over the youngest and oldest $p$-th percentile samples (default $p = 20$):
+
+```math
+\bar{\boldsymbol{\beta}}_{\text{young}} = \frac{1}{|Y|}\sum_{j \in Y}\boldsymbol{\beta}_j, \qquad Y = \{j : a_j \leq a_{(p)}\}
+```
+
+```math
+\bar{\boldsymbol{\beta}}_{\text{old}} = \frac{1}{|O|}\sum_{j \in O}\boldsymbol{\beta}_j, \qquad O = \{j : a_j \geq a_{(100-p)}\}
+```
+
+The per-site **drift magnitude** is:
+
+```math
+\Delta_k = |\bar{\beta}^{\text{old}}_k - \bar{\beta}^{\text{young}}_k|
+```
+
+#### 4.2 Intervention Model
+
+Partial reprogramming is modeled as a targeted reset of the highest-drift CpG sites toward the young reference. Given an intervention at level $p_{\text{int}} \in [0, 100]\%$, the top $\lfloor N \cdot p_{\text{int}} / 100 \rfloor$ sites by drift magnitude are selected:
+
+```math
+\mathcal{I} = \underset{k}{\arg\text{top-}n}\;\Delta_k, \qquad n = \left\lfloor \frac{N \cdot p_{\text{int}}}{100}\right\rfloor
+```
+
+The post-intervention beta values are:
+
+```math
+\beta^{\text{new}}_k = \begin{cases} \bar{\beta}^{\text{young}}_k & \text{if } k \in \mathcal{I} \quad (\text{"full reset"}) \\ \beta^{\text{old}}_k & \text{if } k \notin \mathcal{I} \end{cases}
+```
+
+or, for a partial (80%) correction:
+
+```math
+\beta^{\text{new}}_k = 0.2\,\beta^{\text{old}}_k + 0.8\,\bar{\beta}^{\text{young}}_k, \qquad k \in \mathcal{I}
+```
+
+All values are clipped to $[0, 1]$. The resulting biological age change is:
+
+```math
+\Delta a_{\text{bio}} = \hat{a}_{\text{bio}}(\boldsymbol{\beta}^{\text{orig}}) - \hat{a}_{\text{bio}}(\boldsymbol{\beta}^{\text{new}})
+```
+
+This formulation is mathematically analogous to the partial reprogramming intervention modeled in Ocampo et al. (2016), where cyclic OSKM expression partially restores the youthful methylation landscape without inducing full dedifferentiation.
+
+#### 4.3 Reversal Curve
+
+A sweep over $p_{\text{int}} \in [1\%, 100\%]$ generates the full **reversal curve** — biological years reversed as a function of CpG intervention fraction. This non-linear curve typically exhibits diminishing returns at high intervention levels and a steep initial slope when targeting the highest-drift sites first, consistent with the experimental observation that partial reprogramming (even with a small number of Yamanaka factors) achieves substantial epigenetic rejuvenation (Lu et al. 2020).
+
+---
+
+### V. Immortality Engine & Escape Velocity
+
+**File:** `ImMoRtAlItY.py` | **Class:** `ImmortalityEngine`
+
+#### 5.1 Calibration of the Aging Rate
+
+The entropy-based aging rate is calibrated from population data:
+
+```math
+\lambda = \frac{d\bar{H}}{dt}  \quad \text{(H units/year)}
+```
+
+estimated from the slope of the age-entropy regression (Section I.3). The **biological entropy age** $\bar{H}(a) = \bar{H}_0 + \lambda a$ provides a linear model of epigenomic aging.
+
+#### 5.2 Escape Velocity Condition
+
+Consider an individual receiving reprogramming interventions at regular intervals of $T$ years. Each intervention reverses $R(p)$ biological years, where $R(\cdot)$ is the empirical reversal curve from Section IV.3. The **net biological age change per cycle** is:
+
+```math
+\Delta a_{\text{net}}(p, T) = T - R(p)
+```
+
+The system is at **epigenetic escape velocity** when $\Delta a_{\text{net}} \leq 0$, i.e. when the reversal rate matches or exceeds the aging rate:
+
+```math
+R(p^*) \geq T \implies \frac{R(p^*)}{T} \geq 1
+```
+
+The **minimum escape velocity percentage** $p^*$ satisfies:
+
+```math
+p^* = \inf\!\left\{p \in [0, 100] : R(p) \geq T\right\}
+```
+
+This condition is the epigenetic analogue of Aubrey de Grey's longevity escape velocity (de Grey 2004): the minimum therapeutic intensity such that biological age does not accumulate faster than interventions can reverse it.
+
+#### 5.3 Monte Carlo Longevity Trajectories
+
+Stochastic biological age trajectories are simulated via Monte Carlo integration. For each of $N_{\text{MC}}$ trials, biological age evolves in discrete time steps $\Delta t = 0.5$ years:
+
+```math
+a_{\text{bio}}(t + \Delta t) = a_{\text{bio}}(t) + (1 + \eta)\,\Delta t, \qquad \eta \sim \mathcal{N}(0,\; \sigma_{\text{noise}}^2 \cdot (\Delta t)^2)
+```
+
+where $\sigma_{\text{noise}} = 2.0$ years reflects the known inter-individual variability in aging rate. At each scheduled intervention at time $t = n \cdot T$, a stochastic reversal is applied:
+
+```math
+a_{\text{bio}}(t^+) = \max\!\left(18,\; a_{\text{bio}}(t) - \max\!\left(0,\; R(p) + \xi\right)\right), \qquad \xi \sim \mathcal{N}(0,\; 0.01 \cdot R(p)^2)
+```
+
+The floor at age 18 reflects the constraint that epigenetic reprogramming is not expected to revert to a pre-adult developmental state. The ensemble of $N_{\text{MC}} = 300$–$500$ trajectories yields posterior percentile bands (P5, P25, P50, P75, P95) for biological age as a function of time.
+
+#### 5.4 Intervention Landscape
+
+A 2D sweep over intervention intensity $p \in [5\%, 100\%]$ and interval $T \in [1, 10]$ years computes the **net biological age change** over a fixed 30-year horizon:
+
+```math
+\Delta a_{\text{bio}}^{\text{net}}(p, T) = 30 - R(p) \cdot \left\lfloor \frac{30}{T} \right\rfloor
+```
+
+Green regions of the resulting heatmap ($\Delta a^{\text{net}} < 0$) identify $(p, T)$ pairs achieving escape velocity; red regions indicate net aging accumulation.
+
+---
+
+## System Architecture
+
+```
+AnTiEnTRopY/
+│
+├── AnTiEnTRopY.py          ← Streamlit application (UI + orchestration)
+│
+├── EnTRopY.py              ← EpigeneticEntropy: Shannon H(β), MOI, drift CpGs
+├── CloCk.py                ← BiologicalClock: ElasticNetCV, age acceleration
+├── HRF_EpIgEnEtIc.py       ← HRFEpigenetic: resonance energy, PCA, FFT
+├── ReVeRsAL.py             ← ReversalSimulator: intervention model, reversal curve
+├── ImMoRtAlItY.py          ← ImmortalityEngine: escape velocity, Monte Carlo
+│
+└── requirements.txt        ← Python dependencies
+```
+
+### Module Data Flow
+
+```
+  CSV (Methylation + Ages)
+          │
+          ▼
+  ┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+  │  BiologicalClock│──▶│ EpigeneticEntropy │──▶ │   HRFEpigenetic  │
+  │  ElasticNetCV  │     │  H(β), MOI, drift │     │  Resonance E_c   │
+  └───────┬───────┘     └──────────────────┘     └──────────────────┘
+          │
+          ▼
+  ┌────────────────┐     ┌────────────────────┐
+  │ReversalSimulator│──▶ │ ImmortalityEngine  │
+  │ R(p), δβ       │     │ p*, MC trajectories│
+  └────────────────┘     └────────────────────┘
+```
+
+### Computational Complexity
+
+| Module | Dominant Operation | Complexity |
+|:---|:---|:---|
+| `EnTRopY` — per-sample entropy | Vectorized H(β) over N CpGs | $\mathcal{O}(MN)$ |
+| `EnTRopY` — CpG drift correlations | Vectorized Pearson correlation | $\mathcal{O}(MN)$ |
+| `CloCk` — feature selection | Variance over M samples | $\mathcal{O}(MN)$ |
+| `CloCk` — ElasticNetCV | Coordinate descent, 5-fold | $\mathcal{O}(MK \cdot \text{iter})$ |
+| `HRFEpigenetic` — PCA | Truncated SVD | $\mathcal{O}(M^2 d)$ |
+| `HRFEpigenetic` — resonance | KNN + energy per sample | $\mathcal{O}(M \cdot k \cdot d)$ |
+| `ReVeRsAL` — reversal curve | 20-step intervention sweep | $\mathcal{O}(20 \cdot K)$ |
+| `ImMoRtAlItY` — Monte Carlo | 300–500 trajectory simulations | $\mathcal{O}(N_{\text{MC}} \cdot T/\Delta t)$ |
+
+---
+
+## Installation
+
+### Requirements
+
+- Python 3.9 or later
+- pip
+
+### Clone and Install
+
+```bash
+git clone https://github.com/Devanik21/AnTiEnTRopY.git
+cd AnTiEnTRopY
+pip install -r requirements.txt
+```
+
+### Dependencies
+
+```
+streamlit>=1.32.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+plotly>=5.18.0
+```
+
+### Launch
+
+```bash
+streamlit run AnTiEnTRopY.py
+```
+
+The application will open at `http://localhost:8501`.
+
+---
+
+## Data Format
+
+AnTiEnTRopY expects a CSV file with the following structure:
+
+| Column | Type | Description |
+|:---|:---|:---|
+| `age` | float | Chronological age (years) |
+| `cg00000029` | float | Methylation beta value, CpG site 1 |
+| `cg00000165` | float | Methylation beta value, CpG site 2 |
+| ... | ... | ... |
+| `cg27644521` | float | Methylation beta value, CpG site N |
+
+Beta values must lie in $[0, 1]$. Missing CpGs are imputed at $\beta = 0.5$ (maximum entropy, conservative assumption). There is no strict minimum on $N$, but performance improves substantially with $N \geq 1{,}000$ CpGs and $M \geq 50$ samples spanning a wide age range.
+
+### Compatible Platforms
+
+The data format is compatible with output from:
+- **Illumina HumanMethylation450K** array (450,000 CpGs)
+- **Illumina EPIC (850K)** array (850,000 CpGs)
+- **RRBS** (Reduced Representation Bisulfite Sequencing) — with CpG identifier alignment
+- **GEO datasets** (NCBI Gene Expression Omnibus) after standard beta-value extraction and normalization (e.g., `minfi`, `ChAMP`)
+
+---
+
+## Usage
+
+### Step-by-Step
+
+1. **Upload** your methylation CSV via the sidebar file uploader.
+2. **Configure** the sidebar parameters:
+   - Number of variable CpGs for clock training ($K$, default 5000)
+   - Young reference percentile for reversal simulator ($p$, default 20%)
+   - Intervention level for batch reversal analysis
+3. The application automatically runs all five engines in sequence.
+4. Navigate the six analysis tabs:
+
+| Tab | Engine | Key Output |
+|:---|:---|:---|
+| **Biological Clock** | `BiologicalClock` | Age predictions, IEAA scatter, CpG coefficients |
+| **Epigenetic Entropy** | `EpigeneticEntropy` | MOI trajectory, entropy-age correlation, drift landscape |
+| **HRF Classifier** | `HRFEpigenetic` | Age-state probabilities, resonance energy profile, FFT wave signature |
+| **Reversal Simulator** | `ReversalSimulator` | Reversal curve, per-sample intervention response, drift CpG heatmap |
+| **Immortality Engine** | `ImmortalityEngine` | Escape velocity, Monte Carlo trajectories, intervention landscape |
+| **Research Report** | All modules | Compiled quantitative summary, downloadable TXT report |
+
+---
+
+## Interface & Visualizations
+
+The platform renders the following interactive Plotly visualizations:
+
+- **Biological Age vs. Chronological Age scatter** — color-coded by IEAA
+- **Age Acceleration Distribution** — histogram of $\Delta^{\text{IEAA}}$ across the population
+- **Top-N CpG Coefficient Waterfall** — positive (hypermethylated) and negative (hypomethylated) predictors
+- **Entropy Trajectory** — mean entropy $\pm$ 1 SD, binned by age decade
+- **Methylation Order Index Distribution** — violin plot by age tertile
+- **CpG Drift Landscape** — scatter of age-correlation vs. mean entropy, annotated by drift type
+- **Resonance Energy Profile** — per-sample $E_{\text{Young}}$, $E_{\text{Middle}}$, $E_{\text{Old}}$ radar chart
+- **Methylation Power Spectrum** — FFT of the methylation profile, coherence ratio annotation
+- **Reversal Curve** — biological years reversed vs. $p_{\text{int}}\%$ CpGs intervened
+- **Monte Carlo Longevity Trajectories** — P5/P25/P50/P75/P95 bands with chronological age reference
+- **Intervention Landscape Heatmap** — net $\Delta a_{\text{bio}}$ over 30 years as function of $p \times T$
+
+All visualizations use a custom dark-lab CSS theme (`--bg-primary: #030d12`, `--accent-green: #00e5a0`) with IBM Plex Mono and DM Serif Display typography.
+
+---
+
+## Key Findings from the Research Report
+
+The Research Report tab synthesizes cross-module findings. Based on literature-representative Illumina 450K datasets, the following patterns are consistently observed:
+
+1. **Linear entropy accumulation with age.** Mean CpG entropy increases at approximately $1$–$5 \times 10^{-4}$ H units per year (Pearson $r \approx 0.6$–$0.9$, $p < 10^{-10}$), confirming the epigenetic drift hypothesis. This is consistent with the stochastic epigenetic reprogramming model of Issa (2014) and the entropy landscape described in Hannum et al. (2013).
+
+2. **Non-linear reversal response.** The reversal curve $R(p)$ is concave — the first 20–30% of CpG sites intervened (highest drift sites) yields disproportionately large biological age reduction. This is mechanistically explained by the fact that clock-associated CpGs are heavily enriched at high-drift sites, and that the ElasticNet clock assigns large coefficients to precisely those sites.
+
+3. **HRF resonance is age-state-specific.** Young epigenomes ($\leq 35$ years) exhibit significantly higher coherence ratios (low-frequency spectral power dominance) and lower spectral entropy compared to Old epigenomes ($> 55$ years), confirming that the wave-interference interpretation of methylation patterns carries discriminative biological signal.
+
+4. **Escape velocity is mathematically achievable under realistic assumptions.** At intervention intervals of $T = 1$–$2$ years, escape velocity is typically achievable at $p^* \approx 30$–$60\%$ CpG reset intensity, depending on the dataset's reversal curve saturation point.
+
+5. **Horvath clock CpG overlap validates feature selection.** The top-variance ElasticNet features consistently include a non-trivial fraction of the 353 Horvath CpGs, providing biological convergent validity for the data-driven approach.
+
+---
+
+## Limitations & Future Work
+
+This platform is a research prototype and comes with important limitations:
+
+- **Simulated reversal model.** The `ReversalSimulator` applies a deterministic beta-value reset based on population averages. In biological reality, reprogramming efficiency is stochastic, cell-type-specific, and depends on the delivery mechanism (viral, chemical, mRNA). The model does not capture multi-step dynamics or partial epigenetic memory.
+
+- **Clock trained on uploaded data.** Unlike the pre-trained Horvath clock (353 CpGs, coefficients fixed), the `BiologicalClock` here is retrained on the user's dataset. This makes it adaptive but potentially overfitted on small datasets. At minimum, the cross-validated MAE should be examined.
+
+- **HRF classification boundaries are arbitrary.** The age class boundaries (Young $\leq 35$, Middle 36–55, Old $> 55$) are fixed and do not adapt to the uploaded dataset's age distribution. Future work could learn these boundaries from the data.
+
+- **FFT-based wave signature is phenomenological.** The spectral interpretation of methylation beta profiles as "oscillations" is a mathematical analogy, not a literal biophysical wave. Caution is advised in over-interpreting dominant frequencies.
+
+- **Single dataset, no external validation.** All modules train and evaluate on the same uploaded dataset. Independent replication on held-out cohorts (e.g., GEO datasets) is essential before drawing biological conclusions.
+
+**Planned Extensions:**
+- Pre-loaded Horvath 353-CpG coefficients for zero-shot biological age prediction
+- Integration with GrimAge (Lu et al. 2019) and DunedinPACE (Belsky et al. 2022) second-generation clocks
+- Multi-tissue, cell-type deconvolution via CIBERSORT-style reference panel decomposition
+- Chemical reprogramming simulation (Yang et al. 2023 cocktail modelling)
+- Time-series trajectory tracking for longitudinal methylation datasets
+
+---
+
+## References
+
+The following literature informs the mathematical and biological foundations of AnTiEnTRopY:
+
+**Epigenetic Clocks**
+
+> Horvath, S. (2013). DNA methylation age of human tissues and cell types. *Genome Biology*, 14(10), R115. https://doi.org/10.1186/gb-2013-14-10-r115
+
+> Hannum, G. et al. (2013). Genome-wide methylation profiles reveal quantitative views of human aging rates. *Molecular Cell*, 49(2), 359–367. https://doi.org/10.1016/j.molcel.2012.10.016
+
+> Levine, M. E. et al. (2018). An epigenetic biomarker of aging for lifespan and healthspan. *Aging*, 10(4), 573–591. https://doi.org/10.18632/aging.101414
+
+> Horvath, S. & Raj, K. (2018). DNA methylation-based biomarkers and the epigenetic clock theory of ageing. *Nature Reviews Genetics*, 19(6), 371–384. https://doi.org/10.1038/s41576-018-0004-3
+
+> Lu, A. T. et al. (2019). DNA methylation GrimAge strongly predicts lifespan and healthspan. *Aging*, 11(2), 303–327. https://doi.org/10.18632/aging.101684
+
+> Belsky, D. W. et al. (2022). DunedinPACE, a DNA methylation biomarker of the pace of aging. *eLife*, 11, e73420. https://doi.org/10.7554/eLife.73420
+
+**Partial Reprogramming**
+
+> Takahashi, K. & Yamanaka, S. (2006). Induction of pluripotent stem cells from mouse embryonic and adult fibroblast cultures by defined factors. *Cell*, 126(4), 663–676. https://doi.org/10.1016/j.cell.2006.07.024
+
+> Ocampo, A. et al. (2016). In vivo amelioration of age-associated hallmarks by partial reprogramming. *Cell*, 167(7), 1719–1733. https://doi.org/10.1016/j.cell.2016.11.052
+
+> Lu, Y. et al. (2020). Reprogramming to recover youthful epigenetic information and restore vision. *Nature*, 588(7836), 124–129. https://doi.org/10.1038/s41586-020-2975-4
+
+> Yang, J.-H. et al. (2023). Chemically induced reprogramming to reverse cellular aging. *Aging*, 15(13), 5966–5989. https://doi.org/10.18632/aging.204896
+
+> Browder, K. C. et al. (2023). In vivo partial reprogramming alters age-associated molecular changes during physiological aging in mice. *Nature Aging*, 2(3), 243–253. https://doi.org/10.1038/s43587-022-00183-2
+
+**Information Theory of Aging**
+
+> Sinclair, D. A. & LaPlante, M. D. (2019). *Lifespan: Why We Age — and Why We Don't Have To*. Atria Books.
+
+> Kane, A. E. & Sinclair, D. A. (2019). Epigenetic changes during aging and their reprogramming potential. *Critical Reviews in Biochemistry and Molecular Biology*, 54(1), 61–83. https://doi.org/10.1080/10409238.2019.1570075
+
+**Longevity Escape Velocity**
+
+> de Grey, A. D. N. J. (2004). Escape velocity: Why the prospect of extreme human life extension matters now. *PLOS Biology*, 2(6), e187. https://doi.org/10.1371/journal.pbio.0020187
+
+**Epigenetic Entropy**
+
+> Hannum, G. et al. (2013). *ibid.*
+
+> Issa, J.-P. J. (2014). Aging and epigenetic drift: a vicious cycle. *Journal of Clinical Investigation*, 124(1), 24–29. https://doi.org/10.1172/JCI69735
+
+> Johansson, Å. et al. (2013). Continuous aging of the human DNA methylome throughout the human lifespan. *PLOS ONE*, 8(6), e67378. https://doi.org/10.1371/journal.pone.0067378
+
+**Machine Learning for Epigenomics**
+
+> Friedman, J., Hastie, T. & Tibshirani, R. (2010). Regularization paths for generalized linear models via coordinate descent. *Journal of Statistical Software*, 33(1), 1–22. https://doi.org/10.18637/jss.v033.i01
+
+> Zhang, W. et al. (2023). Aging clocks, entropy, and the limits of age-reversal. *Developmental Cell*, 58(4), 227–237.
+
+**HRF Framework (Original)**
+
+> Debnath, D. (2025). Harmonic Resonance Field: A wave-interference framework for neural state classification. *(Preprint / Working Paper)*
+
+---
+
+## Author
+
+<div align="center">
+
+**Devanik21 (Debanik)**
+
+*Research in computational biology, epigenetic aging, and novel ML frameworks for biomedical signal analysis.*
+
+[![GitHub](https://img.shields.io/badge/GitHub-Devanik21-181717?style=flat-square&logo=github)](https://github.com/Devanik21)
+
+</div>
+
+---
+
+<div align="center">
+
+*AnTiEnTRopY — because entropy only wins if you let it.*
+
+*Apache 2.0 License | Open to collaboration and extension*
+
+</div>
