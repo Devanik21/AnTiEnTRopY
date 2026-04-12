@@ -13,15 +13,9 @@
 [![SciPy](https://img.shields.io/badge/SciPy-1.11%2B-8CAAE6?style=flat-square&logo=scipy&logoColor=white)](https://scipy.org)
 [![Plotly](https://img.shields.io/badge/Plotly-5.18%2B-3F4F75?style=flat-square&logo=plotly&logoColor=white)](https://plotly.com)
 [![Pandas](https://img.shields.io/badge/Pandas-2.0%2B-150458?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org)
-[![Code Style](https://img.shields.io/badge/code%20style-PEP8-black?style=flat-square)](https://peps.python.org/pep-0008/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/Devanik21/AnTiEnTRopY/pulls)
 [![Stars](https://img.shields.io/github/stars/Devanik21/AnTiEnTRopY?style=flat-square&color=yellow)](https://github.com/Devanik21/AnTiEnTRopY/stargazers)
 [![Domain](https://img.shields.io/badge/Domain-Computational%20Epigenomics-9b59b6?style=flat-square)]()
-[![Math](https://img.shields.io/badge/Math-Shannon%20Entropy%20%7C%20Elastic%20Net%20%7C%20HRF-00b4d8?style=flat-square)]()
-[![Biology](https://img.shields.io/badge/Biology-CpG%20Methylation%20%7C%20Aging%20Clocks-00e5a0?style=flat-square)]()
 [![Monte Carlo](https://img.shields.io/badge/Simulation-Monte%20Carlo%20Longevity-ff6b35?style=flat-square)]()
-[![Illumina](https://img.shields.io/badge/Data-Illumina%20450K%20%7C%20EPIC-e74c3c?style=flat-square)]()
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square)]()
 [![Made with](https://img.shields.io/badge/Made%20with-%E2%9D%A4%20by%20Devanik21-ff4081?style=flat-square)](https://github.com/Devanik21)
 
 ---
