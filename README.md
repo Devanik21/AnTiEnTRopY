@@ -2,6 +2,7 @@
 
 # AnTiEnTRopY
 
+
 ### *Epigenetic Entropy Reversal & Biological Age Intelligence Platform*
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
@@ -17,6 +18,9 @@
 [![Domain](https://img.shields.io/badge/Domain-Computational%20Epigenomics-9b59b6?style=flat-square)]()
 [![Monte Carlo](https://img.shields.io/badge/Simulation-Monte%20Carlo%20Longevity-ff6b35?style=flat-square)]()
 [![Made with](https://img.shields.io/badge/Made%20with-%E2%9D%A4%20by%20Devanik21-ff4081?style=flat-square)](https://github.com/Devanik21)
+
+<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/b4baec65-5f50-49d7-a407-1ea141d87348" />
+
 
 ---
 
