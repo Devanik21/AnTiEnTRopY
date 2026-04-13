@@ -10,6 +10,7 @@ Architecture:
   immortality.py → ImmortalityEngine (escape velocity)
 """
 
+# ── Replace your imports (around line 12) ──────────────────────────────────────
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,6 +19,8 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import warnings
 import io
+import json
+import zipfile
 warnings.filterwarnings('ignore')
 
 # ── Page config ────────────────────────────────────────────────────────────────
@@ -281,11 +284,11 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("**Pipeline Settings**")
-    n_cpgs = st.slider("CpGs for clock training", 1000, 8000, 5000, 500,
+    n_cpgs = st.slider("CpGs for clock training", 1000, 8000, st.session_state.get('n_cpgs_val', 5000), 500,
                        help="Top N most variable CpGs used for ElasticNet")
-    young_pct = st.slider("Young reference percentile", 10, 30, 20, 5,
+    young_pct = st.slider("Young reference percentile", 10, 30, st.session_state.get('young_pct_val', 20), 5,
                           help="Youngest N% define the youthful methylome target")
-    hrf_k = st.slider("HRF local oscillators (k)", 3, 15, 5, 1)
+    hrf_k = st.slider("HRF local oscillators (k)", 3, 15, st.session_state.get('hrf_k_val', 5), 1)
     intervention_default = st.slider("Default intervention %", 5, 100, 30, 5)
 
     st.markdown("---")
@@ -1315,3 +1318,59 @@ R2 fit: {immortality.calibration['r_squared']:.4f}
         file_name="antientropy_report.txt",
         mime="text/plain"
     )
+  # ── Replace the bottom of your sidebar (around line 166) ──────────────────────
+    st.markdown("---")
+    st.markdown("**First-Principles DNA Preservation**")
+    session_upload = st.file_uploader(
+        "Upload Session DNA (.zip)",
+        type=["zip"],
+        help="Restore mathematically exact state via deterministic compilation."
+    )
+
+    if session_upload:
+        try:
+            with zipfile.ZipFile(session_upload, 'r') as zf:
+                # 1. Extract pure JSON configurations
+                config = json.loads(zf.read("hyperparameters.json").decode('utf-8'))
+                st.session_state['n_cpgs_val'] = config['n_cpgs']
+                st.session_state['young_pct_val'] = config['young_pct']
+                st.session_state['hrf_k_val'] = config['hrf_k']
+                
+                # 2. Extract uncorrupted matrices
+                X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0)
+                ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns")
+                
+                st.session_state['X'] = X_df
+                st.session_state['ages'] = ages_series
+                st.session_state['cpg_names'] = config['cpg_names']
+                st.session_state['pipeline_done'] = False # Enforce recompilation
+                
+            st.success("✓ DNA loaded. Recompiling deterministic physical state...")
+        except Exception as e:
+            st.error(f"Genomic corruption detected in archive: {e}")
+
+    if st.session_state.get('pipeline_done', False):
+        # Package state into a mathematically pure Zip archive
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            config = {
+                'n_cpgs': n_cpgs,
+                'young_pct': young_pct,
+                'hrf_k': hrf_k,
+                'cpg_names': st.session_state.cpg_names,
+                'version': '1.0.0'
+            }
+            zf.writestr("hyperparameters.json", json.dumps(config, indent=2))
+            zf.writestr("X.csv", st.session_state.X.to_csv())
+            zf.writestr("ages.csv", st.session_state.ages.to_frame(name='Chronological_Age').to_csv())
+
+        st.download_button(
+            label="🧬 Download Session DNA (.zip)",
+            data=buf.getvalue(),
+            file_name="antientropy_deterministic_dna.zip",
+            mime="application/zip",
+            help="Preserve absolute mathematical state indefinitely (JSON+CSV, No Pickle)."
+        )
+
+    st.markdown("---")
+    st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
