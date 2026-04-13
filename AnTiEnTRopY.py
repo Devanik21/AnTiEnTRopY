@@ -1432,7 +1432,9 @@ R2 fit: {immortality.calibration['r_squared']:.4f}
         except Exception as e:
             st.error(f"Genomic corruption detected in archive: {e}")
 
-    if st.session_state.get('pipeline_done', False):
+    # ── Replace the ZIP creation block in the sidebar ─────────────────────────────
+    # We add strict existence checks and use safe dictionary .get() access
+    if st.session_state.get('pipeline_done', False) and 'X' in st.session_state and 'cpg_names' in st.session_state:
         # Package state into a mathematically pure Zip archive
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -1440,12 +1442,12 @@ R2 fit: {immortality.calibration['r_squared']:.4f}
                 'n_cpgs': n_cpgs,
                 'young_pct': young_pct,
                 'hrf_k': hrf_k,
-                'cpg_names': st.session_state.cpg_names,
+                'cpg_names': st.session_state.get('cpg_names', []),  # Safe access
                 'version': '1.0.0'
             }
             zf.writestr("hyperparameters.json", json.dumps(config, indent=2))
-            zf.writestr("X.csv", st.session_state.X.to_csv())
-            zf.writestr("ages.csv", st.session_state.ages.to_frame(name='Chronological_Age').to_csv())
+            zf.writestr("X.csv", st.session_state['X'].to_csv())     # Safe access
+            zf.writestr("ages.csv", st.session_state['ages'].to_frame(name='Chronological_Age').to_csv())
 
         st.download_button(
             label="🧬 Download Session DNA (.zip)",
