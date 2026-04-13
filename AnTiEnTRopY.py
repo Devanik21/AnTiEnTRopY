@@ -257,11 +257,11 @@ def run_pipeline(_X_key, _ages_key, n_cpgs):
     """Full pipeline: clock + entropy + reversal + HRF + immortality."""
     import sys
     sys.path.insert(0, '/home/claude/antientropy')
-    from clock import BiologicalClock
-    from entropy import EpigeneticEntropy
-    from reversal import ReversalSimulator
-    from hrf_epigenetic import HRFEpigenetic
-    from immortality import ImmortalityEngine
+    from CloCk import BiologicalClock
+    from EnTRopY import EpigeneticEntropy
+    from ReVeRsAL import ReversalSimulator
+    from HRF_EpIgEnEtIc import HRFEpigenetic
+    from ImMoRtAlItY import ImmortalityEngine
     return (BiologicalClock, EpigeneticEntropy, ReversalSimulator, HRFEpigenetic, ImmortalityEngine)
 
 # ── Sidebar ─────────────────────────────────────────────────────────────────────
