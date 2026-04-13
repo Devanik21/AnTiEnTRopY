@@ -545,13 +545,18 @@ with tabs[0]:
             marker_color=colors,
             hovertemplate='%{y}: %{x:.4f}<extra></extra>'
         ))
+        # ── Replace fig3.update_layout (around line 388) ────────────────────────
         fig3.update_layout(
             **PLOT_LAYOUT,
             title='Top Clock CpGs (ElasticNet Coefficients)',
             xaxis_title='Coefficient',
-            yaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a', tickfont=dict(size=9)),
             height=320,
             showlegend=False
+        )
+        fig3.update_yaxes(
+            gridcolor='#1a3a4a', 
+            linecolor='#1a3a4a', 
+            tickfont=dict(size=9)
         )
         st.plotly_chart(fig3, use_container_width=True)
 
@@ -887,14 +892,21 @@ with tabs[2]:
             fig_comp.add_trace(go.Scatter(x=x_pos, y=after_vals, mode='lines+markers',
                                           line=dict(color=COLORS['blue'], width=1.5),
                                           marker=dict(size=4), name='After Intervention'))
+            # ── Replace fig_comp.update_layout (around line 593) ──────────────────
             fig_comp.update_layout(
                 **PLOT_LAYOUT,
                 title='Top Drift CpGs: Young Ref | Before | After',
                 xaxis_title='CpG Index (sorted by drift)',
                 yaxis_title='Beta Value',
-                height=300,
-                xaxis=dict(tickvals=x_pos[::5], ticktext=[shared[i] for i in range(0, len(shared), 5)],
-                           tickangle=45, gridcolor='#1a3a4a', linecolor='#1a3a4a', tickfont=dict(size=7))
+                height=300
+            )
+            fig_comp.update_xaxes(
+                tickvals=x_pos[::5], 
+                ticktext=[shared[i] for i in range(0, len(shared), 5)],
+                tickangle=45, 
+                gridcolor='#1a3a4a', 
+                linecolor='#1a3a4a', 
+                tickfont=dict(size=7)
             )
             st.plotly_chart(fig_comp, use_container_width=True)
 
