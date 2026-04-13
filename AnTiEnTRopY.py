@@ -268,6 +268,7 @@ def run_pipeline(_X_key, _ages_key, n_cpgs):
     return (BiologicalClock, EpigeneticEntropy, ReversalSimulator, HRFEpigenetic, ImmortalityEngine)
 
 # ── Sidebar ─────────────────────────────────────────────────────────────────────
+# ── Sidebar ─────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown('<div class="main-header" style="font-size:1.4rem;">AntiEntropy</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Epigenetic Age Reversal</div>', unsafe_allow_html=True)
@@ -292,18 +293,79 @@ with st.sidebar:
     intervention_default = st.slider("Default intervention %", 5, 100, 30, 5)
 
     st.markdown("---")
+    st.markdown("**First-Principles DNA Preservation**")
+    session_upload = st.file_uploader(
+        "Upload Session DNA (.zip)",
+        type=["zip"],
+        help="Restore mathematically exact state via deterministic compilation."
+    )
+
+    if session_upload:
+        try:
+            with zipfile.ZipFile(session_upload, 'r') as zf:
+                # 1. Extract pure JSON configurations
+                config = json.loads(zf.read("hyperparameters.json").decode('utf-8'))
+                st.session_state['n_cpgs_val'] = config['n_cpgs']
+                st.session_state['young_pct_val'] = config['young_pct']
+                st.session_state['hrf_k_val'] = config['hrf_k']
+                
+                # 2. Extract uncorrupted matrices
+                X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0)
+                ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns")
+                
+                st.session_state['X'] = X_df
+                st.session_state['ages'] = ages_series
+                st.session_state['cpg_names'] = config['cpg_names']
+                st.session_state['pipeline_done'] = False # Enforce recompilation
+                
+            st.success("✓ DNA loaded. Recompiling deterministic physical state...")
+        except Exception as e:
+            st.error(f"Genomic corruption detected in archive: {e}")
+
+    if st.session_state.get('pipeline_done', False):
+        # Package state into a mathematically pure Zip archive
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            config = {
+                'n_cpgs': n_cpgs,
+                'young_pct': young_pct,
+                'hrf_k': hrf_k,
+                'cpg_names': st.session_state.cpg_names,
+                'version': '1.0.0'
+            }
+            zf.writestr("hyperparameters.json", json.dumps(config, indent=2))
+            zf.writestr("X.csv", st.session_state.X.to_csv())
+            zf.writestr("ages.csv", st.session_state.ages.to_frame(name='Chronological_Age').to_csv())
+
+        st.download_button(
+            label="🧬 Download Session DNA (.zip)",
+            data=buf.getvalue(),
+            file_name="antientropy_deterministic_dna.zip",
+            mime="application/zip",
+            help="Preserve absolute mathematical state indefinitely (JSON+CSV, No Pickle)."
+        )
+
+    st.markdown("---")
     st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
 
 # ── Main content ───────────────────────────────────────────────────────────────
 st.markdown('<div class="main-header">AntiEntropy</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Epigenetic Entropy · Biological Age Reversal · Immortality Engineering</div>', unsafe_allow_html=True)
 
-if not uploaded:
+is_restored = 'X' in st.session_state and session_upload is not None
+
+# Detect a fresh CSV upload to reset the pipeline safely
+if uploaded and st.session_state.get('last_uploaded') != uploaded.name:
+    st.session_state['pipeline_done'] = False
+    st.session_state['last_uploaded'] = uploaded.name
+    is_restored = False
+
+if not uploaded and not is_restored:
     col1, col2 = st.columns([2, 1])
     with col1:
         st.markdown("""
         <div class="alert-info">
-        <b>Upload your DNA methylation dataset</b> to begin analysis.<br><br>
+        <b>Upload your DNA methylation dataset</b> or <b>Session DNA (.zip)</b> to begin analysis.<br><br>
         Expected format: CSV with <code>Chronological_Age</code> + CpG beta value columns (0–1).<br>
         The platform will automatically train a biological age clock, compute epigenetic entropy,
         simulate partial reprogramming, and model escape velocity.
@@ -326,9 +388,18 @@ if not uploaded:
     st.stop()
 
 # ── Load data ──────────────────────────────────────────────────────────────────
-with st.spinner("Loading methylation data..."):
-    X, ages, cpg_names = load_data(uploaded)
-
+if not is_restored:
+    with st.spinner("Loading methylation data..."):
+        X, ages, cpg_names = load_data(uploaded)
+        st.session_state['X'] = X
+        st.session_state['ages'] = ages
+        st.session_state['cpg_names'] = cpg_names
+else:
+    # Hydrate deterministic data from session memory
+    X = st.session_state.get('X')
+    ages = st.session_state.get('ages')
+    cpg_names = st.session_state.get('cpg_names')
+  
 # ── Train pipeline ─────────────────────────────────────────────────────────────
 classes = run_pipeline(X.values.tobytes()[:100], ages.values.tobytes()[:100], n_cpgs)
 BiologicalClock, EpigeneticEntropy, ReversalSimulator, HRFEpigenetic, ImmortalityEngine = classes
