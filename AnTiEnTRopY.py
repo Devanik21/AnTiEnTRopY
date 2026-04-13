@@ -289,7 +289,7 @@ with st.sidebar:
     intervention_default = st.slider("Default intervention %", 5, 100, 30, 5)
 
     st.markdown("---")
-    st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2025</span>', unsafe_allow_html=True)
+    st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
 
 # ── Main content ───────────────────────────────────────────────────────────────
 st.markdown('<div class="main-header">AntiEntropy</div>', unsafe_allow_html=True)
