@@ -6,7 +6,7 @@ Based on Horvath (2013) methodology, trained on user data.
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import ElasticNetCV, Ridge
+from sklearn.linear_model import ElasticNetCV, ElasticNet, Ridge
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.metrics import mean_absolute_error, r2_score
@@ -14,6 +14,8 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
+MAX_ITER = 2000
+RANDOM_STATE = 42
 
 # Subset of known Horvath 2013 clock CpGs (intersection detection)
 HORVATH_HYPER = [  # methylation increases with age
@@ -69,18 +71,23 @@ class BiologicalClock:
         self.model = ElasticNetCV(
             l1_ratio=[0.1, 0.5, 0.7, 0.9, 0.95, 1.0],
             alphas=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0],
-            cv=KFold(n_splits=5, shuffle=True, random_state=42),
-            max_iter=2000,
-            random_state=42
+            cv=KFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE),
+            max_iter=MAX_ITER,
+            random_state=RANDOM_STATE
         )
         self.model.fit(X_scaled, y_arr)
 
         y_pred = self.model.predict(X_scaled)
 
-        # 5-fold CV MAE
-        ridge = Ridge(alpha=1.0)
+        # 5-fold CV MAE using the best parameters from ElasticNetCV
+        best_model = ElasticNet(
+            alpha=self.model.alpha_,
+            l1_ratio=self.model.l1_ratio_,
+            max_iter=MAX_ITER,
+            random_state=RANDOM_STATE
+        )
         cv_scores = cross_val_score(
-            ridge, X_scaled, y_arr,
+            best_model, X_scaled, y_arr,
             cv=5, scoring='neg_mean_absolute_error'
         )
 
