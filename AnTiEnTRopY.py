@@ -766,7 +766,7 @@ with tabs[1]:
         xaxis_title='Age (years)',
         yaxis_title='Mean Entropy H(β)',
         yaxis2=dict(overlaying='y', side='right', title='Chaos Fraction',
-                    gridcolor='transparent', tickcolor='#3d6b7a'),
+                    gridcolor='rgba(0,0,0,0)', tickcolor='#3d6b7a'),  # <--- Change 'transparent' to 'rgba(0,0,0,0)' here
         height=320,
         legend=dict(bgcolor='rgba(0,0,0,0)')
     )
