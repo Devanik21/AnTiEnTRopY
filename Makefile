@@ -2,7 +2,7 @@
 
 install:
 	pip install -r requirements.txt
-	pip install pytest flake8
+	pip install -r requirements-dev.txt
 
 run:
 	streamlit run AnTiEnTRopY.py
