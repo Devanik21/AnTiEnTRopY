@@ -5,7 +5,7 @@ install:
 	pip install pytest flake8
 
 run:
-	streamlit run app.py
+	streamlit run AnTiEnTRopY.py
 
 test:
 	pytest tests/
