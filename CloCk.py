@@ -6,7 +6,7 @@ Based on Horvath (2013) methodology, trained on user data.
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import ElasticNetCV, Ridge
+from sklearn.linear_model import ElasticNetCV, ElasticNet, Ridge
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.metrics import mean_absolute_error, r2_score
@@ -77,10 +77,15 @@ class BiologicalClock:
 
         y_pred = self.model.predict(X_scaled)
 
-        # 5-fold CV MAE
-        ridge = Ridge(alpha=1.0)
+        # 5-fold CV MAE using the best parameters from ElasticNetCV
+        best_model = ElasticNet(
+            alpha=self.model.alpha_,
+            l1_ratio=self.model.l1_ratio_,
+            max_iter=2000,
+            random_state=42
+        )
         cv_scores = cross_val_score(
-            ridge, X_scaled, y_arr,
+            best_model, X_scaled, y_arr,
             cv=5, scoring='neg_mean_absolute_error'
         )
 
