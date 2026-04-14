@@ -1,5 +1,5 @@
 import numpy as np
-from entropy import EpigeneticEntropy
+from EnTRopY  import EpigeneticEntropy
 
 def test_entropy_initialization():
     entropy_engine = EpigeneticEntropy()
