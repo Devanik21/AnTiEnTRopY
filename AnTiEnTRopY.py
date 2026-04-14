@@ -559,7 +559,7 @@ with tabs[0]:
             height=420,
             legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=10))
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col_b:
         st.markdown("""<div class="alert-info"><b>Clock Architecture</b><br>
@@ -602,7 +602,7 @@ with tabs[0]:
             yaxis_title='Count',
             height=320
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     with col_d:
         top_cpgs = clock.get_top_cpgs(30)
@@ -629,7 +629,7 @@ with tabs[0]:
             linecolor='#1a3a4a', 
             tickfont=dict(size=9)
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
 
     # Age acceleration table
     st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1rem;">Age Acceleration Extremes</div>', unsafe_allow_html=True)
@@ -639,13 +639,13 @@ with tabs[0]:
         top_accel = age_accel_df.nlargest(10, 'age_acceleration')[
             ['chronological_age', 'biological_age', 'age_acceleration']
         ].round(2)
-        st.dataframe(top_accel, use_container_width=True, height=280)
+        st.dataframe(top_accel, width='stretch', height=280)
     with col_f:
         st.markdown("**Least Accelerated (Biologically Younger)**")
         bot_accel = age_accel_df.nsmallest(10, 'age_acceleration')[
             ['chronological_age', 'biological_age', 'age_acceleration']
         ].round(2)
-        st.dataframe(bot_accel, use_container_width=True, height=280)
+        st.dataframe(bot_accel, width='stretch', height=280)
 
 # ─────────────────────────────────────────────────────────────
 # TAB 2: ENTROPY ENGINE
@@ -712,7 +712,7 @@ with tabs[1]:
             yaxis_title='Mean H(β) per sample',
             height=380
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col_b:
         # MOI vs age
@@ -739,7 +739,7 @@ with tabs[1]:
             yaxis_title='MOI (1 = perfectly ordered)',
             height=380
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     # Entropy trajectory binned
     traj = entropy_eng.get_entropy_trajectory(10)
@@ -770,7 +770,7 @@ with tabs[1]:
         height=320,
         legend=dict(bgcolor='rgba(0,0,0,0)')
     )
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(fig3, width='stretch')
 
     # CpG drift landscape
     st.markdown('<div class="section-title" style="font-size:1rem;margin-top:0.5rem;">CpG Age-Drift Landscape</div>', unsafe_allow_html=True)
@@ -798,7 +798,7 @@ with tabs[1]:
             yaxis_title='Mean H(β)',
             height=350
         )
-        st.plotly_chart(fig4, use_container_width=True)
+        st.plotly_chart(fig4, width='stretch')
 
     with col_d:
         drift_df = entropy_eng.drift_cpgs.head(20) if len(entropy_eng.drift_cpgs) > 0 else cpg_stats.nlargest(20, 'age_correlation')
@@ -816,7 +816,7 @@ with tabs[1]:
             xaxis_title='Age Correlation (r)',
             height=350
         )
-        st.plotly_chart(fig5, use_container_width=True)
+        st.plotly_chart(fig5, width='stretch')
 
 # ─────────────────────────────────────────────────────────────
 # TAB 3: REVERSAL SIMULATOR
@@ -860,7 +860,7 @@ with tabs[2]:
             xaxis_title='|β_old - β_young|',
             height=320,
         )
-        st.plotly_chart(fig_drift, use_container_width=True)
+        st.plotly_chart(fig_drift, width='stretch')
 
     if run_rev or True:  # auto-compute on load
         sel_beta = X.iloc[sel_idx].values.astype(np.float32)
@@ -916,7 +916,7 @@ with tabs[2]:
                 yaxis_title='Biological Age (years)',
                 height=350
             )
-            st.plotly_chart(fig_rev, use_container_width=True)
+            st.plotly_chart(fig_rev, width='stretch')
 
         with col_d:
             fig_rev2 = go.Figure()
@@ -939,7 +939,7 @@ with tabs[2]:
                 yaxis_title='Years of Biological Age Reversed',
                 height=350
             )
-            st.plotly_chart(fig_rev2, use_container_width=True)
+            st.plotly_chart(fig_rev2, width='stretch')
 
         # Young vs old reference comparison
         st.markdown('<div class="section-title" style="font-size:1rem;">Methylation Before vs After Intervention</div>', unsafe_allow_html=True)
@@ -979,7 +979,7 @@ with tabs[2]:
                 linecolor='#1a3a4a', 
                 tickfont=dict(size=7)
             )
-            st.plotly_chart(fig_comp, use_container_width=True)
+            st.plotly_chart(fig_comp, width='stretch')
 
 # ─────────────────────────────────────────────────────────────
 # TAB 4: HRF RESONANCE
@@ -1041,7 +1041,7 @@ with tabs[3]:
                 yaxis_title=(ec[2] if len(ec) > 2 else ec[1]).replace('E_', 'E: '),
                 height=400
             )
-            st.plotly_chart(fig_hrf, use_container_width=True)
+            st.plotly_chart(fig_hrf, width='stretch')
 
     with col_b:
         # Class probability ternary/bar
@@ -1064,7 +1064,7 @@ with tabs[3]:
                 height=400,
                 yaxis_range=[0, 1]
             )
-            st.plotly_chart(fig_prob, use_container_width=True)
+            st.plotly_chart(fig_prob, width='stretch')
 
     # Wave signature
     st.markdown('<div class="section-title" style="font-size:1rem;">Methylation Wave Signature Analysis</div>', unsafe_allow_html=True)
@@ -1099,7 +1099,7 @@ with tabs[3]:
             yaxis_title='Power',
             height=320
         )
-        st.plotly_chart(fig_wave, use_container_width=True)
+        st.plotly_chart(fig_wave, width='stretch')
 
     with col_d:
         # Compare young vs old wave signatures
@@ -1128,7 +1128,7 @@ with tabs[3]:
             height=320,
             legend=dict(bgcolor='rgba(0,0,0,0)')
         )
-        st.plotly_chart(fig_compare, use_container_width=True)
+        st.plotly_chart(fig_compare, width='stretch')
 
     # Wave metrics table
     ws_data = []
@@ -1141,7 +1141,7 @@ with tabs[3]:
             'Coherence Ratio': f"{sig['coherence_ratio']:.3f}",
             'Dominant Freq': f"{sig['dominant_frequency']:.4f}",
         })
-    st.dataframe(pd.DataFrame(ws_data), use_container_width=True, height=250)
+    st.dataframe(pd.DataFrame(ws_data), width='stretch', height=250)
 
 # ─────────────────────────────────────────────────────────────
 # TAB 5: IMMORTALITY ENGINE
@@ -1261,7 +1261,7 @@ with tabs[4]:
         height=420,
         legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=10))
     )
-    st.plotly_chart(fig_traj, use_container_width=True)
+    st.plotly_chart(fig_traj, width='stretch')
 
     # Intervention landscape heatmap
     st.markdown('<div class="section-title" style="font-size:1rem;">Intervention Landscape (Escape Velocity Map)</div>', unsafe_allow_html=True)
@@ -1290,7 +1290,7 @@ with tabs[4]:
         yaxis_title='Intervention % (CpGs Reset)',
         height=380
     )
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig_heat, width='stretch')
 
 # ─────────────────────────────────────────────────────────────
 # TAB 6: RESEARCH REPORT
