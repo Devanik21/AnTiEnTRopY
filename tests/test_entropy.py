@@ -6,7 +6,7 @@ def test_entropy_initialization():
     assert entropy_engine is not None
 
 def test_binary_entropy():
-    from entropy import _binary_entropy
+    from EnTRopY  import _binary_entropy
 
     # Test completely unmethylated/methylated (should be 0 entropy)
     assert np.isclose(_binary_entropy(np.array([0.0]))[0], 0.0, atol=1e-5)
