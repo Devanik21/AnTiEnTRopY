@@ -673,7 +673,7 @@ with tabs[0]:
 
         # ── Item 1: Clock CpG Coefficient Waterfall ────────────────────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Clock CpG Coefficient Waterfall (Top 40 by |coefficient|)</div>', unsafe_allow_html=True)
-        _coef_df1 = clock.cpg_coefs.nlargest(40, 'abs_coefficient').copy()
+        _coef_df1 = clock.cpg_coefs.nlargest(40, 'abs_coef').copy()
         _coef_df1 = _coef_df1.sort_values('coefficient')
         _coef_colors1 = [COLORS['green'] if c > 0 else COLORS['red'] for c in _coef_df1['coefficient']]
         fig_coef1 = go.Figure(go.Bar(
