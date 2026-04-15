@@ -419,7 +419,7 @@ if 'clock' not in st.session_state:
     st.session_state.age_accel_df = None
     st.session_state.pipeline_done = False
 
-  if not st.session_state.pipeline_done:
+if not st.session_state.pipeline_done:
     # 100% DETERMINISM LOCK: Ensure random subsetting in HRF/CV yields exact same weights
     np.random.seed(42) 
     
