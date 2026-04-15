@@ -153,10 +153,11 @@ html, body, .stApp {
     border-radius: 0 4px 4px 0;
     font-size: 0.85rem;
 }
-/* Sidebar */
+/* Sidebar explicitly visible */
 section[data-testid="stSidebar"] {
     background: var(--bg-secondary) !important;
     border-right: 1px solid var(--border);
+    visibility: visible !important;
 }
 section[data-testid="stSidebar"] * {
     color: var(--text-primary) !important;
