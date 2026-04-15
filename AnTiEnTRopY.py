@@ -1256,10 +1256,16 @@ with tabs[1]:
                 hovertemplate='%{x} vs %{y}<br>r = %{z:.3f}<extra></extra>'
             ))
             fig_dcorr14.update_layout(
-                **PLOT_LAYOUT, height=450,
-                title='Top Drift CpG Pairwise Correlation (Co-Regulation Clusters)',
-                xaxis=dict(tickangle=60, tickfont=dict(size=7), gridcolor='#1a3a4a', linecolor='#1a3a4a'),
-                yaxis=dict(tickfont=dict(size=7), gridcolor='#1a3a4a', linecolor='#1a3a4a'),
+                **PLOT_LAYOUT,
+                height=450,
+                title="Top Drift CpG Pairwise Correlation (Co-Regulation Clusters)"
+            )
+            fig_dcorr14.update_xaxes(
+                tickangle=60,
+                tickfont=dict(size=7)
+            )
+            fig_dcorr14.update_yaxes(
+                tickfont=dict(size=7)
             )
             st.plotly_chart(fig_dcorr14, key='ent_drift_corr_14', width='stretch')
 
