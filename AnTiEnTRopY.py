@@ -237,8 +237,8 @@ PLOT_LAYOUT = dict(
     paper_bgcolor='rgba(3,13,18,0)',
     plot_bgcolor='rgba(6,21,32,0.6)',
     font=dict(family='IBM Plex Mono', color='#7eb8c4', size=11),
-    xaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a', tickcolor='#3d6b7a'),
-    yaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a', tickcolor='#3d6b7a'),
+    xaxis_gridcolor='#1a3a4a', xaxis_linecolor='#1a3a4a', xaxis_tickcolor='#3d6b7a',
+    yaxis_gridcolor='#1a3a4a', yaxis_linecolor='#1a3a4a', yaxis_tickcolor='#3d6b7a',
     margin=dict(l=50, r=20, t=40, b=40),
 )
 COLORS = {
