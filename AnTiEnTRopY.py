@@ -523,893 +523,899 @@ tabs = st.tabs([
 # TAB 1: BIOLOGICAL CLOCK
 # ─────────────────────────────────────────────────────────────
 with tabs[0]:
-    st.markdown('<div class="section-title">Epigenetic Biological Age Clock</div>', unsafe_allow_html=True)
+    if st.toggle("Load Biological Clock module", key="lazy_tab_0"):
+        st.markdown('<div class="section-title">Epigenetic Biological Age Clock</div>', unsafe_allow_html=True)
 
-    col_a, col_b = st.columns([2, 1])
+        col_a, col_b = st.columns([2, 1])
 
-    with col_a:
-        # Bio age vs Chrono age scatter
-        fig = go.Figure()
-        accel_vals = age_accel_df['age_acceleration'].values
-        color_scale = np.clip((accel_vals + 10) / 20, 0, 1)
+        with col_a:
+            # Bio age vs Chrono age scatter
+            fig = go.Figure()
+            accel_vals = age_accel_df['age_acceleration'].values
+            color_scale = np.clip((accel_vals + 10) / 20, 0, 1)
 
-        fig.add_trace(go.Scatter(
-            x=age_accel_df['chronological_age'],
-            y=age_accel_df['biological_age'],
-            mode='markers',
-            marker=dict(
-                size=6,
-                color=accel_vals,
-                colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
-                colorbar=dict(title='Age Accel.', tickfont=dict(size=9)),
-                showscale=True,
-                line=dict(width=0)
-            ),
-            text=[f"Sample {i}<br>Chrono: {r['chronological_age']:.0f}y<br>Bio: {r['biological_age']:.1f}y<br>Accel: {r['age_acceleration']:+.1f}y"
-                  for i, r in age_accel_df.iterrows()],
-            hovertemplate='%{text}<extra></extra>',
-            name='Samples'
-        ))
-        # Identity line
-        age_range = [float(ages.min()) - 5, float(ages.max()) + 5]
-        fig.add_trace(go.Scatter(
-            x=age_range, y=age_range,
-            mode='lines',
-            line=dict(color=COLORS['dim'], dash='dash', width=1),
-            name='Identity (no accel.)'
-        ))
-        fig.update_layout(
-            **PLOT_LAYOUT,
-            title='Biological Age vs. Chronological Age',
-            xaxis_title='Chronological Age (years)',
-            yaxis_title='Predicted Biological Age (years)',
-            height=420,
-            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=10))
-        )
-        st.plotly_chart(fig, width='stretch')
+            fig.add_trace(go.Scatter(
+                x=age_accel_df['chronological_age'],
+                y=age_accel_df['biological_age'],
+                mode='markers',
+                marker=dict(
+                    size=6,
+                    color=accel_vals,
+                    colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
+                    colorbar=dict(title='Age Accel.', tickfont=dict(size=9)),
+                    showscale=True,
+                    line=dict(width=0)
+                ),
+                text=[f"Sample {i}<br>Chrono: {r['chronological_age']:.0f}y<br>Bio: {r['biological_age']:.1f}y<br>Accel: {r['age_acceleration']:+.1f}y"
+                      for i, r in age_accel_df.iterrows()],
+                hovertemplate='%{text}<extra></extra>',
+                name='Samples'
+            ))
+            # Identity line
+            age_range = [float(ages.min()) - 5, float(ages.max()) + 5]
+            fig.add_trace(go.Scatter(
+                x=age_range, y=age_range,
+                mode='lines',
+                line=dict(color=COLORS['dim'], dash='dash', width=1),
+                name='Identity (no accel.)'
+            ))
+            fig.update_layout(
+                **PLOT_LAYOUT,
+                title='Biological Age vs. Chronological Age',
+                xaxis_title='Chronological Age (years)',
+                yaxis_title='Predicted Biological Age (years)',
+                height=420,
+                legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=10))
+            )
+            st.plotly_chart(fig, width='stretch')
 
-    with col_b:
-        st.markdown("""<div class="alert-info"><b>Clock Architecture</b><br>
-        ElasticNet regression on top-N variable CpGs.<br>
-        Age Acceleration = residual from bio_age ~ chrono_age regression
-        (Horvath, 2013 methodology).</div>""", unsafe_allow_html=True)
+        with col_b:
+            st.markdown("""<div class="alert-info"><b>Clock Architecture</b><br>
+            ElasticNet regression on top-N variable CpGs.<br>
+            Age Acceleration = residual from bio_age ~ chrono_age regression
+            (Horvath, 2013 methodology).</div>""", unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div class="metric-card" style="margin-top:1rem;">
-        <div class="metric-label">Model Performance</div>
-        <div style="margin-top:0.8rem;font-size:0.82rem;line-height:2.2;color:#7eb8c4;">
-        Train MAE: <span style="color:#00e5a0;">{m['train_mae']:.2f} years</span><br>
-        CV MAE: <span style="color:#00e5a0;">{m['cv_mae']:.2f} ± {m['cv_mae_std']:.2f}y</span><br>
-        R²: <span style="color:#00e5a0;">{m['train_r2']:.4f}</span><br>
-        CpGs used: <span style="color:#00e5a0;">{m['n_cpgs_total']:,}</span><br>
-        Non-zero: <span style="color:#00e5a0;">{m['n_cpgs_nonzero']:,}</span><br>
-        α: <span style="color:#f0a500;">{m['alpha']:.4f}</span><br>
-        L1 ratio: <span style="color:#f0a500;">{m['l1_ratio']:.2f}</span><br>
-        Horvath overlap: <span style="color:#a78bfa;">{m['horvath_overlap']}</span>
-        </div>
-        </div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="metric-card" style="margin-top:1rem;">
+            <div class="metric-label">Model Performance</div>
+            <div style="margin-top:0.8rem;font-size:0.82rem;line-height:2.2;color:#7eb8c4;">
+            Train MAE: <span style="color:#00e5a0;">{m['train_mae']:.2f} years</span><br>
+            CV MAE: <span style="color:#00e5a0;">{m['cv_mae']:.2f} ± {m['cv_mae_std']:.2f}y</span><br>
+            R²: <span style="color:#00e5a0;">{m['train_r2']:.4f}</span><br>
+            CpGs used: <span style="color:#00e5a0;">{m['n_cpgs_total']:,}</span><br>
+            Non-zero: <span style="color:#00e5a0;">{m['n_cpgs_nonzero']:,}</span><br>
+            α: <span style="color:#f0a500;">{m['alpha']:.4f}</span><br>
+            L1 ratio: <span style="color:#f0a500;">{m['l1_ratio']:.2f}</span><br>
+            Horvath overlap: <span style="color:#a78bfa;">{m['horvath_overlap']}</span>
+            </div>
+            </div>""", unsafe_allow_html=True)
 
-    # Age acceleration distribution
-    col_c, col_d = st.columns(2)
-    with col_c:
-        fig2 = go.Figure()
-        fig2.add_trace(go.Histogram(
-            x=age_accel_df['age_acceleration'],
-            nbinsx=40,
-            marker_color=COLORS['green'],
-            opacity=0.75,
-            name='Age Acceleration'
-        ))
-        fig2.add_vline(x=0, line_color=COLORS['red'], line_dash='dash', line_width=1.5,
-                       annotation_text='No acceleration', annotation_font_color=COLORS['red'])
-        fig2.update_layout(
-            **PLOT_LAYOUT,
-            title='Epigenetic Age Acceleration Distribution',
-            xaxis_title='Age Acceleration (years)',
-            yaxis_title='Count',
-            height=320
-        )
-        st.plotly_chart(fig2, width='stretch')
+        # Age acceleration distribution
+        col_c, col_d = st.columns(2)
+        with col_c:
+            fig2 = go.Figure()
+            fig2.add_trace(go.Histogram(
+                x=age_accel_df['age_acceleration'],
+                nbinsx=40,
+                marker_color=COLORS['green'],
+                opacity=0.75,
+                name='Age Acceleration'
+            ))
+            fig2.add_vline(x=0, line_color=COLORS['red'], line_dash='dash', line_width=1.5,
+                           annotation_text='No acceleration', annotation_font_color=COLORS['red'])
+            fig2.update_layout(
+                **PLOT_LAYOUT,
+                title='Epigenetic Age Acceleration Distribution',
+                xaxis_title='Age Acceleration (years)',
+                yaxis_title='Count',
+                height=320
+            )
+            st.plotly_chart(fig2, width='stretch')
 
-    with col_d:
-        top_cpgs = clock.get_top_cpgs(30)
-        top_active = top_cpgs[top_cpgs['abs_coef'] > 0].head(20)
-        colors = [COLORS['red'] if d == 'Hypermethylated' else COLORS['green']
-                  for d in top_active['direction']]
-        fig3 = go.Figure(go.Bar(
-            x=top_active['coefficient'],
-            y=top_active['cpg'],
-            orientation='h',
-            marker_color=colors,
-            hovertemplate='%{y}: %{x:.4f}<extra></extra>'
-        ))
-        # ── Replace fig3.update_layout (around line 388) ────────────────────────
-        fig3.update_layout(
-            **PLOT_LAYOUT,
-            title='Top Clock CpGs (ElasticNet Coefficients)',
-            xaxis_title='Coefficient',
-            height=320,
-            showlegend=False
-        )
-        fig3.update_yaxes(
-            gridcolor='#1a3a4a', 
-            linecolor='#1a3a4a', 
-            tickfont=dict(size=9)
-        )
-        st.plotly_chart(fig3, width='stretch')
+        with col_d:
+            top_cpgs = clock.get_top_cpgs(30)
+            top_active = top_cpgs[top_cpgs['abs_coef'] > 0].head(20)
+            colors = [COLORS['red'] if d == 'Hypermethylated' else COLORS['green']
+                      for d in top_active['direction']]
+            fig3 = go.Figure(go.Bar(
+                x=top_active['coefficient'],
+                y=top_active['cpg'],
+                orientation='h',
+                marker_color=colors,
+                hovertemplate='%{y}: %{x:.4f}<extra></extra>'
+            ))
+            # ── Replace fig3.update_layout (around line 388) ────────────────────────
+            fig3.update_layout(
+                **PLOT_LAYOUT,
+                title='Top Clock CpGs (ElasticNet Coefficients)',
+                xaxis_title='Coefficient',
+                height=320,
+                showlegend=False
+            )
+            fig3.update_yaxes(
+                gridcolor='#1a3a4a', 
+                linecolor='#1a3a4a', 
+                tickfont=dict(size=9)
+            )
+            st.plotly_chart(fig3, width='stretch')
 
-    # Age acceleration table
-    st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1rem;">Age Acceleration Extremes</div>', unsafe_allow_html=True)
-    col_e, col_f = st.columns(2)
-    with col_e:
-        st.markdown("**Most Accelerated (Biologically Older)**")
-        top_accel = age_accel_df.nlargest(10, 'age_acceleration')[
-            ['chronological_age', 'biological_age', 'age_acceleration']
-        ].round(2)
-        st.dataframe(top_accel, width='stretch', height=280)
-    with col_f:
-        st.markdown("**Least Accelerated (Biologically Younger)**")
-        bot_accel = age_accel_df.nsmallest(10, 'age_acceleration')[
-            ['chronological_age', 'biological_age', 'age_acceleration']
-        ].round(2)
-        st.dataframe(bot_accel, width='stretch', height=280)
+        # Age acceleration table
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1rem;">Age Acceleration Extremes</div>', unsafe_allow_html=True)
+        col_e, col_f = st.columns(2)
+        with col_e:
+            st.markdown("**Most Accelerated (Biologically Older)**")
+            top_accel = age_accel_df.nlargest(10, 'age_acceleration')[
+                ['chronological_age', 'biological_age', 'age_acceleration']
+            ].round(2)
+            st.dataframe(top_accel, width='stretch', height=280)
+        with col_f:
+            st.markdown("**Least Accelerated (Biologically Younger)**")
+            bot_accel = age_accel_df.nsmallest(10, 'age_acceleration')[
+                ['chronological_age', 'biological_age', 'age_acceleration']
+            ].round(2)
+            st.dataframe(bot_accel, width='stretch', height=280)
 
 # ─────────────────────────────────────────────────────────────
 # TAB 2: ENTROPY ENGINE
 # ─────────────────────────────────────────────────────────────
 with tabs[1]:
-    st.markdown('<div class="section-title">Epigenetic Entropy Engine</div>', unsafe_allow_html=True)
+    if st.toggle("Load Entropy Engine module", key="lazy_tab_1"):
+        st.markdown('<div class="section-title">Epigenetic Entropy Engine</div>', unsafe_allow_html=True)
 
-    st.markdown("""<div class="alert-info">
-    <b>Entropy formula:</b> H(β) = −β·log₂(β) − (1−β)·log₂(1−β)<br>
-    β → 0 or 1: fully methylated/unmethylated → H=0 (ordered, youthful)<br>
-    β → 0.5: maximum disorder → H=1 (chaotic, senescent)<br>
-    <b>Methylation Order Index (MOI) = 1 − mean(H)</b> — decreases with age.
-    </div>""", unsafe_allow_html=True)
-
-    esum = entropy_eng.get_entropy_summary()
-    cc1, cc2, cc3, cc4 = st.columns(4)
-    delta_entropy = esum['mean_entropy_old'] - esum['mean_entropy_young']
-    for col, val, label, color in zip(
-        [cc1, cc2, cc3, cc4],
-        [esum['mean_entropy_young'], esum['mean_entropy_old'],
-         esum.get('entropy_per_decade', 0), esum.get('pearson_r', 0)],
-        ['Entropy (Young Q1)', 'Entropy (Old Q4)', 'ΔEntropy/decade', 'Age-Entropy r'],
-        [COLORS['green'], COLORS['red'], COLORS['amber'], COLORS['purple']]
-    ):
-        col.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{color};font-size:1.3rem;">{val:.4f}</div>
-        <div class="metric-label">{label}</div>
+        st.markdown("""<div class="alert-info">
+        <b>Entropy formula:</b> H(β) = −β·log₂(β) − (1−β)·log₂(1−β)<br>
+        β → 0 or 1: fully methylated/unmethylated → H=0 (ordered, youthful)<br>
+        β → 0.5: maximum disorder → H=1 (chaotic, senescent)<br>
+        <b>Methylation Order Index (MOI) = 1 − mean(H)</b> — decreases with age.
         </div>""", unsafe_allow_html=True)
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        # Entropy vs Age scatter
-        ent_df = entropy_eng.sample_entropy
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=ent_df['chronological_age'],
-            y=ent_df['mean_entropy'],
-            mode='markers',
-            marker=dict(
-                size=5,
-                color=ent_df['mean_entropy'],
-                colorscale=[[0, COLORS['green']], [1, COLORS['red']]],
-                opacity=0.7,
-                showscale=False
-            ),
-            hovertemplate='Age: %{x:.0f}y | H̄: %{y:.5f}<extra></extra>',
-            name='Samples'
-        ))
-        # Regression line
-        xfit = np.array([float(ages.min()), float(ages.max())])
-        slope = esum['slope']
-        intercept = esum['intercept']
-        fig.add_trace(go.Scatter(
-            x=xfit,
-            y=slope * xfit + intercept,
-            mode='lines',
-            line=dict(color=COLORS['amber'], width=2),
-            name=f'Trend (r={esum["pearson_r"]:.3f})'
-        ))
-        fig.update_layout(
-            **PLOT_LAYOUT,
-            title='Mean Methylation Entropy vs. Chronological Age',
-            xaxis_title='Chronological Age (years)',
-            yaxis_title='Mean H(β) per sample',
-            height=380
-        )
-        st.plotly_chart(fig, width='stretch')
+        esum = entropy_eng.get_entropy_summary()
+        cc1, cc2, cc3, cc4 = st.columns(4)
+        delta_entropy = esum['mean_entropy_old'] - esum['mean_entropy_young']
+        for col, val, label, color in zip(
+            [cc1, cc2, cc3, cc4],
+            [esum['mean_entropy_young'], esum['mean_entropy_old'],
+             esum.get('entropy_per_decade', 0), esum.get('pearson_r', 0)],
+            ['Entropy (Young Q1)', 'Entropy (Old Q4)', 'ΔEntropy/decade', 'Age-Entropy r'],
+            [COLORS['green'], COLORS['red'], COLORS['amber'], COLORS['purple']]
+        ):
+            col.markdown(f"""<div class="metric-card">
+            <div class="metric-value" style="color:{color};font-size:1.3rem;">{val:.4f}</div>
+            <div class="metric-label">{label}</div>
+            </div>""", unsafe_allow_html=True)
 
-    with col_b:
-        # MOI vs age
-        fig2 = go.Figure()
-        fig2.add_trace(go.Scatter(
-            x=ent_df['chronological_age'],
-            y=ent_df['methylation_order_index'],
-            mode='markers',
-            marker=dict(size=5, color=COLORS['blue'], opacity=0.6),
-            hovertemplate='Age: %{x:.0f}y | MOI: %{y:.4f}<extra></extra>',
-            name='MOI'
-        ))
-        fig2.add_trace(go.Scatter(
-            x=ent_df['chronological_age'],
-            y=1 - (slope * ent_df['chronological_age'] + intercept),
-            mode='lines',
-            line=dict(color=COLORS['amber'], width=2, dash='dot'),
-            name='Trend'
-        ))
-        fig2.update_layout(
-            **PLOT_LAYOUT,
-            title='Methylation Order Index (MOI) vs. Age',
-            xaxis_title='Chronological Age (years)',
-            yaxis_title='MOI (1 = perfectly ordered)',
-            height=380
-        )
-        st.plotly_chart(fig2, width='stretch')
-
-    # Entropy trajectory binned
-    traj = entropy_eng.get_entropy_trajectory(10)
-    fig3 = go.Figure()
-    if len(traj) > 0:
-        fig3.add_trace(go.Scatter(
-            x=traj['age_mid'], y=traj['mean_entropy'],
-            mode='lines+markers',
-            line=dict(color=COLORS['green'], width=2),
-            marker=dict(size=8, symbol='circle'),
-            error_y=dict(array=traj['std_entropy'], color=COLORS['green'], thickness=1),
-            name='Mean Entropy ± std'
-        ))
-        fig3.add_trace(go.Bar(
-            x=traj['age_mid'], y=traj['mean_chaos'],
-            name='Chaos fraction (β ∈ 0.4-0.6)',
-            marker_color=COLORS['red'],
-            opacity=0.3,
-            yaxis='y2'
-        ))
-    fig3.update_layout(
-        **PLOT_LAYOUT,
-        title='Entropy Trajectory by Age Decade',
-        xaxis_title='Age (years)',
-        yaxis_title='Mean Entropy H(β)',
-        yaxis2=dict(overlaying='y', side='right', title='Chaos Fraction',
-                    gridcolor='rgba(0,0,0,0)', tickcolor='#3d6b7a'),  # <--- Change 'transparent' to 'rgba(0,0,0,0)' here
-        height=320,
-        legend=dict(bgcolor='rgba(0,0,0,0)')
-    )
-    st.plotly_chart(fig3, width='stretch')
-
-    # CpG drift landscape
-    st.markdown('<div class="section-title" style="font-size:1rem;margin-top:0.5rem;">CpG Age-Drift Landscape</div>', unsafe_allow_html=True)
-    cpg_stats = entropy_eng.cpg_entropy_stats
-    col_c, col_d = st.columns(2)
-    with col_c:
-        # Volcano plot: drift correlation vs mean entropy
-        sample_cpgs = cpg_stats.sample(min(3000, len(cpg_stats)), random_state=42)
-        color_map = {'Hypermethylated': COLORS['red'], 'Hypomethylated': COLORS['green'], 'Stable': COLORS['dim']}
-        colors = [color_map[d] for d in sample_cpgs['drift_type']]
-        fig4 = go.Figure(go.Scatter(
-            x=sample_cpgs['age_correlation'],
-            y=sample_cpgs['mean_entropy'],
-            mode='markers',
-            marker=dict(size=2, color=colors, opacity=0.5),
-            text=sample_cpgs['cpg'],
-            hovertemplate='%{text}<br>r=%{x:.3f}, H=%{y:.3f}<extra></extra>'
-        ))
-        fig4.add_vline(x=0.3, line_color=COLORS['red'], line_dash='dash', line_width=1)
-        fig4.add_vline(x=-0.3, line_color=COLORS['green'], line_dash='dash', line_width=1)
-        fig4.update_layout(
-            **PLOT_LAYOUT,
-            title='CpG Drift Landscape (age-correlation vs entropy)',
-            xaxis_title='Pearson r (beta ~ age)',
-            yaxis_title='Mean H(β)',
-            height=350
-        )
-        st.plotly_chart(fig4, width='stretch')
-
-    with col_d:
-        drift_df = entropy_eng.drift_cpgs.head(20) if len(entropy_eng.drift_cpgs) > 0 else cpg_stats.nlargest(20, 'age_correlation')
-        colors_drift = [COLORS['red'] if r > 0 else COLORS['green']
-                        for r in drift_df['age_correlation']]
-        fig5 = go.Figure(go.Bar(
-            x=drift_df['age_correlation'],
-            y=drift_df['cpg'],
-            orientation='h',
-            marker_color=colors_drift
-        ))
-        fig5.update_layout(
-            **PLOT_LAYOUT,
-            title='Top Drifting CpGs (|r| > 0.3)',
-            xaxis_title='Age Correlation (r)',
-            height=350
-        )
-        st.plotly_chart(fig5, width='stretch')
-
-# ─────────────────────────────────────────────────────────────
-# TAB 3: REVERSAL SIMULATOR
-# ─────────────────────────────────────────────────────────────
-with tabs[2]:
-    st.markdown('<div class="section-title">Anti-Entropy Reversal Simulator</div>', unsafe_allow_html=True)
-    st.markdown("""<div class="alert-info">
-    <b>Partial reprogramming model:</b> β_new = β_old + α·(β_young − β_old)<br>
-    Intervention targets the N% of CpGs with highest age-driven drift,
-    moving them toward the population-mean young methylome (youngest {pct}% of samples).
-    Biological age is re-predicted post-intervention using the trained clock.
-    </div>""".format(pct=young_pct), unsafe_allow_html=True)
-
-    col_a, col_b = st.columns([1, 2])
-    with col_a:
-        st.markdown("**Select Sample**")
-        sample_options = [f"#{i} | Age {ages.iloc[i]:.0f}y | BioAge {age_accel_df['biological_age'].iloc[i]:.1f}y"
-                         for i in range(min(50, len(ages)))]
-        sel_idx = st.selectbox("Sample", range(len(sample_options)),
-                               format_func=lambda i: sample_options[i])
-        sel_pct = st.slider("Intervention %", 1, 100, intervention_default, 1,
-                            key='rev_pct', help="% of highest-drift CpGs to reset")
-        run_rev = st.button("Run Reversal Simulation", key='run_rev')
-
-    with col_b:
-        # Drift landscape preview
-        drift_land = reversal_sim.get_drift_landscape(50)
-        fig_drift = go.Figure()
-        colors_land = [COLORS['red'] if d == 'Hypermethylated with age' else COLORS['green']
-                       for d in drift_land['drift_direction']]
-        fig_drift.add_trace(go.Bar(
-            x=drift_land['drift'][:30],
-            y=drift_land['cpg'][:30],
-            orientation='h',
-            marker_color=colors_land[:30],
-            hovertemplate='%{y}<br>Drift: %{x:.4f}<extra></extra>'
-        ))
-        fig_drift.update_layout(
-            **PLOT_LAYOUT,
-            title='Top Drifted CpGs (Young → Old Reference)',
-            xaxis_title='|β_old - β_young|',
-            height=320,
-        )
-        st.plotly_chart(fig_drift, width='stretch')
-
-    if run_rev or True:  # auto-compute on load
-        sel_beta = X.iloc[sel_idx].values.astype(np.float32)
-        sel_chrono = float(ages.iloc[sel_idx])
-        sel_bio = float(age_accel_df['biological_age'].iloc[sel_idx])
-
-        # Full reversal curve
-        with st.spinner("Computing reversal curve..."):
-            rev_curve = reversal_sim.reversal_curve(sel_beta, clock, steps=25)
-
-        # Single intervention result
-        rev_result = reversal_sim.simulate_intervention(sel_beta, clock, sel_pct)
-
-        # Summary metrics
-        m1, m2, m3, m4 = st.columns(4)
-        m1.markdown(f"""<div class="metric-card">
-        <div class="metric-value">{sel_chrono:.0f}y</div>
-        <div class="metric-label">Chronological Age</div>
-        </div>""", unsafe_allow_html=True)
-        m2.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{COLORS['amber']}">{rev_result['bio_age_before']:.1f}y</div>
-        <div class="metric-label">Bio Age (Before)</div>
-        </div>""", unsafe_allow_html=True)
-        m3.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{COLORS['green']}">{rev_result['bio_age_after']:.1f}y</div>
-        <div class="metric-label">Bio Age (After)</div>
-        </div>""", unsafe_allow_html=True)
-        m4.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{COLORS['blue']}">{rev_result['years_reversed']:.1f}y</div>
-        <div class="metric-label">Years Reversed</div>
-        </div>""", unsafe_allow_html=True)
-
-        col_c, col_d = st.columns(2)
-        with col_c:
-            fig_rev = go.Figure()
-            fig_rev.add_trace(go.Scatter(
-                x=rev_curve['intervention_pct'],
-                y=rev_curve['bio_age_after'],
-                mode='lines+markers',
-                line=dict(color=COLORS['green'], width=2.5),
-                marker=dict(size=5),
-                name='Bio Age Post-Intervention',
-                fill='tonexty' if False else None,
-            ))
-            fig_rev.add_hline(y=sel_bio, line_color=COLORS['amber'], line_dash='dash', line_width=1.5,
-                              annotation_text=f'Baseline: {sel_bio:.1f}y', annotation_font_color=COLORS['amber'])
-            fig_rev.add_vline(x=sel_pct, line_color=COLORS['purple'], line_dash='dot', line_width=1.5,
-                              annotation_text=f'{sel_pct}%', annotation_font_color=COLORS['purple'])
-            fig_rev.update_layout(
-                **PLOT_LAYOUT,
-                title=f'Reversal Curve — Sample #{sel_idx} (Chrono: {sel_chrono:.0f}y)',
-                xaxis_title='Intervention % (CpGs Reset)',
-                yaxis_title='Biological Age (years)',
-                height=350
-            )
-            st.plotly_chart(fig_rev, width='stretch')
-
-        with col_d:
-            fig_rev2 = go.Figure()
-            fig_rev2.add_trace(go.Scatter(
-                x=rev_curve['intervention_pct'],
-                y=rev_curve['years_reversed'],
-                mode='lines+markers',
-                line=dict(color=COLORS['blue'], width=2.5),
-                marker=dict(size=5),
-                fill='tozeroy',
-                fillcolor=f'rgba(0,180,216,0.1)',
-                name='Years Reversed'
-            ))
-            fig_rev2.add_hline(y=0, line_color=COLORS['dim'], line_width=1)
-            fig_rev2.add_vline(x=sel_pct, line_color=COLORS['purple'], line_dash='dot', line_width=1.5)
-            fig_rev2.update_layout(
-                **PLOT_LAYOUT,
-                title='Reversal Magnitude vs Intervention Level',
-                xaxis_title='Intervention % (CpGs Reset)',
-                yaxis_title='Years of Biological Age Reversed',
-                height=350
-            )
-            st.plotly_chart(fig_rev2, width='stretch')
-
-        # Young vs old reference comparison
-        st.markdown('<div class="section-title" style="font-size:1rem;">Methylation Before vs After Intervention</div>', unsafe_allow_html=True)
-        top_cpg_names = [reversal_sim.feature_names[i]
-                         for i in np.argsort(reversal_sim.drift_magnitude)[-40:][::-1]]
-        shared = [c for c in top_cpg_names if c in clock.feature_names][:30]
-        if shared:
-            idx_list = [reversal_sim.feature_names.index(c) for c in shared]
-            young_vals = reversal_sim.young_reference[idx_list]
-            before_vals = sel_beta[[reversal_sim.feature_names.index(c) for c in shared]]
-            after_vals = rev_result['beta_reprogrammed'][[reversal_sim.feature_names.index(c) for c in shared]]
-
-            fig_comp = go.Figure()
-            x_pos = list(range(len(shared)))
-            fig_comp.add_trace(go.Scatter(x=x_pos, y=young_vals, mode='lines+markers',
-                                          line=dict(color=COLORS['green'], width=1.5),
-                                          marker=dict(size=4), name='Young Reference'))
-            fig_comp.add_trace(go.Scatter(x=x_pos, y=before_vals, mode='lines+markers',
-                                          line=dict(color=COLORS['red'], width=1.5, dash='dot'),
-                                          marker=dict(size=4), name='Before Intervention'))
-            fig_comp.add_trace(go.Scatter(x=x_pos, y=after_vals, mode='lines+markers',
-                                          line=dict(color=COLORS['blue'], width=1.5),
-                                          marker=dict(size=4), name='After Intervention'))
-            # ── Replace fig_comp.update_layout (around line 593) ──────────────────
-            fig_comp.update_layout(
-                **PLOT_LAYOUT,
-                title='Top Drift CpGs: Young Ref | Before | After',
-                xaxis_title='CpG Index (sorted by drift)',
-                yaxis_title='Beta Value',
-                height=300
-            )
-            fig_comp.update_xaxes(
-                tickvals=x_pos[::5], 
-                ticktext=[shared[i] for i in range(0, len(shared), 5)],
-                tickangle=45, 
-                gridcolor='#1a3a4a', 
-                linecolor='#1a3a4a', 
-                tickfont=dict(size=7)
-            )
-            st.plotly_chart(fig_comp, width='stretch')
-
-# ─────────────────────────────────────────────────────────────
-# TAB 4: HRF RESONANCE
-# ─────────────────────────────────────────────────────────────
-with tabs[3]:
-    st.markdown('<div class="section-title">HRF Epigenetic Resonance Classifier</div>', unsafe_allow_html=True)
-    st.markdown("""<div class="alert-info">
-    <b>Novel application of Harmonic Resonance Fields (Debanik Debnath, 2025) to methylation.</b><br>
-    Ψ_c(q, x_i) = exp(−γ‖q−x_i‖²) · (1 + cos(ω_c · ‖q−x_i‖))<br>
-    Young epigenomes exhibit coherent methylation wave patterns (high resonance energy).
-    Senescent epigenomes are decoherent. Classification proceeds via resonance energy maximization.
-    </div>""", unsafe_allow_html=True)
-
-    hm = hrf.metrics
-    h1, h2, h3, h4 = st.columns(4)
-    h1.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['green']}">{hm['train_accuracy']*100:.1f}%</div>
-    <div class="metric-label">HRF Train Accuracy</div></div>""", unsafe_allow_html=True)
-    h2.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['amber']}">{hm['best_omega']:.1f}</div>
-    <div class="metric-label">Optimal ω₀</div></div>""", unsafe_allow_html=True)
-    h3.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['blue']}">{hm['best_gamma']:.3f}</div>
-    <div class="metric-label">Damping γ</div></div>""", unsafe_allow_html=True)
-    h4.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['purple']}">{hm['n_classes']}</div>
-    <div class="metric-label">Age Classes</div></div>""", unsafe_allow_html=True)
-
-    # Resonance energy profiles
-    with st.spinner("Computing resonance energy profiles..."):
-        res_df = hrf.resonance_energy_profile(X.iloc[:min(100, len(X))])
-
-    col_a, col_b = st.columns(2)
-    with col_a:
-        energy_cols = [c for c in res_df.columns if c.startswith('E_')]
-        if len(energy_cols) >= 2:
-            fig_hrf = go.Figure()
-            ec = energy_cols
-            age_subset = ages.iloc[:min(100, len(ages))].values
-            fig_hrf.add_trace(go.Scatter(
-                x=res_df[ec[0]] if len(ec) > 0 else [],
-                y=res_df[ec[2]] if len(ec) > 2 else res_df[ec[1]],
+        col_a, col_b = st.columns(2)
+        with col_a:
+            # Entropy vs Age scatter
+            ent_df = entropy_eng.sample_entropy
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=ent_df['chronological_age'],
+                y=ent_df['mean_entropy'],
                 mode='markers',
                 marker=dict(
-                    size=7,
-                    color=age_subset,
-                    colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
-                    colorbar=dict(title='Chrono Age', tickfont=dict(size=9)),
-                    showscale=True,
-                    opacity=0.8,
+                    size=5,
+                    color=ent_df['mean_entropy'],
+                    colorscale=[[0, COLORS['green']], [1, COLORS['red']]],
+                    opacity=0.7,
+                    showscale=False
                 ),
-                text=[f"Age: {a:.0f}y | Class: {c}" for a, c in zip(age_subset, res_df['predicted_class'])],
-                hovertemplate='%{text}<extra></extra>'
+                hovertemplate='Age: %{x:.0f}y | H̄: %{y:.5f}<extra></extra>',
+                name='Samples'
             ))
-            fig_hrf.update_layout(
-                **PLOT_LAYOUT,
-                title='Resonance Energy Space (Young vs Old Classes)',
-                xaxis_title=ec[0].replace('E_', 'E: '),
-                yaxis_title=(ec[2] if len(ec) > 2 else ec[1]).replace('E_', 'E: '),
-                height=400
-            )
-            st.plotly_chart(fig_hrf, width='stretch')
-
-    with col_b:
-        # Class probability ternary/bar
-        prob_cols = [c for c in res_df.columns if c.startswith('P_')]
-        if len(prob_cols) >= 2:
-            mean_probs = res_df[prob_cols].mean()
-            fig_prob = go.Figure(go.Bar(
-                x=[p.replace('P_', '') for p in prob_cols],
-                y=mean_probs.values,
-                marker_color=[COLORS['green'], COLORS['amber'], COLORS['red']][:len(prob_cols)],
-                text=[f'{v:.3f}' for v in mean_probs.values],
-                textposition='outside',
-                textfont=dict(color='#7eb8c4', size=10)
+            # Regression line
+            xfit = np.array([float(ages.min()), float(ages.max())])
+            slope = esum['slope']
+            intercept = esum['intercept']
+            fig.add_trace(go.Scatter(
+                x=xfit,
+                y=slope * xfit + intercept,
+                mode='lines',
+                line=dict(color=COLORS['amber'], width=2),
+                name=f'Trend (r={esum["pearson_r"]:.3f})'
             ))
-            fig_prob.update_layout(
+            fig.update_layout(
                 **PLOT_LAYOUT,
-                title='Mean Resonance Probability by Age Class',
-                xaxis_title='Age Class',
-                yaxis_title='Mean Resonance Probability',
-                height=400,
-                yaxis_range=[0, 1]
+                title='Mean Methylation Entropy vs. Chronological Age',
+                xaxis_title='Chronological Age (years)',
+                yaxis_title='Mean H(β) per sample',
+                height=380
             )
-            st.plotly_chart(fig_prob, width='stretch')
+            st.plotly_chart(fig, width='stretch')
 
-    # Wave signature
-    st.markdown('<div class="section-title" style="font-size:1rem;">Methylation Wave Signature Analysis</div>', unsafe_allow_html=True)
-    col_c, col_d = st.columns(2)
+        with col_b:
+            # MOI vs age
+            fig2 = go.Figure()
+            fig2.add_trace(go.Scatter(
+                x=ent_df['chronological_age'],
+                y=ent_df['methylation_order_index'],
+                mode='markers',
+                marker=dict(size=5, color=COLORS['blue'], opacity=0.6),
+                hovertemplate='Age: %{x:.0f}y | MOI: %{y:.4f}<extra></extra>',
+                name='MOI'
+            ))
+            fig2.add_trace(go.Scatter(
+                x=ent_df['chronological_age'],
+                y=1 - (slope * ent_df['chronological_age'] + intercept),
+                mode='lines',
+                line=dict(color=COLORS['amber'], width=2, dash='dot'),
+                name='Trend'
+            ))
+            fig2.update_layout(
+                **PLOT_LAYOUT,
+                title='Methylation Order Index (MOI) vs. Age',
+                xaxis_title='Chronological Age (years)',
+                yaxis_title='MOI (1 = perfectly ordered)',
+                height=380
+            )
+            st.plotly_chart(fig2, width='stretch')
 
-    with col_c:
-        sel_wave_idx = st.selectbox("Sample for wave analysis", range(min(20, len(ages))),
-                                    format_func=lambda i: f"#{i} | Age {ages.iloc[i]:.0f}y",
-                                    key='wave_sel')
-        wave_beta = X.iloc[sel_wave_idx].values[:500]
-        wave_sig = hrf.get_methylation_wave_signature(
-            wave_beta, cpg_names[:500]
-        )
-        fig_wave = go.Figure()
-        fig_wave.add_trace(go.Scatter(
-            x=wave_sig['frequencies'],
-            y=wave_sig['power_spectrum'],
-            mode='lines',
-            line=dict(color=COLORS['blue'], width=1.5),
-            fill='tozeroy',
-            fillcolor=f'rgba(0,180,216,0.15)',
-            name='Power Spectrum'
-        ))
-        fig_wave.add_vline(x=wave_sig['dominant_frequency'],
-                           line_color=COLORS['green'], line_dash='dash',
-                           annotation_text=f"f*={wave_sig['dominant_frequency']:.3f}",
-                           annotation_font_color=COLORS['green'])
-        fig_wave.update_layout(
+        # Entropy trajectory binned
+        traj = entropy_eng.get_entropy_trajectory(10)
+        fig3 = go.Figure()
+        if len(traj) > 0:
+            fig3.add_trace(go.Scatter(
+                x=traj['age_mid'], y=traj['mean_entropy'],
+                mode='lines+markers',
+                line=dict(color=COLORS['green'], width=2),
+                marker=dict(size=8, symbol='circle'),
+                error_y=dict(array=traj['std_entropy'], color=COLORS['green'], thickness=1),
+                name='Mean Entropy ± std'
+            ))
+            fig3.add_trace(go.Bar(
+                x=traj['age_mid'], y=traj['mean_chaos'],
+                name='Chaos fraction (β ∈ 0.4-0.6)',
+                marker_color=COLORS['red'],
+                opacity=0.3,
+                yaxis='y2'
+            ))
+        fig3.update_layout(
             **PLOT_LAYOUT,
-            title=f'Methylation Power Spectrum — Sample #{sel_wave_idx} (Age {ages.iloc[sel_wave_idx]:.0f}y)',
-            xaxis_title='Spatial Frequency',
-            yaxis_title='Power',
-            height=320
-        )
-        st.plotly_chart(fig_wave, width='stretch')
-
-    with col_d:
-        # Compare young vs old wave signatures
-        young_idx = int(ages.argmin())
-        old_idx = int(ages.argmax())
-        young_sig = hrf.get_methylation_wave_signature(X.iloc[young_idx].values[:500], cpg_names[:500])
-        old_sig = hrf.get_methylation_wave_signature(X.iloc[old_idx].values[:500], cpg_names[:500])
-        fig_compare = go.Figure()
-        fig_compare.add_trace(go.Scatter(
-            x=young_sig['frequencies'], y=young_sig['power_spectrum'],
-            mode='lines', line=dict(color=COLORS['green'], width=1.5),
-            fill='tozeroy', fillcolor='rgba(0,229,160,0.1)',
-            name=f'Youngest (Age {ages.iloc[young_idx]:.0f}y)'
-        ))
-        fig_compare.add_trace(go.Scatter(
-            x=old_sig['frequencies'], y=old_sig['power_spectrum'],
-            mode='lines', line=dict(color=COLORS['red'], width=1.5),
-            fill='tozeroy', fillcolor='rgba(255,61,90,0.1)',
-            name=f'Oldest (Age {ages.iloc[old_idx]:.0f}y)'
-        ))
-        fig_compare.update_layout(
-            **PLOT_LAYOUT,
-            title='Young vs Old Methylation Wave Signature',
-            xaxis_title='Spatial Frequency',
-            yaxis_title='Power',
+            title='Entropy Trajectory by Age Decade',
+            xaxis_title='Age (years)',
+            yaxis_title='Mean Entropy H(β)',
+            yaxis2=dict(overlaying='y', side='right', title='Chaos Fraction',
+                        gridcolor='rgba(0,0,0,0)', tickcolor='#3d6b7a'),  # <--- Change 'transparent' to 'rgba(0,0,0,0)' here
             height=320,
             legend=dict(bgcolor='rgba(0,0,0,0)')
         )
-        st.plotly_chart(fig_compare, width='stretch')
+        st.plotly_chart(fig3, width='stretch')
 
-    # Wave metrics table
-    ws_data = []
-    for i in range(min(30, len(ages))):
-        sig = hrf.get_methylation_wave_signature(X.iloc[i].values[:500], cpg_names[:500])
-        ws_data.append({
-            'Sample': f'#{i}',
-            'Chrono Age': f"{ages.iloc[i]:.0f}y",
-            'Spectral Entropy': f"{sig['spectral_entropy']:.3f}",
-            'Coherence Ratio': f"{sig['coherence_ratio']:.3f}",
-            'Dominant Freq': f"{sig['dominant_frequency']:.4f}",
-        })
-    st.dataframe(pd.DataFrame(ws_data), width='stretch', height=250)
+        # CpG drift landscape
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:0.5rem;">CpG Age-Drift Landscape</div>', unsafe_allow_html=True)
+        cpg_stats = entropy_eng.cpg_entropy_stats
+        col_c, col_d = st.columns(2)
+        with col_c:
+            # Volcano plot: drift correlation vs mean entropy
+            sample_cpgs = cpg_stats.sample(min(3000, len(cpg_stats)), random_state=42)
+            color_map = {'Hypermethylated': COLORS['red'], 'Hypomethylated': COLORS['green'], 'Stable': COLORS['dim']}
+            colors = [color_map[d] for d in sample_cpgs['drift_type']]
+            fig4 = go.Figure(go.Scatter(
+                x=sample_cpgs['age_correlation'],
+                y=sample_cpgs['mean_entropy'],
+                mode='markers',
+                marker=dict(size=2, color=colors, opacity=0.5),
+                text=sample_cpgs['cpg'],
+                hovertemplate='%{text}<br>r=%{x:.3f}, H=%{y:.3f}<extra></extra>'
+            ))
+            fig4.add_vline(x=0.3, line_color=COLORS['red'], line_dash='dash', line_width=1)
+            fig4.add_vline(x=-0.3, line_color=COLORS['green'], line_dash='dash', line_width=1)
+            fig4.update_layout(
+                **PLOT_LAYOUT,
+                title='CpG Drift Landscape (age-correlation vs entropy)',
+                xaxis_title='Pearson r (beta ~ age)',
+                yaxis_title='Mean H(β)',
+                height=350
+            )
+            st.plotly_chart(fig4, width='stretch')
 
-# ─────────────────────────────────────────────────────────────
-# TAB 5: IMMORTALITY ENGINE
-# ─────────────────────────────────────────────────────────────
+        with col_d:
+            drift_df = entropy_eng.drift_cpgs.head(20) if len(entropy_eng.drift_cpgs) > 0 else cpg_stats.nlargest(20, 'age_correlation')
+            colors_drift = [COLORS['red'] if r > 0 else COLORS['green']
+                            for r in drift_df['age_correlation']]
+            fig5 = go.Figure(go.Bar(
+                x=drift_df['age_correlation'],
+                y=drift_df['cpg'],
+                orientation='h',
+                marker_color=colors_drift
+            ))
+            fig5.update_layout(
+                **PLOT_LAYOUT,
+                title='Top Drifting CpGs (|r| > 0.3)',
+                xaxis_title='Age Correlation (r)',
+                height=350
+            )
+            st.plotly_chart(fig5, width='stretch')
+
+        # ─────────────────────────────────────────────────────────────
+        # TAB 3: REVERSAL SIMULATOR
+        # ─────────────────────────────────────────────────────────────
+with tabs[2]:
+    if st.toggle("Load Reversal Simulator module", key="lazy_tab_2"):
+        st.markdown('<div class="section-title">Anti-Entropy Reversal Simulator</div>', unsafe_allow_html=True)
+        st.markdown("""<div class="alert-info">
+        <b>Partial reprogramming model:</b> β_new = β_old + α·(β_young − β_old)<br>
+        Intervention targets the N% of CpGs with highest age-driven drift,
+        moving them toward the population-mean young methylome (youngest {pct}% of samples).
+        Biological age is re-predicted post-intervention using the trained clock.
+        </div>""".format(pct=young_pct), unsafe_allow_html=True)
+
+        col_a, col_b = st.columns([1, 2])
+        with col_a:
+            st.markdown("**Select Sample**")
+            sample_options = [f"#{i} | Age {ages.iloc[i]:.0f}y | BioAge {age_accel_df['biological_age'].iloc[i]:.1f}y"
+                             for i in range(min(50, len(ages)))]
+            sel_idx = st.selectbox("Sample", range(len(sample_options)),
+                                   format_func=lambda i: sample_options[i])
+            sel_pct = st.slider("Intervention %", 1, 100, intervention_default, 1,
+                                key='rev_pct', help="% of highest-drift CpGs to reset")
+            run_rev = st.button("Run Reversal Simulation", key='run_rev')
+
+        with col_b:
+            # Drift landscape preview
+            drift_land = reversal_sim.get_drift_landscape(50)
+            fig_drift = go.Figure()
+            colors_land = [COLORS['red'] if d == 'Hypermethylated with age' else COLORS['green']
+                           for d in drift_land['drift_direction']]
+            fig_drift.add_trace(go.Bar(
+                x=drift_land['drift'][:30],
+                y=drift_land['cpg'][:30],
+                orientation='h',
+                marker_color=colors_land[:30],
+                hovertemplate='%{y}<br>Drift: %{x:.4f}<extra></extra>'
+            ))
+            fig_drift.update_layout(
+                **PLOT_LAYOUT,
+                title='Top Drifted CpGs (Young → Old Reference)',
+                xaxis_title='|β_old - β_young|',
+                height=320,
+            )
+            st.plotly_chart(fig_drift, width='stretch')
+
+        if run_rev or True:  # auto-compute on load
+            sel_beta = X.iloc[sel_idx].values.astype(np.float32)
+            sel_chrono = float(ages.iloc[sel_idx])
+            sel_bio = float(age_accel_df['biological_age'].iloc[sel_idx])
+
+            # Full reversal curve
+            with st.spinner("Computing reversal curve..."):
+                rev_curve = reversal_sim.reversal_curve(sel_beta, clock, steps=25)
+
+            # Single intervention result
+            rev_result = reversal_sim.simulate_intervention(sel_beta, clock, sel_pct)
+
+            # Summary metrics
+            m1, m2, m3, m4 = st.columns(4)
+            m1.markdown(f"""<div class="metric-card">
+            <div class="metric-value">{sel_chrono:.0f}y</div>
+            <div class="metric-label">Chronological Age</div>
+            </div>""", unsafe_allow_html=True)
+            m2.markdown(f"""<div class="metric-card">
+            <div class="metric-value" style="color:{COLORS['amber']}">{rev_result['bio_age_before']:.1f}y</div>
+            <div class="metric-label">Bio Age (Before)</div>
+            </div>""", unsafe_allow_html=True)
+            m3.markdown(f"""<div class="metric-card">
+            <div class="metric-value" style="color:{COLORS['green']}">{rev_result['bio_age_after']:.1f}y</div>
+            <div class="metric-label">Bio Age (After)</div>
+            </div>""", unsafe_allow_html=True)
+            m4.markdown(f"""<div class="metric-card">
+            <div class="metric-value" style="color:{COLORS['blue']}">{rev_result['years_reversed']:.1f}y</div>
+            <div class="metric-label">Years Reversed</div>
+            </div>""", unsafe_allow_html=True)
+
+            col_c, col_d = st.columns(2)
+            with col_c:
+                fig_rev = go.Figure()
+                fig_rev.add_trace(go.Scatter(
+                    x=rev_curve['intervention_pct'],
+                    y=rev_curve['bio_age_after'],
+                    mode='lines+markers',
+                    line=dict(color=COLORS['green'], width=2.5),
+                    marker=dict(size=5),
+                    name='Bio Age Post-Intervention',
+                    fill='tonexty' if False else None,
+                ))
+                fig_rev.add_hline(y=sel_bio, line_color=COLORS['amber'], line_dash='dash', line_width=1.5,
+                                  annotation_text=f'Baseline: {sel_bio:.1f}y', annotation_font_color=COLORS['amber'])
+                fig_rev.add_vline(x=sel_pct, line_color=COLORS['purple'], line_dash='dot', line_width=1.5,
+                                  annotation_text=f'{sel_pct}%', annotation_font_color=COLORS['purple'])
+                fig_rev.update_layout(
+                    **PLOT_LAYOUT,
+                    title=f'Reversal Curve — Sample #{sel_idx} (Chrono: {sel_chrono:.0f}y)',
+                    xaxis_title='Intervention % (CpGs Reset)',
+                    yaxis_title='Biological Age (years)',
+                    height=350
+                )
+                st.plotly_chart(fig_rev, width='stretch')
+
+            with col_d:
+                fig_rev2 = go.Figure()
+                fig_rev2.add_trace(go.Scatter(
+                    x=rev_curve['intervention_pct'],
+                    y=rev_curve['years_reversed'],
+                    mode='lines+markers',
+                    line=dict(color=COLORS['blue'], width=2.5),
+                    marker=dict(size=5),
+                    fill='tozeroy',
+                    fillcolor=f'rgba(0,180,216,0.1)',
+                    name='Years Reversed'
+                ))
+                fig_rev2.add_hline(y=0, line_color=COLORS['dim'], line_width=1)
+                fig_rev2.add_vline(x=sel_pct, line_color=COLORS['purple'], line_dash='dot', line_width=1.5)
+                fig_rev2.update_layout(
+                    **PLOT_LAYOUT,
+                    title='Reversal Magnitude vs Intervention Level',
+                    xaxis_title='Intervention % (CpGs Reset)',
+                    yaxis_title='Years of Biological Age Reversed',
+                    height=350
+                )
+                st.plotly_chart(fig_rev2, width='stretch')
+
+            # Young vs old reference comparison
+            st.markdown('<div class="section-title" style="font-size:1rem;">Methylation Before vs After Intervention</div>', unsafe_allow_html=True)
+            top_cpg_names = [reversal_sim.feature_names[i]
+                             for i in np.argsort(reversal_sim.drift_magnitude)[-40:][::-1]]
+            shared = [c for c in top_cpg_names if c in clock.feature_names][:30]
+            if shared:
+                idx_list = [reversal_sim.feature_names.index(c) for c in shared]
+                young_vals = reversal_sim.young_reference[idx_list]
+                before_vals = sel_beta[[reversal_sim.feature_names.index(c) for c in shared]]
+                after_vals = rev_result['beta_reprogrammed'][[reversal_sim.feature_names.index(c) for c in shared]]
+
+                fig_comp = go.Figure()
+                x_pos = list(range(len(shared)))
+                fig_comp.add_trace(go.Scatter(x=x_pos, y=young_vals, mode='lines+markers',
+                                              line=dict(color=COLORS['green'], width=1.5),
+                                              marker=dict(size=4), name='Young Reference'))
+                fig_comp.add_trace(go.Scatter(x=x_pos, y=before_vals, mode='lines+markers',
+                                              line=dict(color=COLORS['red'], width=1.5, dash='dot'),
+                                              marker=dict(size=4), name='Before Intervention'))
+                fig_comp.add_trace(go.Scatter(x=x_pos, y=after_vals, mode='lines+markers',
+                                              line=dict(color=COLORS['blue'], width=1.5),
+                                              marker=dict(size=4), name='After Intervention'))
+                # ── Replace fig_comp.update_layout (around line 593) ──────────────────
+                fig_comp.update_layout(
+                    **PLOT_LAYOUT,
+                    title='Top Drift CpGs: Young Ref | Before | After',
+                    xaxis_title='CpG Index (sorted by drift)',
+                    yaxis_title='Beta Value',
+                    height=300
+                )
+                fig_comp.update_xaxes(
+                    tickvals=x_pos[::5], 
+                    ticktext=[shared[i] for i in range(0, len(shared), 5)],
+                    tickangle=45, 
+                    gridcolor='#1a3a4a', 
+                    linecolor='#1a3a4a', 
+                    tickfont=dict(size=7)
+                )
+                st.plotly_chart(fig_comp, width='stretch')
+
+        # ─────────────────────────────────────────────────────────────
+        # TAB 4: HRF RESONANCE
+        # ─────────────────────────────────────────────────────────────
+with tabs[3]:
+    if st.toggle("Load HRF Resonance module", key="lazy_tab_3"):
+        st.markdown('<div class="section-title">HRF Epigenetic Resonance Classifier</div>', unsafe_allow_html=True)
+        st.markdown("""<div class="alert-info">
+        <b>Novel application of Harmonic Resonance Fields (Debanik Debnath, 2025) to methylation.</b><br>
+        Ψ_c(q, x_i) = exp(−γ‖q−x_i‖²) · (1 + cos(ω_c · ‖q−x_i‖))<br>
+        Young epigenomes exhibit coherent methylation wave patterns (high resonance energy).
+        Senescent epigenomes are decoherent. Classification proceeds via resonance energy maximization.
+        </div>""", unsafe_allow_html=True)
+
+        hm = hrf.metrics
+        h1, h2, h3, h4 = st.columns(4)
+        h1.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['green']}">{hm['train_accuracy']*100:.1f}%</div>
+        <div class="metric-label">HRF Train Accuracy</div></div>""", unsafe_allow_html=True)
+        h2.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['amber']}">{hm['best_omega']:.1f}</div>
+        <div class="metric-label">Optimal ω₀</div></div>""", unsafe_allow_html=True)
+        h3.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['blue']}">{hm['best_gamma']:.3f}</div>
+        <div class="metric-label">Damping γ</div></div>""", unsafe_allow_html=True)
+        h4.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['purple']}">{hm['n_classes']}</div>
+        <div class="metric-label">Age Classes</div></div>""", unsafe_allow_html=True)
+
+        # Resonance energy profiles
+        with st.spinner("Computing resonance energy profiles..."):
+            res_df = hrf.resonance_energy_profile(X.iloc[:min(100, len(X))])
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            energy_cols = [c for c in res_df.columns if c.startswith('E_')]
+            if len(energy_cols) >= 2:
+                fig_hrf = go.Figure()
+                ec = energy_cols
+                age_subset = ages.iloc[:min(100, len(ages))].values
+                fig_hrf.add_trace(go.Scatter(
+                    x=res_df[ec[0]] if len(ec) > 0 else [],
+                    y=res_df[ec[2]] if len(ec) > 2 else res_df[ec[1]],
+                    mode='markers',
+                    marker=dict(
+                        size=7,
+                        color=age_subset,
+                        colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
+                        colorbar=dict(title='Chrono Age', tickfont=dict(size=9)),
+                        showscale=True,
+                        opacity=0.8,
+                    ),
+                    text=[f"Age: {a:.0f}y | Class: {c}" for a, c in zip(age_subset, res_df['predicted_class'])],
+                    hovertemplate='%{text}<extra></extra>'
+                ))
+                fig_hrf.update_layout(
+                    **PLOT_LAYOUT,
+                    title='Resonance Energy Space (Young vs Old Classes)',
+                    xaxis_title=ec[0].replace('E_', 'E: '),
+                    yaxis_title=(ec[2] if len(ec) > 2 else ec[1]).replace('E_', 'E: '),
+                    height=400
+                )
+                st.plotly_chart(fig_hrf, width='stretch')
+
+        with col_b:
+            # Class probability ternary/bar
+            prob_cols = [c for c in res_df.columns if c.startswith('P_')]
+            if len(prob_cols) >= 2:
+                mean_probs = res_df[prob_cols].mean()
+                fig_prob = go.Figure(go.Bar(
+                    x=[p.replace('P_', '') for p in prob_cols],
+                    y=mean_probs.values,
+                    marker_color=[COLORS['green'], COLORS['amber'], COLORS['red']][:len(prob_cols)],
+                    text=[f'{v:.3f}' for v in mean_probs.values],
+                    textposition='outside',
+                    textfont=dict(color='#7eb8c4', size=10)
+                ))
+                fig_prob.update_layout(
+                    **PLOT_LAYOUT,
+                    title='Mean Resonance Probability by Age Class',
+                    xaxis_title='Age Class',
+                    yaxis_title='Mean Resonance Probability',
+                    height=400,
+                    yaxis_range=[0, 1]
+                )
+                st.plotly_chart(fig_prob, width='stretch')
+
+        # Wave signature
+        st.markdown('<div class="section-title" style="font-size:1rem;">Methylation Wave Signature Analysis</div>', unsafe_allow_html=True)
+        col_c, col_d = st.columns(2)
+
+        with col_c:
+            sel_wave_idx = st.selectbox("Sample for wave analysis", range(min(20, len(ages))),
+                                        format_func=lambda i: f"#{i} | Age {ages.iloc[i]:.0f}y",
+                                        key='wave_sel')
+            wave_beta = X.iloc[sel_wave_idx].values[:500]
+            wave_sig = hrf.get_methylation_wave_signature(
+                wave_beta, cpg_names[:500]
+            )
+            fig_wave = go.Figure()
+            fig_wave.add_trace(go.Scatter(
+                x=wave_sig['frequencies'],
+                y=wave_sig['power_spectrum'],
+                mode='lines',
+                line=dict(color=COLORS['blue'], width=1.5),
+                fill='tozeroy',
+                fillcolor=f'rgba(0,180,216,0.15)',
+                name='Power Spectrum'
+            ))
+            fig_wave.add_vline(x=wave_sig['dominant_frequency'],
+                               line_color=COLORS['green'], line_dash='dash',
+                               annotation_text=f"f*={wave_sig['dominant_frequency']:.3f}",
+                               annotation_font_color=COLORS['green'])
+            fig_wave.update_layout(
+                **PLOT_LAYOUT,
+                title=f'Methylation Power Spectrum — Sample #{sel_wave_idx} (Age {ages.iloc[sel_wave_idx]:.0f}y)',
+                xaxis_title='Spatial Frequency',
+                yaxis_title='Power',
+                height=320
+            )
+            st.plotly_chart(fig_wave, width='stretch')
+
+        with col_d:
+            # Compare young vs old wave signatures
+            young_idx = int(ages.argmin())
+            old_idx = int(ages.argmax())
+            young_sig = hrf.get_methylation_wave_signature(X.iloc[young_idx].values[:500], cpg_names[:500])
+            old_sig = hrf.get_methylation_wave_signature(X.iloc[old_idx].values[:500], cpg_names[:500])
+            fig_compare = go.Figure()
+            fig_compare.add_trace(go.Scatter(
+                x=young_sig['frequencies'], y=young_sig['power_spectrum'],
+                mode='lines', line=dict(color=COLORS['green'], width=1.5),
+                fill='tozeroy', fillcolor='rgba(0,229,160,0.1)',
+                name=f'Youngest (Age {ages.iloc[young_idx]:.0f}y)'
+            ))
+            fig_compare.add_trace(go.Scatter(
+                x=old_sig['frequencies'], y=old_sig['power_spectrum'],
+                mode='lines', line=dict(color=COLORS['red'], width=1.5),
+                fill='tozeroy', fillcolor='rgba(255,61,90,0.1)',
+                name=f'Oldest (Age {ages.iloc[old_idx]:.0f}y)'
+            ))
+            fig_compare.update_layout(
+                **PLOT_LAYOUT,
+                title='Young vs Old Methylation Wave Signature',
+                xaxis_title='Spatial Frequency',
+                yaxis_title='Power',
+                height=320,
+                legend=dict(bgcolor='rgba(0,0,0,0)')
+            )
+            st.plotly_chart(fig_compare, width='stretch')
+
+        # Wave metrics table
+        ws_data = []
+        for i in range(min(30, len(ages))):
+            sig = hrf.get_methylation_wave_signature(X.iloc[i].values[:500], cpg_names[:500])
+            ws_data.append({
+                'Sample': f'#{i}',
+                'Chrono Age': f"{ages.iloc[i]:.0f}y",
+                'Spectral Entropy': f"{sig['spectral_entropy']:.3f}",
+                'Coherence Ratio': f"{sig['coherence_ratio']:.3f}",
+                'Dominant Freq': f"{sig['dominant_frequency']:.4f}",
+            })
+        st.dataframe(pd.DataFrame(ws_data), width='stretch', height=250)
+
+        # ─────────────────────────────────────────────────────────────
+        # TAB 5: IMMORTALITY ENGINE
+        # ─────────────────────────────────────────────────────────────
 with tabs[4]:
-    st.markdown('<div class="section-title">Immortality Engine — Epigenetic Escape Velocity</div>', unsafe_allow_html=True)
-    st.markdown("""<div class="alert-warning">
-    <b>Escape velocity condition:</b> R(p, T) ≥ A·T<br>
-    R = years reversed per intervention at level p%; A = aging rate (y/y); T = interval (years).<br>
-    When reversal rate exceeds aging rate, biological age asymptotically stabilizes → escape velocity achieved.
-    </div>""", unsafe_allow_html=True)
+    if st.toggle("Load Immortality Engine module", key="lazy_tab_4"):
+        st.markdown('<div class="section-title">Immortality Engine — Epigenetic Escape Velocity</div>', unsafe_allow_html=True)
+        st.markdown("""<div class="alert-warning">
+        <b>Escape velocity condition:</b> R(p, T) ≥ A·T<br>
+        R = years reversed per intervention at level p%; A = aging rate (y/y); T = interval (years).<br>
+        When reversal rate exceeds aging rate, biological age asymptotically stabilizes → escape velocity achieved.
+        </div>""", unsafe_allow_html=True)
 
-    # Calibration metrics
-    cal = immortality.calibration
-    ic1, ic2, ic3, ic4 = st.columns(4)
-    ic1.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['amber']}">{cal['entropy_per_year']:.6f}</div>
-    <div class="metric-label">Entropy/year (A)</div></div>""", unsafe_allow_html=True)
-    ic2.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['red']}">{cal['entropy_per_decade']:.5f}</div>
-    <div class="metric-label">Entropy/decade</div></div>""", unsafe_allow_html=True)
-    ic3.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['blue']}">{cal['r_squared']:.4f}</div>
-    <div class="metric-label">R² (age-entropy fit)</div></div>""", unsafe_allow_html=True)
-    ic4.markdown(f"""<div class="metric-card">
-    <div class="metric-value" style="color:{COLORS['purple']}">{cal['p_value']:.2e}</div>
-    <div class="metric-label">p-value</div></div>""", unsafe_allow_html=True)
+        # Calibration metrics
+        cal = immortality.calibration
+        ic1, ic2, ic3, ic4 = st.columns(4)
+        ic1.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['amber']}">{cal['entropy_per_year']:.6f}</div>
+        <div class="metric-label">Entropy/year (A)</div></div>""", unsafe_allow_html=True)
+        ic2.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['red']}">{cal['entropy_per_decade']:.5f}</div>
+        <div class="metric-label">Entropy/decade</div></div>""", unsafe_allow_html=True)
+        ic3.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['blue']}">{cal['r_squared']:.4f}</div>
+        <div class="metric-label">R² (age-entropy fit)</div></div>""", unsafe_allow_html=True)
+        ic4.markdown(f"""<div class="metric-card">
+        <div class="metric-value" style="color:{COLORS['purple']}">{cal['p_value']:.2e}</div>
+        <div class="metric-label">p-value</div></div>""", unsafe_allow_html=True)
 
-    # Select sample and intervention parameters
-    col_a, col_b = st.columns([1, 2])
-    with col_a:
-        st.markdown("**Longevity Simulation Parameters**")
-        imm_idx = st.selectbox("Sample", range(min(30, len(ages))),
-                               format_func=lambda i: f"#{i} | Age {ages.iloc[i]:.0f}y | BioAge {age_accel_df['biological_age'].iloc[i]:.1f}y",
-                               key='imm_idx')
-        imm_pct = st.slider("Intervention %", 5, 100, 40, 5, key='imm_pct')
-        imm_interval = st.slider("Intervention interval (years)", 1, 20, 5, 1, key='imm_interval')
-        imm_years = st.slider("Simulation horizon (years)", 10, 100, 50, 5, key='imm_years')
+        # Select sample and intervention parameters
+        col_a, col_b = st.columns([1, 2])
+        with col_a:
+            st.markdown("**Longevity Simulation Parameters**")
+            imm_idx = st.selectbox("Sample", range(min(30, len(ages))),
+                                   format_func=lambda i: f"#{i} | Age {ages.iloc[i]:.0f}y | BioAge {age_accel_df['biological_age'].iloc[i]:.1f}y",
+                                   key='imm_idx')
+            imm_pct = st.slider("Intervention %", 5, 100, 40, 5, key='imm_pct')
+            imm_interval = st.slider("Intervention interval (years)", 1, 20, 5, 1, key='imm_interval')
+            imm_years = st.slider("Simulation horizon (years)", 10, 100, 50, 5, key='imm_years')
 
-    with col_b:
-        # Compute reversal curve for this sample and set it on immortality engine
-        imm_beta = X.iloc[imm_idx].values.astype(np.float32)
-        with st.spinner("Computing escape velocity..."):
-            imm_rev_curve = reversal_sim.reversal_curve(imm_beta, clock, steps=25)
-            immortality.set_reversal_curve(imm_rev_curve)
-            ev = immortality.compute_escape_velocity(float(imm_interval))
+        with col_b:
+            # Compute reversal curve for this sample and set it on immortality engine
+            imm_beta = X.iloc[imm_idx].values.astype(np.float32)
+            with st.spinner("Computing escape velocity..."):
+                imm_rev_curve = reversal_sim.reversal_curve(imm_beta, clock, steps=25)
+                immortality.set_reversal_curve(imm_rev_curve)
+                ev = immortality.compute_escape_velocity(float(imm_interval))
 
-        if ev['escape_achievable']:
-            st.markdown(f"""<div class="alert-success">
-            <b>🟢 ESCAPE VELOCITY ACHIEVABLE</b><br>
-            Minimum intervention: <b>{ev['escape_velocity_pct']:.1f}%</b> every <b>{imm_interval} year(s)</b><br>
-            Current setting ({imm_pct}%): {"✓ ABOVE" if imm_pct >= ev['escape_velocity_pct'] else "✗ BELOW"} escape velocity<br>
-            Max single-intervention reversal: <b>{ev['max_reversible_years']:.2f} years</b>
-            </div>""", unsafe_allow_html=True)
-        else:
-            st.markdown(f"""<div class="alert-danger">
-            <b>⚠️ Escape velocity not achievable at current parameters</b><br>
-            {ev['message']}<br>
-            Reduce intervention interval or increase intensity.
-            </div>""", unsafe_allow_html=True)
+            if ev['escape_achievable']:
+                st.markdown(f"""<div class="alert-success">
+                <b>🟢 ESCAPE VELOCITY ACHIEVABLE</b><br>
+                Minimum intervention: <b>{ev['escape_velocity_pct']:.1f}%</b> every <b>{imm_interval} year(s)</b><br>
+                Current setting ({imm_pct}%): {"✓ ABOVE" if imm_pct >= ev['escape_velocity_pct'] else "✗ BELOW"} escape velocity<br>
+                Max single-intervention reversal: <b>{ev['max_reversible_years']:.2f} years</b>
+                </div>""", unsafe_allow_html=True)
+            else:
+                st.markdown(f"""<div class="alert-danger">
+                <b>⚠️ Escape velocity not achievable at current parameters</b><br>
+                {ev['message']}<br>
+                Reduce intervention interval or increase intensity.
+                </div>""", unsafe_allow_html=True)
 
-    # Monte Carlo longevity trajectories
-    imm_chrono = float(ages.iloc[imm_idx])
-    imm_bio = float(age_accel_df['biological_age'].iloc[imm_idx])
+        # Monte Carlo longevity trajectories
+        imm_chrono = float(ages.iloc[imm_idx])
+        imm_bio = float(age_accel_df['biological_age'].iloc[imm_idx])
 
-    # ── Replace the Monte Carlo block in TAB 5 (around line 855) ────────────────
-    with st.spinner("Running Monte Carlo longevity simulation..."):
-        np.random.seed(42) # <-- Ensure 100% visual preservation of trajectory lines
-        traj_df = immortality.longevity_trajectory(
-            initial_bio_age=imm_bio,
-            initial_chrono_age=imm_chrono,
-            intervention_pct=imm_pct,
-            intervention_interval=float(imm_interval),
-            years_ahead=imm_years,
-            n_monte_carlo=300
+        # ── Replace the Monte Carlo block in TAB 5 (around line 855) ────────────────
+        with st.spinner("Running Monte Carlo longevity simulation..."):
+            np.random.seed(42) # <-- Ensure 100% visual preservation of trajectory lines
+            traj_df = immortality.longevity_trajectory(
+                initial_bio_age=imm_bio,
+                initial_chrono_age=imm_chrono,
+                intervention_pct=imm_pct,
+                intervention_interval=float(imm_interval),
+                years_ahead=imm_years,
+                n_monte_carlo=300
+            )
+        fig_traj = go.Figure()
+        # Confidence band
+        fig_traj.add_trace(go.Scatter(
+            x=pd.concat([traj_df['chrono_age'], traj_df['chrono_age'].iloc[::-1]]),
+            y=pd.concat([traj_df['bio_age_p95'], traj_df['bio_age_p5'].iloc[::-1]]),
+            fill='toself', fillcolor=f'rgba(0,229,160,0.06)',
+            line=dict(color='rgba(0,0,0,0)'), showlegend=False, name='90% CI'
+        ))
+        fig_traj.add_trace(go.Scatter(
+            x=pd.concat([traj_df['chrono_age'], traj_df['chrono_age'].iloc[::-1]]),
+            y=pd.concat([traj_df['bio_age_p75'], traj_df['bio_age_p25'].iloc[::-1]]),
+            fill='toself', fillcolor=f'rgba(0,229,160,0.12)',
+            line=dict(color='rgba(0,0,0,0)'), showlegend=False
+        ))
+        fig_traj.add_trace(go.Scatter(
+            x=traj_df['chrono_age'], y=traj_df['bio_age_mean'],
+            mode='lines', line=dict(color=COLORS['green'], width=2.5),
+            name=f'Bio Age (Intervention {imm_pct}% / {imm_interval}y)'
+        ))
+        fig_traj.add_trace(go.Scatter(
+            x=traj_df['chrono_age'], y=traj_df['no_intervention'],
+            mode='lines', line=dict(color=COLORS['red'], width=1.5, dash='dash'),
+            name='No Intervention (natural aging)'
+        ))
+        fig_traj.add_trace(go.Scatter(
+            x=traj_df['chrono_age'], y=traj_df['chrono_age'],
+            mode='lines', line=dict(color=COLORS['dim'], width=1, dash='dot'),
+            name='Chronological Age (1:1)'
+        ))
+
+        # Mark intervention points
+        for t in range(imm_interval, imm_years + 1, imm_interval):
+            fig_traj.add_vline(
+                x=imm_chrono + t,
+                line_color=COLORS['purple'], line_width=0.5, line_dash='dot', opacity=0.4
+            )
+        fig_traj.update_layout(
+            **PLOT_LAYOUT,
+            title=f'Monte Carlo Longevity Trajectory — Sample #{imm_idx} (Initial BioAge {imm_bio:.1f}y)',
+            xaxis_title='Chronological Age (years)',
+            yaxis_title='Biological Age (years)',
+            height=420,
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=10))
         )
-    fig_traj = go.Figure()
-    # Confidence band
-    fig_traj.add_trace(go.Scatter(
-        x=pd.concat([traj_df['chrono_age'], traj_df['chrono_age'].iloc[::-1]]),
-        y=pd.concat([traj_df['bio_age_p95'], traj_df['bio_age_p5'].iloc[::-1]]),
-        fill='toself', fillcolor=f'rgba(0,229,160,0.06)',
-        line=dict(color='rgba(0,0,0,0)'), showlegend=False, name='90% CI'
-    ))
-    fig_traj.add_trace(go.Scatter(
-        x=pd.concat([traj_df['chrono_age'], traj_df['chrono_age'].iloc[::-1]]),
-        y=pd.concat([traj_df['bio_age_p75'], traj_df['bio_age_p25'].iloc[::-1]]),
-        fill='toself', fillcolor=f'rgba(0,229,160,0.12)',
-        line=dict(color='rgba(0,0,0,0)'), showlegend=False
-    ))
-    fig_traj.add_trace(go.Scatter(
-        x=traj_df['chrono_age'], y=traj_df['bio_age_mean'],
-        mode='lines', line=dict(color=COLORS['green'], width=2.5),
-        name=f'Bio Age (Intervention {imm_pct}% / {imm_interval}y)'
-    ))
-    fig_traj.add_trace(go.Scatter(
-        x=traj_df['chrono_age'], y=traj_df['no_intervention'],
-        mode='lines', line=dict(color=COLORS['red'], width=1.5, dash='dash'),
-        name='No Intervention (natural aging)'
-    ))
-    fig_traj.add_trace(go.Scatter(
-        x=traj_df['chrono_age'], y=traj_df['chrono_age'],
-        mode='lines', line=dict(color=COLORS['dim'], width=1, dash='dot'),
-        name='Chronological Age (1:1)'
-    ))
+        st.plotly_chart(fig_traj, width='stretch')
 
-    # Mark intervention points
-    for t in range(imm_interval, imm_years + 1, imm_interval):
-        fig_traj.add_vline(
-            x=imm_chrono + t,
-            line_color=COLORS['purple'], line_width=0.5, line_dash='dot', opacity=0.4
-        )
-    fig_traj.update_layout(
-        **PLOT_LAYOUT,
-        title=f'Monte Carlo Longevity Trajectory — Sample #{imm_idx} (Initial BioAge {imm_bio:.1f}y)',
-        xaxis_title='Chronological Age (years)',
-        yaxis_title='Biological Age (years)',
-        height=420,
-        legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=10))
-    )
-    st.plotly_chart(fig_traj, width='stretch')
+        # Intervention landscape heatmap
+        st.markdown('<div class="section-title" style="font-size:1rem;">Intervention Landscape (Escape Velocity Map)</div>', unsafe_allow_html=True)
+        with st.spinner("Computing intervention landscape..."):
+            landscape = immortality.compute_intervention_landscape(
+                imm_bio, imm_chrono, years_ahead=30
+            )
 
-    # Intervention landscape heatmap
-    st.markdown('<div class="section-title" style="font-size:1rem;">Intervention Landscape (Escape Velocity Map)</div>', unsafe_allow_html=True)
-    with st.spinner("Computing intervention landscape..."):
-        landscape = immortality.compute_intervention_landscape(
-            imm_bio, imm_chrono, years_ahead=30
+        pivot_bio = landscape.pivot(
+            index='intervention_pct', columns='interval_years', values='net_bio_age_change'
         )
 
-    pivot_bio = landscape.pivot(
-        index='intervention_pct', columns='interval_years', values='net_bio_age_change'
-    )
+        fig_heat = go.Figure(go.Heatmap(
+            z=pivot_bio.values,
+            x=pivot_bio.columns.astype(str),
+            y=pivot_bio.index.round(1).astype(str),
+            colorscale=[[0, COLORS['green']], [0.5, '#1a3a4a'], [1, COLORS['red']]],
+            zmid=0,
+            colorbar=dict(title='Net Bio Age Δ (years)', tickfont=dict(size=9)),
+            hovertemplate='Interval: %{x}y | Pct: %{y}%<br>Net ΔBioAge: %{z:.1f}y<extra></extra>'
+        ))
+        fig_heat.update_layout(
+            **PLOT_LAYOUT,
+            title='Net Biological Age Change over 30y<br>(Green = reversal > aging = ESCAPE)',
+            xaxis_title='Intervention Interval (years)',
+            yaxis_title='Intervention % (CpGs Reset)',
+            height=380
+        )
+        st.plotly_chart(fig_heat, width='stretch')
 
-    fig_heat = go.Figure(go.Heatmap(
-        z=pivot_bio.values,
-        x=pivot_bio.columns.astype(str),
-        y=pivot_bio.index.round(1).astype(str),
-        colorscale=[[0, COLORS['green']], [0.5, '#1a3a4a'], [1, COLORS['red']]],
-        zmid=0,
-        colorbar=dict(title='Net Bio Age Δ (years)', tickfont=dict(size=9)),
-        hovertemplate='Interval: %{x}y | Pct: %{y}%<br>Net ΔBioAge: %{z:.1f}y<extra></extra>'
-    ))
-    fig_heat.update_layout(
-        **PLOT_LAYOUT,
-        title='Net Biological Age Change over 30y<br>(Green = reversal > aging = ESCAPE)',
-        xaxis_title='Intervention Interval (years)',
-        yaxis_title='Intervention % (CpGs Reset)',
-        height=380
-    )
-    st.plotly_chart(fig_heat, width='stretch')
-
-# ─────────────────────────────────────────────────────────────
-# TAB 6: RESEARCH REPORT
-# ─────────────────────────────────────────────────────────────
+        # ─────────────────────────────────────────────────────────────
+        # TAB 6: RESEARCH REPORT
+        # ─────────────────────────────────────────────────────────────
 with tabs[5]:
-    st.markdown('<div class="section-title">Research Summary & Findings</div>', unsafe_allow_html=True)
+    if st.toggle("Load Research Report module", key="lazy_tab_5"):
+        st.markdown('<div class="section-title">Research Summary & Findings</div>', unsafe_allow_html=True)
 
-    esum2 = entropy_eng.get_entropy_summary()
+        esum2 = entropy_eng.get_entropy_summary()
 
-    st.markdown(f"""
-    <div class="alert-info" style="margin-bottom:1rem;">
-    <b>Study: Epigenetic Entropy Reversal via Partial Reprogramming</b><br>
-    Dataset: {len(ages)} samples, {len(cpg_names):,} CpG sites, 
-    age range {float(ages.min()):.0f}–{float(ages.max()):.0f} years
-    </div>""", unsafe_allow_html=True)
-
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown("### 🕐 Biological Clock")
         st.markdown(f"""
-- **Architecture**: ElasticNet regression, {n_cpgs:,} variable CpGs selected
-- **Train MAE**: {m['train_mae']:.2f} years | **R²**: {m['train_r2']:.4f}
-- **CV MAE**: {m['cv_mae']:.2f} ± {m['cv_mae_std']:.2f} years (5-fold)
-- **Non-zero CpGs**: {m['n_cpgs_nonzero']:,} predictors (L1 regularization)
-- **Horvath overlap**: {m['horvath_overlap']} known clock CpGs identified
-- **Optimal α**: {m['alpha']:.4f} | **L1 ratio**: {m['l1_ratio']:.2f}
+        <div class="alert-info" style="margin-bottom:1rem;">
+        <b>Study: Epigenetic Entropy Reversal via Partial Reprogramming</b><br>
+        Dataset: {len(ages)} samples, {len(cpg_names):,} CpG sites, 
+        age range {float(ages.min()):.0f}–{float(ages.max()):.0f} years
+        </div>""", unsafe_allow_html=True)
 
-### 🔥 Epigenetic Entropy
-- **Entropy-age correlation**: r = {esum2.get('pearson_r', 0):.4f} (p = {esum2.get('p_value', 1):.2e})
-- **Aging rate**: {esum2.get('entropy_per_decade', 0):.5f} H units/decade
-- **Young Q1 entropy**: {esum2.get('mean_entropy_young', 0):.5f}
-- **Old Q4 entropy**: {esum2.get('mean_entropy_old', 0):.5f}
-- **Drift CpGs** (|r| > 0.3): {esum2.get('n_drift_cpgs', 0):,}
-  — Hypermethylated: {esum2.get('n_hyper', 0):,} | Hypomethylated: {esum2.get('n_hypo', 0):,}
-""")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown("### 🕐 Biological Clock")
+            st.markdown(f"""
+    - **Architecture**: ElasticNet regression, {n_cpgs:,} variable CpGs selected
+    - **Train MAE**: {m['train_mae']:.2f} years | **R²**: {m['train_r2']:.4f}
+    - **CV MAE**: {m['cv_mae']:.2f} ± {m['cv_mae_std']:.2f} years (5-fold)
+    - **Non-zero CpGs**: {m['n_cpgs_nonzero']:,} predictors (L1 regularization)
+    - **Horvath overlap**: {m['horvath_overlap']} known clock CpGs identified
+    - **Optimal α**: {m['alpha']:.4f} | **L1 ratio**: {m['l1_ratio']:.2f}
 
-    with col_b:
-        st.markdown("### 🌊 HRF Epigenetic Resonance")
-        st.markdown(f"""
-- **Train accuracy**: {hrf.metrics['train_accuracy']*100:.2f}% (Young/Middle/Old classification)
-- **Optimal ω₀**: {hrf.metrics['best_omega']:.1f} | **γ**: {hrf.metrics['best_gamma']:.3f}
-- **Classes**: Young (≤35): {hrf.metrics['n_young']} | Middle (36–55): {hrf.metrics['n_middle']} | Old (>55): {hrf.metrics['n_old']}
-- **Novel finding**: Young epigenomes exhibit significantly higher methylation coherence ratio (spectral order), confirming the wave-interference interpretation.
-
-### 🔄 Reversal Potential
-- **Young reference**: lowest {young_pct}% of samples by chronological age
-- **Max reversal at 100% intervention**: see individual sample curves
-- **Intervention model**: β_new = β_old + (β_young − β_old) at top-drift CpGs
-
-### ♾️ Immortality Engine
-- **Aging rate A**: {immortality.calibration['entropy_per_year']:.6f} H units/year
-- **R²** of entropy-age linear fit: {immortality.calibration['r_squared']:.4f}
-- **Escape condition**: R(p, T) ≥ T (years reversed ≥ interval length)
-""")
-
-    st.markdown("---")
-    st.markdown("### 📌 Key Observations")
-    st.markdown(f"""
-1. **Epigenetic entropy increases linearly with age** (r = {esum2.get('pearson_r', 0):.3f}), 
-   at a rate of {esum2.get('entropy_per_decade', 0):.5f} H units per decade — consistent with 
-   Horvath's epigenetic drift hypothesis.
-
-2. **The HRF wave framework** successfully classifies epigenetic age states at 
-   {hrf.metrics['train_accuracy']*100:.1f}% accuracy, demonstrating that methylation patterns 
-   carry class-specific resonance signatures analogous to the EEG findings in Debanik Debnath (2025).
-
-3. **Partial reprogramming simulation** reveals a non-linear reversal curve — 
-   the first 20–30% of CpG interventions yield disproportionate biological age reduction 
-   (targeting highest-drift sites first). This matches experimental observations from 
-   Yamanaka partial reprogramming studies.
-
-4. **Escape velocity is mathematically computable** from this dataset, providing 
-   a first-principles theoretical framework for the intervention frequency required to 
-   prevent net epigenetic aging.
-
-5. **The combination of HRF + epigenetic entropy + escape velocity** represents a 
-   genuinely novel research framework with no direct prior art.
+    ### 🔥 Epigenetic Entropy
+    - **Entropy-age correlation**: r = {esum2.get('pearson_r', 0):.4f} (p = {esum2.get('p_value', 1):.2e})
+    - **Aging rate**: {esum2.get('entropy_per_decade', 0):.5f} H units/decade
+    - **Young Q1 entropy**: {esum2.get('mean_entropy_young', 0):.5f}
+    - **Old Q4 entropy**: {esum2.get('mean_entropy_old', 0):.5f}
+    - **Drift CpGs** (|r| > 0.3): {esum2.get('n_drift_cpgs', 0):,}
+      — Hypermethylated: {esum2.get('n_hyper', 0):,} | Hypomethylated: {esum2.get('n_hypo', 0):,}
     """)
 
-    st.markdown("---")
-    report_text = f"""AntiEntropy Research Report
-================================
-Dataset: {len(ages)} samples, {len(cpg_names):,} CpGs
-Age range: {float(ages.min()):.0f} – {float(ages.max()):.0f} years
+        with col_b:
+            st.markdown("### 🌊 HRF Epigenetic Resonance")
+            st.markdown(f"""
+    - **Train accuracy**: {hrf.metrics['train_accuracy']*100:.2f}% (Young/Middle/Old classification)
+    - **Optimal ω₀**: {hrf.metrics['best_omega']:.1f} | **γ**: {hrf.metrics['best_gamma']:.3f}
+    - **Classes**: Young (≤35): {hrf.metrics['n_young']} | Middle (36–55): {hrf.metrics['n_middle']} | Old (>55): {hrf.metrics['n_old']}
+    - **Novel finding**: Young epigenomes exhibit significantly higher methylation coherence ratio (spectral order), confirming the wave-interference interpretation.
 
-BIOLOGICAL CLOCK
-Train MAE: {m['train_mae']:.3f} years
-Train R2:  {m['train_r2']:.4f}
-CV MAE:    {m['cv_mae']:.3f} ± {m['cv_mae_std']:.3f}
-Non-zero CpGs: {m['n_cpgs_nonzero']}
+    ### 🔄 Reversal Potential
+    - **Young reference**: lowest {young_pct}% of samples by chronological age
+    - **Max reversal at 100% intervention**: see individual sample curves
+    - **Intervention model**: β_new = β_old + (β_young − β_old) at top-drift CpGs
 
-EPIGENETIC ENTROPY
-Age-entropy r: {esum2.get('pearson_r', 0):.4f} (p={esum2.get('p_value', 1):.2e})
-Entropy/decade: {esum2.get('entropy_per_decade', 0):.5f}
-Drift CpGs: {esum2.get('n_drift_cpgs', 0)}
+    ### ♾️ Immortality Engine
+    - **Aging rate A**: {immortality.calibration['entropy_per_year']:.6f} H units/year
+    - **R²** of entropy-age linear fit: {immortality.calibration['r_squared']:.4f}
+    - **Escape condition**: R(p, T) ≥ T (years reversed ≥ interval length)
+    """)
 
-HRF CLASSIFIER
-Accuracy: {hrf.metrics['train_accuracy']*100:.2f}%
-Optimal omega: {hrf.metrics['best_omega']}, gamma: {hrf.metrics['best_gamma']}
+        st.markdown("---")
+        st.markdown("### 📌 Key Observations")
+        st.markdown(f"""
+    1. **Epigenetic entropy increases linearly with age** (r = {esum2.get('pearson_r', 0):.3f}), 
+       at a rate of {esum2.get('entropy_per_decade', 0):.5f} H units per decade — consistent with 
+       Horvath's epigenetic drift hypothesis.
 
-IMMORTALITY ENGINE
-Aging rate: {immortality.calibration['entropy_per_year']:.6f} H/year
-R2 fit: {immortality.calibration['r_squared']:.4f}
-"""
-    st.download_button(
+    2. **The HRF wave framework** successfully classifies epigenetic age states at 
+       {hrf.metrics['train_accuracy']*100:.1f}% accuracy, demonstrating that methylation patterns 
+       carry class-specific resonance signatures analogous to the EEG findings in Debanik Debnath (2025).
+
+    3. **Partial reprogramming simulation** reveals a non-linear reversal curve — 
+       the first 20–30% of CpG interventions yield disproportionate biological age reduction 
+       (targeting highest-drift sites first). This matches experimental observations from 
+       Yamanaka partial reprogramming studies.
+
+    4. **Escape velocity is mathematically computable** from this dataset, providing 
+       a first-principles theoretical framework for the intervention frequency required to 
+       prevent net epigenetic aging.
+
+    5. **The combination of HRF + epigenetic entropy + escape velocity** represents a 
+       genuinely novel research framework with no direct prior art.
+        """)
+
+        st.markdown("---")
+        report_text = f"""AntiEntropy Research Report
+    ================================
+    Dataset: {len(ages)} samples, {len(cpg_names):,} CpGs
+    Age range: {float(ages.min()):.0f} – {float(ages.max()):.0f} years
+
+    BIOLOGICAL CLOCK
+    Train MAE: {m['train_mae']:.3f} years
+    Train R2:  {m['train_r2']:.4f}
+    CV MAE:    {m['cv_mae']:.3f} ± {m['cv_mae_std']:.3f}
+    Non-zero CpGs: {m['n_cpgs_nonzero']}
+
+    EPIGENETIC ENTROPY
+    Age-entropy r: {esum2.get('pearson_r', 0):.4f} (p={esum2.get('p_value', 1):.2e})
+    Entropy/decade: {esum2.get('entropy_per_decade', 0):.5f}
+    Drift CpGs: {esum2.get('n_drift_cpgs', 0)}
+
+    HRF CLASSIFIER
+    Accuracy: {hrf.metrics['train_accuracy']*100:.2f}%
+    Optimal omega: {hrf.metrics['best_omega']}, gamma: {hrf.metrics['best_gamma']}
+
+    IMMORTALITY ENGINE
+    Aging rate: {immortality.calibration['entropy_per_year']:.6f} H/year
+    R2 fit: {immortality.calibration['r_squared']:.4f}
+    """
+        st.download_button(
         "Download Research Report (TXT)",
         report_text,
         file_name="antientropy_report.txt",
         mime="text/plain"
-    )
+        )
   
 
-    st.markdown("---")
-    st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
+        st.markdown("---")
+        st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
