@@ -153,7 +153,6 @@ html, body, .stApp {
     border-radius: 0 4px 4px 0;
     font-size: 0.85rem;
 }
-
 /* Sidebar */
 section[data-testid="stSidebar"] {
     background: var(--bg-secondary) !important;
@@ -221,6 +220,11 @@ code {
     font-family: 'IBM Plex Mono', monospace !important;
     font-size: 0.8rem !important;
 }
+
+/* Hide Streamlit header and footer to remove the "black box" */
+header {visibility: hidden;}
+footer {visibility: hidden;}
+#MainMenu {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -356,8 +360,9 @@ with st.sidebar:
     st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
 
 # ── Main content ───────────────────────────────────────────────────────────────
-st.markdown('<div class="main-header">AntiEntropy</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Epigenetic Entropy · Biological Age Reversal · Immortality Engineering</div>', unsafe_allow_html=True)
+# (Redundant header removed)
+# st.markdown('<div class="main-header">AntiEntropy</div>', unsafe_allow_html=True)
+# st.markdown('<div class="sub-header">Epigenetic Entropy · Biological Age Reversal · Immortality Engineering</div>', unsafe_allow_html=True)
 
 is_restored = 'X' in st.session_state and session_upload is not None
 
