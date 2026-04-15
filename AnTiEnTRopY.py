@@ -1211,10 +1211,12 @@ with tabs[1]:
         fig_bheat12.update_layout(
             **PLOT_LAYOUT, height=380,
             title='Beta Value Density Landscape Across Age Decades',
-            xaxis_title='Beta Value (methylation)', yaxis_title='Age Decade',
-            xaxis=dict(tickangle=45, tickfont=dict(size=8), gridcolor='#1a3a4a', linecolor='#1a3a4a'),
-            yaxis=dict(tickfont=dict(size=8), gridcolor='#1a3a4a', linecolor='#1a3a4a'),
+            xaxis_title='Beta Value (methylation)', 
+            yaxis_title='Age Decade'
         )
+        fig_bheat12.update_xaxes(tickangle=45, tickfont=dict(size=8))
+        fig_bheat12.update_yaxes(tickfont=dict(size=8))
+      
         st.plotly_chart(fig_bheat12, key='ent_beta_heat_12', width='stretch')
 
         # ── Item 13: Entropy Rate Phase Portrait ───────────────────────
@@ -2204,7 +2206,10 @@ with tabs[3]:
         with _pca_col1:
             if hrf.pca_components is not None:
                 _n_pc = min(50, hrf.pca_components.shape[0])
-                _pc_var = np.var(hrf.X_train @ hrf.pca_components[:_n_pc].T, axis=0) if hrf.X_train is not None else np.arange(_n_pc)[::-1].astype(float)
+                if hrf.X_train.shape[1] == hrf.pca_components.shape[1]:
+                    _pc_var = np.var(hrf.X_train @ hrf.pca_components[:_n_pc].T, axis=0)
+                else:
+                    _pc_var = np.var(hrf.X_train[:, :_n_pc], axis=0)
                 _pc_var_norm = _pc_var / (_pc_var.sum() + 1e-10)
                 _pc_cum = np.cumsum(_pc_var_norm)
                 fig_eigen34 = go.Figure()
@@ -3043,10 +3048,11 @@ with tabs[5]:
         ))
         fig_corr51.update_layout(
             **PLOT_LAYOUT, height=520,
-            title='Cross-Module Metric Correlation Matrix',
-            xaxis=dict(tickangle=45, tickfont=dict(size=8), gridcolor='#1a3a4a', linecolor='#1a3a4a'),
-            yaxis=dict(tickfont=dict(size=8), gridcolor='#1a3a4a', linecolor='#1a3a4a'),
+            title='Cross-Module Metric Correlation Matrix'
         )
+        fig_corr51.update_xaxes(tickangle=45, tickfont=dict(size=8))
+        fig_corr51.update_yaxes(tickfont=dict(size=8))
+      
         st.plotly_chart(fig_corr51, key='report_corr_matrix_51', width='stretch')
 
         # ── Item 52: Statistical Test Battery ──────────────────────────
