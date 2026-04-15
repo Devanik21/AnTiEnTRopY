@@ -4,7 +4,7 @@ A Nobel-tier research interface for biological aging analysis.
 
 Architecture:
   clock.py       → BiologicalClock (ElasticNet)
-  entropy.py     → EpigeneticEntropy (methylation disorder)
+  entropy.py     → EpigeneticEntropy (methylation disorder) 
   reversal.py    → ReversalSimulator (partial reprogramming)
   hrf_epigenetic → HRFEpigenetic (wave interference classifier)
   immortality.py → ImmortalityEngine (escape velocity)
