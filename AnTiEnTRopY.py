@@ -222,8 +222,11 @@ code {
     font-size: 0.8rem !important;
 }
 
-/* Hide Streamlit header and footer to remove the "black box" */
-header {visibility: hidden;}
+/* Hide Streamlit elements but keep sidebar toggle accessible */
+[data-testid="stHeader"] {
+    background: rgba(0, 0, 0, 0) !important;
+    color: transparent !important;
+}
 footer {visibility: hidden;}
 #MainMenu {visibility: hidden;}
 </style>
