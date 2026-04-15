@@ -290,7 +290,7 @@ with st.sidebar:
     young_pct = st.slider("Young reference percentile", 10, 30, st.session_state.get('young_pct_val', 20), 5,
                           help="Youngest N% define the youthful methylome target")
     hrf_k = st.slider("HRF local oscillators (k)", 3, 15, st.session_state.get('hrf_k_val', 5), 1)
-    intervention_default = st.slider("Default intervention %", 5, 100, 30, 5)
+    intervention_default = st.slider("Default intervention %", 5, 100, st.session_state.get('int_def_val', 30), 5)
 
     st.markdown("---")
     st.markdown("**First-Principles DNA Preservation**")
@@ -308,7 +308,8 @@ with st.sidebar:
                 st.session_state['n_cpgs_val'] = config['n_cpgs']
                 st.session_state['young_pct_val'] = config['young_pct']
                 st.session_state['hrf_k_val'] = config['hrf_k']
-                
+                st.session_state['int_def_val'] = config.get('int_def_val', 30)
+              
                 # 2. Extract uncorrupted matrices
                 X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0)
                 ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns")
@@ -330,6 +331,7 @@ with st.sidebar:
                 'n_cpgs': n_cpgs,
                 'young_pct': young_pct,
                 'hrf_k': hrf_k,
+                'int_def_val': intervention_default,
                 'cpg_names': st.session_state.cpg_names,
                 'version': '1.0.0'
             }
@@ -417,7 +419,10 @@ if 'clock' not in st.session_state:
     st.session_state.age_accel_df = None
     st.session_state.pipeline_done = False
 
-if not st.session_state.pipeline_done:
+  if not st.session_state.pipeline_done:
+    # 100% DETERMINISM LOCK: Ensure random subsetting in HRF/CV yields exact same weights
+    np.random.seed(42) 
+    
     prog = st.progress(0, text="Initializing pipeline...")
 
     prog.progress(10, "Training biological age clock (ElasticNet)...")
@@ -1401,61 +1406,7 @@ R2 fit: {immortality.calibration['r_squared']:.4f}
         file_name="antientropy_report.txt",
         mime="text/plain"
     )
-  # ── Replace the bottom of your sidebar (around line 166) ──────────────────────
-    st.markdown("---")
-    st.markdown("**First-Principles DNA Preservation**")
-    session_upload = st.file_uploader(
-        "Upload Session DNA (.zip)",
-        type=["zip"],
-        help="Restore mathematically exact state via deterministic compilation."
-    )
-
-    if session_upload:
-        try:
-            with zipfile.ZipFile(session_upload, 'r') as zf:
-                # 1. Extract pure JSON configurations
-                config = json.loads(zf.read("hyperparameters.json").decode('utf-8'))
-                st.session_state['n_cpgs_val'] = config['n_cpgs']
-                st.session_state['young_pct_val'] = config['young_pct']
-                st.session_state['hrf_k_val'] = config['hrf_k']
-                
-                # 2. Extract uncorrupted matrices
-                X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0)
-                ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns")
-                
-                st.session_state['X'] = X_df
-                st.session_state['ages'] = ages_series
-                st.session_state['cpg_names'] = config['cpg_names']
-                st.session_state['pipeline_done'] = False # Enforce recompilation
-                
-            st.success("✓ DNA loaded. Recompiling deterministic physical state...")
-        except Exception as e:
-            st.error(f"Genomic corruption detected in archive: {e}")
-
-    # ── Replace the ZIP creation block in the sidebar ─────────────────────────────
-    # We add strict existence checks and use safe dictionary .get() access
-    if st.session_state.get('pipeline_done', False) and 'X' in st.session_state and 'cpg_names' in st.session_state:
-        # Package state into a mathematically pure Zip archive
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-            config = {
-                'n_cpgs': n_cpgs,
-                'young_pct': young_pct,
-                'hrf_k': hrf_k,
-                'cpg_names': st.session_state.get('cpg_names', []),  # Safe access
-                'version': '1.0.0'
-            }
-            zf.writestr("hyperparameters.json", json.dumps(config, indent=2))
-            zf.writestr("X.csv", st.session_state['X'].to_csv())     # Safe access
-            zf.writestr("ages.csv", st.session_state['ages'].to_frame(name='Chronological_Age').to_csv())
-
-        st.download_button(
-            label="🧬 Download Session DNA (.zip)",
-            data=buf.getvalue(),
-            file_name="antientropy_deterministic_dna.zip",
-            mime="application/zip",
-            help="Preserve absolute mathematical state indefinitely (JSON+CSV, No Pickle)."
-        )
+  
 
     st.markdown("---")
     st.markdown('<span style="font-size:0.65rem;color:#3d6b7a;letter-spacing:0.1em;">ANTIENTROPY v1.0 · NIT AGARTALA · 2026</span>', unsafe_allow_html=True)
