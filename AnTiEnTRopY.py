@@ -336,6 +336,7 @@ with st.sidebar:
         except Exception as e:
             st.error(f"Genomic corruption detected in archive: {e}")
 
+    # ── Replace your zip packaging block (around line 196) ─────────────────────────
     if st.session_state.get('pipeline_done', False):
         # Package state into a mathematically pure Zip archive
         buf = io.BytesIO()
@@ -349,8 +350,10 @@ with st.sidebar:
                 'version': '1.0.0'
             }
             zf.writestr("hyperparameters.json", json.dumps(config, indent=2))
-            zf.writestr("X.csv", st.session_state.X.to_csv())
-            zf.writestr("ages.csv", st.session_state.ages.to_frame(name='Chronological_Age').to_csv())
+            
+            # CRITICAL ZERO-LOSS PRESERVATION: Enforce exact float32 string limits
+            zf.writestr("X.csv", st.session_state.X.to_csv(float_format='%.9g'))
+            zf.writestr("ages.csv", st.session_state.ages.to_frame(name='Chronological_Age').to_csv(float_format='%.9g'))
 
         st.download_button(
             label="🧬 Download Session DNA (.zip)",
