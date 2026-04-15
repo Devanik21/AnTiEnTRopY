@@ -311,8 +311,10 @@ with st.sidebar:
                 st.session_state['int_def_val'] = config.get('int_def_val', 30)
               
                 # 2. Extract uncorrupted matrices
-                X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0)
-                ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns")
+                # ── Replace your matrix extraction (around line 177) ────────────────
+                # 2. Extract uncorrupted matrices with forced 32-bit float precision
+                X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0).astype(np.float32)
+                ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns").astype(np.float32)
                 
                 st.session_state['X'] = X_df
                 st.session_state['ages'] = ages_series
@@ -1212,7 +1214,9 @@ with tabs[4]:
     imm_chrono = float(ages.iloc[imm_idx])
     imm_bio = float(age_accel_df['biological_age'].iloc[imm_idx])
 
+    # ── Replace the Monte Carlo block in TAB 5 (around line 855) ────────────────
     with st.spinner("Running Monte Carlo longevity simulation..."):
+        np.random.seed(42) # <-- Ensure 100% visual preservation of trajectory lines
         traj_df = immortality.longevity_trajectory(
             initial_bio_age=imm_bio,
             initial_chrono_age=imm_chrono,
@@ -1221,7 +1225,6 @@ with tabs[4]:
             years_ahead=imm_years,
             n_monte_carlo=300
         )
-
     fig_traj = go.Figure()
     # Confidence band
     fig_traj.add_trace(go.Scatter(
