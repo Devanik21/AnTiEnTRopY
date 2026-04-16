@@ -993,6 +993,99 @@ with tabs[0]:
             )
             st.plotly_chart(fig_coef10b, key='clock_coef_dist_10b', width='stretch')
 
+        # ══════════════════════════════════════════════════════════════
+        # EXTENDED CLOCK ANALYTICS (Items 61-64)
+        # ══════════════════════════════════════════════════════════════
+
+        # ── Item 61: Prediction Error vs. Age ──────────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Prediction Error vs. Chronological Age</div>', unsafe_allow_html=True)
+        _error_df61 = age_accel_df.copy()
+        _error_df61['prediction_error'] = _error_df61['biological_age'] - _error_df61['chronological_age']
+        fig_err61 = go.Figure()
+        fig_err61.add_trace(go.Scatter(
+            x=_error_df61['chronological_age'], y=_error_df61['prediction_error'],
+            mode='markers', marker=dict(size=5, color=COLORS['blue'], opacity=0.6),
+            hovertemplate='Age: %{x:.0f}y<br>Error: %{y:.1f}y<extra></extra>'
+        ))
+        fig_err61.add_hline(y=0, line_color=COLORS['red'], line_dash='dash', line_width=1)
+        fig_err61.update_layout(
+            **PLOT_LAYOUT, height=350,
+            title='Clock Prediction Error vs. Age (Bias Check)',
+            xaxis_title='Chronological Age (years)',
+            yaxis_title='Prediction Error (Bio Age − Chrono Age)',
+            showlegend=False
+        )
+        st.plotly_chart(fig_err61, use_container_width=True, key='clock_error_vs_age_61')
+
+        # ── Item 62: Feature Variance Distribution ─────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Clock Feature Variance Distribution</div>', unsafe_allow_html=True)
+        _all_variances62 = X.var(axis=0)
+        _clock_variances62 = _all_variances62[clock.feature_names]
+        fig_var62 = go.Figure()
+        fig_var62.add_trace(go.Histogram(
+            x=np.log10(_all_variances62.clip(1e-10)), name='All CpGs',
+            marker_color=COLORS['dim'], opacity=0.6, nbinsx=50
+        ))
+        fig_var62.add_trace(go.Histogram(
+            x=np.log10(_clock_variances62.clip(1e-10)), name='Clock CpGs',
+            marker_color=COLORS['green'], opacity=0.8, nbinsx=50
+        ))
+        fig_var62.update_layout(
+            **PLOT_LAYOUT, height=350, barmode='overlay',
+            title='Variance Distribution: Clock CpGs vs. All CpGs',
+            xaxis_title='log₁₀(CpG Beta Variance)', yaxis_title='Count',
+            legend=dict(bgcolor='rgba(0,0,0,0)')
+        )
+        st.plotly_chart(fig_var62, use_container_width=True, key='clock_feature_variance_62')
+
+        # ── Item 63: Top Clock CpG Methylation (Young vs. Old) ───────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Top Clock CpG Methylation in Young vs. Old Cohorts</div>', unsafe_allow_html=True)
+        _top_clock_cpgs63 = clock.get_top_cpgs(10)['cpg'].tolist()
+        _cutoff_young63 = np.percentile(ages, reversal_sim.young_percentile)
+        _cutoff_old63 = np.percentile(ages, 100 - reversal_sim.young_percentile)
+        _young_mask63 = ages <= _cutoff_young63
+        _old_mask63 = ages >= _cutoff_old63
+        _young_data63 = X.loc[_young_mask63, _top_clock_cpgs63]
+        _old_data63 = X.loc[_old_mask63, _top_clock_cpgs63]
+        fig_box63 = go.Figure()
+        for cpg in _top_clock_cpgs63:
+            fig_box63.add_trace(go.Box(y=_young_data63[cpg], name=cpg, marker_color=COLORS['green'], showlegend=False))
+            fig_box63.add_trace(go.Box(y=_old_data63[cpg], name=cpg, marker_color=COLORS['red'], showlegend=False))
+        fig_box63.update_layout(
+            **PLOT_LAYOUT, height=400, boxmode='group',
+            title='Top 10 Clock CpGs: Young (Green) vs. Old (Red) Methylation',
+            xaxis_title='CpG Site', yaxis_title='Beta Value'
+        )
+        st.plotly_chart(fig_box63, use_container_width=True, key='clock_cpg_young_old_63')
+
+        # ── Item 64: Clock vs. Entropy-Based Age Prediction ────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Clock-Predicted Age vs. Entropy-Predicted Age</div>', unsafe_allow_html=True)
+        _esum64 = entropy_eng.get_entropy_summary()
+        _slope64 = _esum64.get('slope', 1e-6)
+        _intercept64 = _esum64.get('intercept', 0)
+        _ent_age64 = (entropy_eng.sample_entropy['mean_entropy'] - _intercept64) / (_slope64 + 1e-10)
+        _clock_age64 = age_accel_df['biological_age']
+        fig_comp64 = go.Figure()
+        fig_comp64.add_trace(go.Scatter(
+            x=_clock_age64, y=_ent_age64, mode='markers',
+            marker=dict(size=6, color=ages.values,
+                        colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
+                        colorbar=dict(title='Chrono Age', tickfont=dict(size=9)), showscale=True, opacity=0.7),
+            hovertemplate='Clock Age: %{x:.1f}y<br>Entropy Age: %{y:.1f}y<extra></extra>'
+        ))
+        _minmax = [min(_clock_age64.min(), _ent_age64.min()), max(_clock_age64.max(), _ent_age64.max())]
+        fig_comp64.add_trace(go.Scatter(x=_minmax, y=_minmax, mode='lines', line=dict(color=COLORS['dim'], dash='dash')))
+        _r64 = _clock_age64.corr(_ent_age64)
+        fig_comp64.update_layout(
+            **PLOT_LAYOUT, height=400,
+            title=f'Clock vs. Entropy Age Prediction (r = {_r64:.3f})',
+            xaxis_title='Biological Age (from Clock)',
+            yaxis_title='Biological Age (from Entropy)',
+            showlegend=False
+        )
+        st.plotly_chart(fig_comp64, use_container_width=True, key='clock_vs_entropy_age_64')
+
+
 # ─────────────────────────────────────────────────────────────
 # TAB 2: ENTROPY ENGINE
 # ─────────────────────────────────────────────────────────────
@@ -1461,6 +1554,88 @@ with tabs[1]:
             ),
         )
         st.plotly_chart(fig_surf20, key='ent_cum_surface_20', width='stretch')
+
+        # ══════════════════════════════════════════════════════════════
+        # EXTENDED ENTROPY ANALYTICS (Items 65-68)
+        # ══════════════════════════════════════════════════════════════
+
+        # ── Item 65: Age-Correlation Distribution ──────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">CpG Age-Correlation Distribution</div>', unsafe_allow_html=True)
+        _age_corr65 = entropy_eng.cpg_entropy_stats['age_correlation'].dropna()
+        fig_ac65 = go.Figure()
+        fig_ac65.add_trace(go.Histogram(
+            x=_age_corr65, nbinsx=100, marker_color=COLORS['blue'], opacity=0.8,
+            hovertemplate='r: %{x:.3f}<br>Count: %{y}<extra></extra>'
+        ))
+        fig_ac65.add_vline(x=0, line_color=COLORS['dim'], line_width=1)
+        fig_ac65.add_vline(x=0.3, line_color=COLORS['red'], line_dash='dash', line_width=1, annotation_text='Drift threshold')
+        fig_ac65.add_vline(x=-0.3, line_color=COLORS['green'], line_dash='dash', line_width=1)
+        fig_ac65.update_layout(
+            **PLOT_LAYOUT, height=350,
+            title=f'Distribution of CpG-Age Correlations (μ={_age_corr65.mean():.3f}, σ={_age_corr65.std():.3f})',
+            xaxis_title='Pearson r (CpG Beta vs. Age)', yaxis_title='Count'
+        )
+        st.plotly_chart(fig_ac65, use_container_width=True, key='ent_age_corr_dist_65')
+
+        # ── Item 66: CpG Variance vs. Entropy ──────────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">CpG Variance vs. Mean Entropy</div>', unsafe_allow_html=True)
+        _sample_cpgs66 = entropy_eng.cpg_entropy_stats.sample(min(5000, len(entropy_eng.cpg_entropy_stats)))
+        fig_ve66 = go.Figure()
+        fig_ve66.add_trace(go.Scatter(
+            x=_sample_cpgs66['variance'], y=_sample_cpgs66['mean_entropy'], mode='markers',
+            marker=dict(size=3, color=_sample_cpgs66['age_correlation'],
+                        colorscale=[[0, COLORS['green']], [0.5, COLORS['dim']], [1, COLORS['red']]],
+                        colorbar=dict(title='Age Corr.', tickfont=dict(size=9)), showscale=True, opacity=0.6),
+            text=_sample_cpgs66['cpg'],
+            hovertemplate='CpG: %{text}<br>Variance: %{x:.4f}<br>Entropy: %{y:.4f}<extra></extra>'
+        ))
+        fig_ve66.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title='CpG-level Variance vs. Mean Entropy',
+            xaxis_title='Beta Value Variance', yaxis_title='Mean Shannon Entropy H(β)'
+        )
+        st.plotly_chart(fig_ve66, use_container_width=True, key='ent_var_vs_ent_66')
+
+        # ── Item 67: Chaos vs. Order Scatter Plot ──────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Sample Chaos vs. Order Fraction</div>', unsafe_allow_html=True)
+        _ent_df67 = entropy_eng.sample_entropy
+        fig_co67 = go.Figure()
+        fig_co67.add_trace(go.Scatter(
+            x=_ent_df67['chaos_fraction'], y=_ent_df67['ordered_fraction'], mode='markers',
+            marker=dict(size=6, color=_ent_df67['chronological_age'],
+                        colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
+                        colorbar=dict(title='Age', tickfont=dict(size=9)), showscale=True, opacity=0.8),
+            hovertemplate='Age: %{marker.color:.0f}y<br>Chaos: %{x:.3f}<br>Order: %{y:.3f}<extra></extra>'
+        ))
+        fig_co67.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title='Sample Landscape: Chaotic vs. Ordered CpGs',
+            xaxis_title='Chaos Fraction (β ∈ 0.4-0.6)',
+            yaxis_title='Ordered Fraction (β < 0.2 or > 0.8)'
+        )
+        st.plotly_chart(fig_co67, use_container_width=True, key='ent_chaos_order_67')
+
+        # ── Item 68: Entropy of Top Clock CpGs vs. Age ─────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Entropy of Clock CpGs vs. Age</div>', unsafe_allow_html=True)
+        _clock_cpgs68 = clock.feature_names
+        _clock_cpg_entropy68 = _binary_entropy(X[_clock_cpgs68].values).mean(axis=1)
+        _r68, _p68 = pearsonr(ages.values, _clock_cpg_entropy68)
+        fig_ce68 = go.Figure()
+        fig_ce68.add_trace(go.Scatter(
+            x=ages, y=_clock_cpg_entropy68, mode='markers',
+            marker=dict(size=5, color=COLORS['purple'], opacity=0.6),
+            hovertemplate='Age: %{x:.0f}y<br>Clock CpG Entropy: %{y:.4f}<extra></extra>'
+        ))
+        _slope68, _int68, _, _, _ = stats.linregress(ages.values, _clock_cpg_entropy68)
+        _xfit68 = np.array([ages.min(), ages.max()])
+        fig_ce68.add_trace(go.Scatter(x=_xfit68, y=_slope68 * _xfit68 + _int68, mode='lines', line=dict(color=COLORS['amber'], width=2)))
+        fig_ce68.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Mean Entropy of Clock CpGs vs. Age (r={_r68:.3f})',
+            xaxis_title='Chronological Age (years)',
+            yaxis_title='Mean H(β) of Clock CpGs'
+        )
+        st.plotly_chart(fig_ce68, use_container_width=True, key='ent_clock_cpg_entropy_68')
 
 # ─────────────────────────────────────────────────────────────
 # TAB 3: REVERSAL SIMULATOR
@@ -1964,6 +2139,114 @@ with tabs[2]:
             legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=9))
         )
         st.plotly_chart(fig_hl30, key='rev_halflife_30', width='stretch')
+
+        # ══════════════════════════════════════════════════════════════
+        # EXTENDED REVERSAL ANALYTICS (Items 69-72)
+        # ══════════════════════════════════════════════════════════════
+
+        # ── Item 69: Age Acceleration Reversal ─────────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Age Acceleration Reversal Potential</div>', unsafe_allow_html=True)
+        _batch_df69 = _batch_df21.copy() # From item 21
+        _batch_df69['bio_age_after'] = _batch_df69.apply(
+            lambda row: reversal_sim.simulate_intervention(X.iloc[row['idx']].values, clock, sel_pct)['bio_age_after'],
+            axis=1
+        )
+        _batch_df69['accel_after'] = _batch_df69['bio_age_after'] - _batch_df69['chrono_age']
+        fig_accel69 = go.Figure()
+        fig_accel69.add_trace(go.Scatter(
+            x=_batch_df69['accel'], y=_batch_df69['accel_after'], mode='markers',
+            marker=dict(size=7, color=_batch_df69['chrono_age'],
+                        colorscale=[[0, COLORS['green']], [0.5, COLORS['amber']], [1, COLORS['red']]],
+                        colorbar=dict(title='Age', tickfont=dict(size=9)), showscale=True, opacity=0.8),
+            hovertemplate='Accel Before: %{x:.1f}y<br>Accel After: %{y:.1f}y<extra></extra>'
+        ))
+        _minmax69 = [min(_batch_df69['accel'].min(), _batch_df69['accel_after'].min()), max(_batch_df69['accel'].max(), _batch_df69['accel_after'].max())]
+        fig_accel69.add_trace(go.Scatter(x=_minmax69, y=_minmax69, mode='lines', line=dict(color=COLORS['dim'], dash='dash')))
+        fig_accel69.add_hline(y=0, line_color=COLORS['dim'], line_dash='dot')
+        fig_accel69.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Age Acceleration Before vs. After {sel_pct}% Intervention',
+            xaxis_title='Age Acceleration Before (years)',
+            yaxis_title='Age Acceleration After (years)'
+        )
+        st.plotly_chart(fig_accel69, use_container_width=True, key='rev_accel_reversal_69')
+
+        # ── Item 70: Reversal Potential: Young vs. Partial Target ──────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Reversal Curve: Full (100%) vs. Partial (80%) Reprogramming</div>', unsafe_allow_html=True)
+        with st.spinner("Computing partial reprogramming curve..."):
+            _rev_curve_partial70 = pd.DataFrame([
+                reversal_sim.simulate_intervention(sel_beta, clock, p, target='partial')
+                for p in np.linspace(1, 100, 25)
+            ])
+        fig_partial70 = go.Figure()
+        fig_partial70.add_trace(go.Scatter(
+            x=rev_curve['intervention_pct'], y=rev_curve['years_reversed'],
+            mode='lines+markers', name='Full Reprogramming (to Young Ref)',
+            line=dict(color=COLORS['green'], width=2.5)
+        ))
+        fig_partial70.add_trace(go.Scatter(
+            x=_rev_curve_partial70['intervention_pct'], y=_rev_curve_partial70['years_reversed'],
+            mode='lines+markers', name='Partial Reprogramming (80% to Young Ref)',
+            line=dict(color=COLORS['blue'], width=2.5, dash='dash')
+        ))
+        fig_partial70.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Reversal Magnitude: Full vs. Partial Reprogramming — Sample #{sel_idx}',
+            xaxis_title='Intervention % (CpGs Reset)',
+            yaxis_title='Years of Biological Age Reversed',
+            legend=dict(bgcolor='rgba(0,0,0,0)')
+        )
+        st.plotly_chart(fig_partial70, use_container_width=True, key='rev_partial_comp_70')
+
+        # ── Item 71: Entropy Reduction vs. Age Reversal ────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Entropy Reduction vs. Age Reversal</div>', unsafe_allow_html=True)
+        _entropy_rev_data71 = []
+        _initial_entropy71 = entropy_eng.get_sample_entropy_at(sel_beta)['mean_entropy']
+        for _, row in rev_curve.iterrows():
+            _res = reversal_sim.simulate_intervention(sel_beta, clock, row['intervention_pct'])
+            _post_entropy = entropy_eng.get_sample_entropy_at(_res['beta_reprogrammed'])['mean_entropy']
+            _entropy_rev_data71.append({
+                'years_reversed': row['years_reversed'],
+                'delta_entropy': _initial_entropy71 - _post_entropy,
+                'pct': row['intervention_pct']
+            })
+        _ent_rev_df71 = pd.DataFrame(_entropy_rev_data71)
+        fig_ent_rev71 = go.Figure()
+        fig_ent_rev71.add_trace(go.Scatter(
+            x=_ent_rev_df71['delta_entropy'], y=_ent_rev_df71['years_reversed'], mode='markers',
+            marker=dict(size=7, color=_ent_rev_df71['pct'],
+                        colorscale=[[0, COLORS['blue']], [1, COLORS['green']]],
+                        colorbar=dict(title='Interv. %', tickfont=dict(size=9)), showscale=True),
+            hovertemplate='ΔH: %{x:.5f}<br>Years Reversed: %{y:.1f}y<extra></extra>'
+        ))
+        fig_ent_rev71.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Age Reversal vs. Entropy Reduction — Sample #{sel_idx}',
+            xaxis_title='Entropy Reduction (ΔH)',
+            yaxis_title='Years Reversed'
+        )
+        st.plotly_chart(fig_ent_rev71, use_container_width=True, key='rev_entropy_vs_age_71')
+
+        # ── Item 72: Methylome Distance to Youth ───────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Methylome Distance to Youthful State</div>', unsafe_allow_html=True)
+        _dist_before72 = np.linalg.norm(sel_beta - reversal_sim.young_reference)
+        _dist_after72 = np.linalg.norm(rev_result['beta_reprogrammed'] - reversal_sim.young_reference)
+        _dist_old_ref72 = np.linalg.norm(reversal_sim.old_reference - reversal_sim.young_reference)
+        fig_dist72 = go.Figure()
+        fig_dist72.add_trace(go.Bar(
+            x=['Old Reference', 'Sample Before', 'Sample After'],
+            y=[_dist_old_ref72, _dist_before72, _dist_after72],
+            marker_color=[COLORS['red'], COLORS['amber'], COLORS['green']],
+            text=[f"{y:.2f}" for y in [_dist_old_ref72, _dist_before72, _dist_after72]],
+            textposition='outside'
+        ))
+        fig_dist72.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Euclidean Distance to Young Reference Methylome — {sel_pct}% Intervention',
+            yaxis_title='Euclidean Distance',
+            showlegend=False
+        )
+        st.plotly_chart(fig_dist72, use_container_width=True, key='rev_distance_to_youth_72')
 
 # ─────────────────────────────────────────────────────────────
 # TAB 4: HRF RESONANCE
@@ -2469,6 +2752,104 @@ with tabs[3]:
         )
         st.plotly_chart(fig_sens40, key='hrf_sensitivity_40', width='stretch')
 
+        # ══════════════════════════════════════════════════════════════
+        # EXTENDED HRF ANALYTICS (Items 73-76)
+        # ══════════════════════════════════════════════════════════════
+
+        # ── Item 73: Classification Confidence vs. Age ─────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Classification Confidence vs. Age</div>', unsafe_allow_html=True)
+        _prob_cols73 = [c for c in res_df.columns if c.startswith('P_')]
+        _confidence73 = res_df[_prob_cols73].max(axis=1)
+        _age_subset73 = ages.iloc[:len(_confidence73)]
+        fig_conf73 = go.Figure()
+        fig_conf73.add_trace(go.Scatter(
+            x=_age_subset73, y=_confidence73, mode='markers',
+            marker=dict(size=6, color=COLORS['blue'], opacity=0.7),
+            hovertemplate='Age: %{x:.0f}y<br>Confidence: %{y:.3f}<extra></extra>'
+        ))
+        fig_conf73.update_layout(
+            **PLOT_LAYOUT, height=350,
+            title='HRF Classification Confidence vs. Age',
+            xaxis_title='Chronological Age (years)',
+            yaxis_title='Confidence (Max Resonance Probability)'
+        )
+        st.plotly_chart(fig_conf73, use_container_width=True, key='hrf_confidence_73')
+
+        # ── Item 74: Nearest Neighbor Distance Profile ─────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Nearest Neighbor Distance Profile</div>', unsafe_allow_html=True)
+        _query_vec74 = hrf._pca_reduce(hrf.scaler.transform(X.iloc[[sel_wave_idx]]))[0]
+        _dist_data74 = []
+        for c in hrf.classes:
+            _dists, _ = hrf.nn_per_class[c].kneighbors(_query_vec74.reshape(1, -1))
+            _dist_data74.append(go.Box(y=_dists[0], name=hrf.CLASS_LABELS[c], marker_color=hrf.CLASS_COLORS[c]))
+        fig_dist74 = go.Figure(data=_dist_data74)
+        fig_dist74.update_layout(
+            **PLOT_LAYOUT, height=350,
+            title=f'Distance to k-Nearest Oscillators for Sample #{sel_wave_idx}',
+            yaxis_title='Euclidean Distance in PCA Space',
+            xaxis_title='Target Age Class',
+            showlegend=False
+        )
+        st.plotly_chart(fig_dist74, use_container_width=True, key='hrf_nn_dist_74')
+
+        # ── Item 75: Visualization of an "Eigen-CpG" (PC1 Weights) ─────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">PC1 "Eigen-CpG" Visualization</div>', unsafe_allow_html=True)
+        if hrf.pca_components is not None:
+            _pc1_weights = hrf.pca_components[0]
+            _top_pc1_idx = np.argsort(np.abs(_pc1_weights))[-30:]
+            _top_pc1_cpgs = X.columns[_top_pc1_idx]
+            _top_pc1_weights = _pc1_weights[_top_pc1_idx]
+            _pc1_colors = [COLORS['green'] if w > 0 else COLORS['red'] for w in _top_pc1_weights]
+            fig_pc1_75 = go.Figure(go.Bar(
+                x=_top_pc1_weights, y=_top_pc1_cpgs, orientation='h',
+                marker_color=_pc1_colors,
+                hovertemplate='%{y}<br>Weight: %{x:.4f}<extra></extra>'
+            ))
+            fig_pc1_75.update_layout(
+                **PLOT_LAYOUT, height=500,
+                title='Top 30 CpG Weights in Principal Component 1',
+                xaxis_title='Weight in PC1',
+                yaxis=dict(tickfont=dict(size=8))
+            )
+            st.plotly_chart(fig_pc1_75, use_container_width=True, key='hrf_eigen_cpg_75')
+
+        # ── Item 76: Resonance Energy Components Breakdown ─────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Resonance Energy Components Breakdown</div>', unsafe_allow_html=True)
+        _query76 = hrf.X_train[sel_wave_idx]
+        _class76 = hrf.y_train[sel_wave_idx]
+        _omega_c76 = hrf.omega_0 * (_class76 + 1)
+        _, _indices76 = hrf.nn_per_class[_class76].kneighbors(_query76.reshape(1, -1))
+        _neighbors76 = hrf.X_train[hrf.y_train == _class76][_indices76[0]]
+
+        _diffs76 = _neighbors76 - _query76
+        _distances76 = np.sqrt(np.sum(_diffs76 ** 2, axis=1) + 1e-8)
+        _envelope76 = np.exp(-hrf.gamma * _distances76 ** 2)
+        _oscillation76 = 1.0 + np.cos(_omega_c76 * _distances76)
+        _potentials76 = _envelope76 * _oscillation76
+
+        fig_comp76 = go.Figure()
+        _sorted_idx76 = np.argsort(_distances76)
+        fig_comp76.add_trace(go.Scatter(
+            x=_distances76[_sorted_idx76], y=_envelope76[_sorted_idx76],
+            mode='lines', name='Gaussian Envelope (Locality)', line=dict(color=COLORS['amber'], dash='dash')
+        ))
+        fig_comp76.add_trace(go.Scatter(
+            x=_distances76[_sorted_idx76], y=_oscillation76[_sorted_idx76],
+            mode='lines', name='Oscillatory Term (Wave)', line=dict(color=COLORS['blue'], dash='dot')
+        ))
+        fig_comp76.add_trace(go.Bar(
+            x=_distances76[_sorted_idx76], y=_potentials76[_sorted_idx76],
+            name='Resulting Wave Potential', marker_color=COLORS['green'], opacity=0.6
+        ))
+        fig_comp76.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Resonance Energy Components for Sample #{sel_wave_idx}',
+            xaxis_title='Distance to Neighboring Oscillators',
+            yaxis_title='Component Value',
+            legend=dict(bgcolor='rgba(0,0,0,0)')
+        )
+        st.plotly_chart(fig_comp76, use_container_width=True, key='hrf_components_76')
+
 # ─────────────────────────────────────────────────────────────
 # TAB 5: IMMORTALITY ENGINE
 # ─────────────────────────────────────────────────────────────
@@ -2952,6 +3333,136 @@ with tabs[4]:
             legend=dict(bgcolor='rgba(0,0,0,0)')
         )
         st.plotly_chart(fig_surplus50, key='imm_surplus_50', width='stretch')
+
+        # ══════════════════════════════════════════════════════════════
+        # EXTENDED IMMORTALITY ANALYTICS (Items 77-81)
+        # ══════════════════════════════════════════════════════════════
+
+        # ── Item 77: Sensitivity to Aging Noise (age_noise_std) ────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Sensitivity Analysis: Stochastic Aging Noise</div>', unsafe_allow_html=True)
+        fig_sens77 = go.Figure()
+        _noise_scenarios = [
+            ('Low Noise (σ=1.0)', 1.0, COLORS['green']),
+            ('Baseline Noise (σ=2.0)', 2.0, COLORS['blue']),
+            ('High Noise (σ=4.0)', 4.0, COLORS['red']),
+        ]
+        for _s_name, _s_std, _s_color in _noise_scenarios:
+            immortality.age_noise_std = _s_std # Temporarily set
+            _s_traj_df = immortality.longevity_trajectory(
+                initial_bio_age=imm_bio, initial_chrono_age=imm_chrono,
+                intervention_pct=imm_pct, intervention_interval=float(imm_interval),
+                years_ahead=imm_years, n_monte_carlo=100
+            )
+            fig_sens77.add_trace(go.Scatter(
+                x=_s_traj_df['chrono_age'], y=_s_traj_df['bio_age_mean'],
+                mode='lines', line=dict(color=_s_color, width=2), name=_s_name
+            ))
+        immortality.age_noise_std = 2.0 # Reset to default
+        fig_sens77.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title=f'Sensitivity to Stochastic Aging Noise — Sample #{imm_idx}',
+            xaxis_title='Chronological Age (years)', yaxis_title='Mean Biological Age (years)',
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(size=9))
+        )
+        st.plotly_chart(fig_sens77, use_container_width=True, key='imm_noise_sensitivity_77')
+
+        # ── Item 78: Distribution of Final Biological Age ──────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Distribution of Final Biological Age (Monte Carlo)</div>', unsafe_allow_html=True)
+        _final_bio_ages78 = traj_df.iloc[-1][[c for c in traj_df.columns if 'bio_age_p' in c]].values
+        _final_ages_mc = traj_array[:, -1] # From longevity_trajectory call
+        fig_final_dist78 = go.Figure()
+        fig_final_dist78.add_trace(go.Histogram(
+            x=_final_ages_mc, nbinsx=30, marker_color=COLORS['green'], opacity=0.8,
+            hovertemplate='Final Bio Age: %{x:.1f}y<br>Count: %{y}<extra></extra>'
+        ))
+        _final_mean = _final_ages_mc.mean()
+        fig_final_dist78.add_vline(x=_final_mean, line_color=COLORS['amber'], line_dash='dash',
+                                   annotation_text=f'Mean: {_final_mean:.1f}y', annotation_font_color=COLORS['amber'])
+        fig_final_dist78.update_layout(
+            **PLOT_LAYOUT, height=350,
+            title=f'Distribution of Final Bio Age at T={imm_years} years',
+            xaxis_title=f'Biological Age at Chrono Age {imm_chrono + imm_years:.0f}y',
+            yaxis_title='Monte Carlo Trial Count'
+        )
+        st.plotly_chart(fig_final_dist78, use_container_width=True, key='imm_final_age_dist_78')
+
+        # ── Item 79: "Cost of Immortality" ─────────────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">"Cost of Immortality" — Total Interventions</div>', unsafe_allow_html=True)
+        _horizons = [20, 40, 60, 80, 100]
+        _intervals = [1, 2, 5, 10]
+        _cost_data79 = []
+        for h in _horizons:
+            for i in _intervals:
+                _n_int = h / i
+                _cost_data79.append({'horizon': h, 'interval': i, 'count': _n_int})
+        _cost_df79 = pd.DataFrame(_cost_data79)
+        fig_cost79 = go.Figure()
+        for i in _intervals:
+            _df_i = _cost_df79[_cost_df79['interval'] == i]
+            fig_cost79.add_trace(go.Scatter(
+                x=_df_i['horizon'], y=_df_i['count'], mode='lines+markers', name=f'{i}-year interval'
+            ))
+        fig_cost79.update_layout(
+            **PLOT_LAYOUT, height=380,
+            title='Total Number of Interventions Required Over Time',
+            xaxis_title='Time Horizon (years)',
+            yaxis_title='Total Interventions',
+            legend=dict(bgcolor='rgba(0,0,0,0)')
+        )
+        st.plotly_chart(fig_cost79, use_container_width=True, key='imm_cost_79')
+
+        # ── Item 80: Escape Velocity vs. Initial Age Acceleration ──────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Escape Velocity vs. Initial Age Acceleration</div>', unsafe_allow_html=True)
+        _ev_data80 = []
+        _n_ev_samples = min(20, len(ages))
+        for i in range(_n_ev_samples):
+            _beta_i = X.iloc[i].values.astype(np.float32)
+            _curve_i = reversal_sim.reversal_curve(_beta_i, clock, steps=15)
+            immortality.set_reversal_curve(_curve_i)
+            _ev_i = immortality.compute_escape_velocity(float(imm_interval))
+            if _ev_i['escape_achievable']:
+                _ev_data80.append({
+                    'accel': age_accel_df['age_acceleration'].iloc[i],
+                    'escape_pct': _ev_i['escape_velocity_pct'],
+                    'age': ages.iloc[i]
+                })
+        immortality.set_reversal_curve(imm_rev_curve) # Reset
+        if _ev_data80:
+            _ev_df80 = pd.DataFrame(_ev_data80)
+            fig_ev80 = go.Figure(go.Scatter(
+                x=_ev_df80['accel'], y=_ev_df80['escape_pct'], mode='markers',
+                marker=dict(size=8, color=_ev_df80['age'],
+                            colorscale=[[0, COLORS['green']], [1, COLORS['red']]],
+                            colorbar=dict(title='Age', tickfont=dict(size=9)), showscale=True),
+                hovertemplate='Accel: %{x:.1f}y<br>Escape %: %{y:.1f}%<extra></extra>'
+            ))
+            fig_ev80.update_layout(
+                **PLOT_LAYOUT, height=380,
+                title=f'Escape Velocity % vs. Initial Age Acceleration ({imm_interval}y interval)',
+                xaxis_title='Initial Age Acceleration (years)',
+                yaxis_title='Required Intervention % for Escape'
+            )
+            st.plotly_chart(fig_ev80, use_container_width=True, key='imm_ev_vs_accel_80')
+
+        # ── Item 81: Time to Halve Age Acceleration ────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Time to Halve Age Acceleration</div>', unsafe_allow_html=True)
+        _initial_accel81 = imm_bio - imm_chrono
+        _target_accel81 = _initial_accel81 / 2
+        _time_to_halve81 = None
+        if _initial_accel81 > 0:
+            for i, row in traj_df.iterrows():
+                _current_accel = row['bio_age_mean'] - row['chrono_age']
+                if _current_accel <= _target_accel81:
+                    _time_to_halve81 = row['years_elapsed']
+                    break
+        _tth_cols = st.columns(3)
+        _tth_cols[0].markdown(f"""<div class="metric-card"><div class="metric-value" style="font-size:1.1rem;">{_initial_accel81:+.2f}y</div><div class="metric-label">Initial Accel.</div></div>""", unsafe_allow_html=True)
+        _tth_cols[1].markdown(f"""<div class="metric-card"><div class="metric-value" style="font-size:1.1rem;">{_target_accel81:+.2f}y</div><div class="metric-label">Target Accel.</div></div>""", unsafe_allow_html=True)
+        _tth_cols[2].markdown(f"""<div class="metric-card"><div class="metric-value" style="color:{COLORS['green']};font-size:1.1rem;">{'N/A' if _time_to_halve81 is None else f'{_time_to_halve81:.1f}y'}</div><div class="metric-label">Time to Halve</div></div>""", unsafe_allow_html=True)
+        if _time_to_halve81 is not None:
+            st.markdown(f"""<div class="alert-success">With a {imm_pct}% intervention every {imm_interval} years, this sample's age acceleration is projected to be halved in <b>{_time_to_halve81:.1f} years</b>.</div>""", unsafe_allow_html=True)
+        else:
+            st.markdown(f"""<div class="alert-warning">Under this protocol, the sample's age acceleration is not projected to halve within the {imm_years}-year simulation horizon.</div>""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────
 # TAB 6: RESEARCH REPORT
