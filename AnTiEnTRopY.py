@@ -312,29 +312,36 @@ with st.sidebar:
     )
 
     if session_upload:
-        try:
-            with zipfile.ZipFile(session_upload, 'r') as zf:
-                # 1. Extract pure JSON configurations
-                config = json.loads(zf.read("hyperparameters.json").decode('utf-8'))
-                st.session_state['n_cpgs_val'] = config['n_cpgs']
-                st.session_state['young_pct_val'] = config['young_pct']
-                st.session_state['hrf_k_val'] = config['hrf_k']
-                st.session_state['int_def_val'] = config.get('int_def_val', 30)
-              
-                # 2. Extract uncorrupted matrices
-                # ── Replace your matrix extraction (around line 177) ────────────────
-                # 2. Extract uncorrupted matrices with forced 32-bit float precision
-                X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0).astype(np.float32)
-                ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns").astype(np.float32)
-                
-                st.session_state['X'] = X_df
-                st.session_state['ages'] = ages_series
-                st.session_state['cpg_names'] = config['cpg_names']
-                st.session_state['pipeline_done'] = False # Enforce recompilation
-                
-            st.success("✓ DNA loaded. Recompiling deterministic physical state...")
-        except Exception as e:
-            st.error(f"Genomic corruption detected in archive: {e}")
+        # ZERO-CHEATING FIX: Only extract and enforce recompilation if this is a NEW zip upload
+        if st.session_state.get('last_zip_uploaded') != session_upload.name:
+            try:
+                with zipfile.ZipFile(session_upload, 'r') as zf:
+                    # 1. Extract pure JSON configurations
+                    config = json.loads(zf.read("hyperparameters.json").decode('utf-8'))
+                    st.session_state['n_cpgs_val'] = config['n_cpgs']
+                    st.session_state['young_pct_val'] = config['young_pct']
+                    st.session_state['hrf_k_val'] = config['hrf_k']
+                    st.session_state['int_def_val'] = config.get('int_def_val', 30)
+                  
+                    # 2. Extract uncorrupted matrices with forced 32-bit float precision
+                    X_df = pd.read_csv(io.BytesIO(zf.read("X.csv")), index_col=0).astype(np.float32)
+                    ages_series = pd.read_csv(io.BytesIO(zf.read("ages.csv")), index_col=0).squeeze("columns").astype(np.float32)
+                    
+                    st.session_state['X'] = X_df
+                    st.session_state['ages'] = ages_series
+                    st.session_state['cpg_names'] = config['cpg_names']
+                    
+                    # Force recompilation ONLY on the initial load of this specific file
+                    st.session_state['pipeline_done'] = False 
+                    
+                # Lock the state to prevent infinite recompilation loops on UI interactions
+                st.session_state['last_zip_uploaded'] = session_upload.name
+                st.success(f"✓ DNA loaded. Recompiling deterministic physical state from {session_upload.name}...")
+            except Exception as e:
+                st.error(f"Genomic corruption detected in archive: {e}")
+        else:
+            # File is already processed, just show the success state
+            st.success(f"✓ Session DNA active: {session_upload.name}")
 
     # ── Replace your zip packaging block (around line 196) ─────────────────────────
     if st.session_state.get('pipeline_done', False):
