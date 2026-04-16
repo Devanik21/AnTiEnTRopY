@@ -6,7 +6,7 @@ Architecture:
   clock.py       → BiologicalClock (ElasticNet)
   entropy.py     → EpigeneticEntropy (methylation disorder) 
   reversal.py    → ReversalSimulator (partial reprogramming)
-  hrf_epigenetic → HRFEpigenetic (wave interference classifier)
+  hrf_epigenetic → HRFEpigenetic (wave interference classifier)  
   immortality.py → ImmortalityEngine (escape velocity)  
 """
 
