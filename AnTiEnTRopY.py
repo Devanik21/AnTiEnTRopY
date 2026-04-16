@@ -2149,7 +2149,7 @@ with tabs[2]:
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Age Acceleration Reversal Potential</div>', unsafe_allow_html=True)
         _batch_df69 = _batch_df21.copy() # From item 21
         _batch_df69['bio_age_after'] = _batch_df69.apply(
-            lambda row: reversal_sim.simulate_intervention(X.iloc[row['idx']].values, clock, sel_pct)['bio_age_after'],
+            lambda row: reversal_sim.simulate_intervention(X.iloc[int(row['idx'])].values, clock, sel_pct)['bio_age_after'],
             axis=1
         )
         _batch_df69['accel_after'] = _batch_df69['bio_age_after'] - _batch_df69['chrono_age']
