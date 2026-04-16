@@ -266,11 +266,15 @@ def load_data(uploaded_file) -> tuple:
     return X, ages, cpg_cols
 
 # ── Model training ─────────────────────────────────────────────────────────────
-@st.cache_resource(show_spinner=False)
 def run_pipeline(_X_key, _ages_key, n_cpgs):
     """Full pipeline: clock + entropy + reversal + HRF + immortality."""
     import sys
-    sys.path.insert(0, '/home/claude/antientropy')
+    import os
+    # Ensure current directory is in path for local imports
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
+    
     from CloCk import BiologicalClock
     from EnTRopY import EpigeneticEntropy
     from ReVeRsAL import ReversalSimulator
