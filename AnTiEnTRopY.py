@@ -1,4 +1,3 @@
-
 """
 app.py — AntiEntropy: Epigenetic Age Reversal Platform
 A Nobel-tier research interface for biological aging analysis.
@@ -442,6 +441,10 @@ if 'clock' not in st.session_state:
     st.session_state.hrf = None
     st.session_state.immortality = None
     st.session_state.age_accel_df = None
+    st.session_state.pipeline_done = False
+
+# Version compatibility hook: force re-train if cached HRF is legacy (v14 or older)
+if st.session_state.get('hrf') is not None and not hasattr(st.session_state['hrf'], '_simulate_predict'):
     st.session_state.pipeline_done = False
 
 if not st.session_state.pipeline_done:
