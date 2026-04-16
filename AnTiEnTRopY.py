@@ -9,7 +9,7 @@ Architecture:
   hrf_epigenetic → HRFEpigenetic (wave interference classifier)
   immortality.py → ImmortalityEngine (escape velocity)  
 """
- 
+
 # ── Replace your imports (around line 12) ──────────────────────────────────────
 import streamlit as st
 import pandas as pd
@@ -2780,9 +2780,11 @@ with tabs[3]:
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Nearest Neighbor Distance Profile</div>', unsafe_allow_html=True)
         _query_vec74 = hrf._pca_reduce(hrf.scaler.transform(X.iloc[[sel_wave_idx]]))[0]
         _dist_data74 = []
+        _labels74 = {0: 'Young (≤35)', 1: 'Middle (36-55)', 2: 'Old (>55)'}
+        _colors74 = {0: '#00ff9f', 1: '#ffb700', 2: '#ff4455'}
         for c in hrf.classes:
             _dists, _ = hrf.nn_per_class[c].kneighbors(_query_vec74.reshape(1, -1))
-            _dist_data74.append(go.Box(y=_dists[0], name=hrf.CLASS_LABELS[c], marker_color=hrf.CLASS_COLORS[c]))
+            _dist_data74.append(go.Box(y=_dists[0], name=_labels74.get(c, str(c)), marker_color=_colors74.get(c, '#3d6b7a')))
         fig_dist74 = go.Figure(data=_dist_data74)
         fig_dist74.update_layout(
             **PLOT_LAYOUT, height=350,
