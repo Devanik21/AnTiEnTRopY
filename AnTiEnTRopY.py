@@ -1981,17 +1981,17 @@ with tabs[3]:
         hm = hrf.metrics
         h1, h2, h3, h4 = st.columns(4)
         h1.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{COLORS['green']}">{hm['train_accuracy']*100:.1f}%</div>
-        <div class="metric-label">HRF Train Accuracy</div></div>""", unsafe_allow_html=True)
+        <div class="metric-value" style="color:{COLORS['green']}">{hm.get('top3_evolution_peaks', [hm['train_accuracy']])[0]*100:.1f}%</div>
+        <div class="metric-label">Peak Evolution Acc.</div></div>""", unsafe_allow_html=True)
         h2.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{COLORS['amber']}">{hm['best_omega']:.1f}</div>
+        <div class="metric-value" style="color:{COLORS['amber']}">{hm.get('best_freq', hm.get('best_omega', 0.0)):.1f}</div>
         <div class="metric-label">Optimal ω₀</div></div>""", unsafe_allow_html=True)
         h3.markdown(f"""<div class="metric-card">
         <div class="metric-value" style="color:{COLORS['blue']}">{hm['best_gamma']:.3f}</div>
         <div class="metric-label">Damping γ</div></div>""", unsafe_allow_html=True)
         h4.markdown(f"""<div class="metric-card">
-        <div class="metric-value" style="color:{COLORS['purple']}">{hm['n_classes']}</div>
-        <div class="metric-label">Age Classes</div></div>""", unsafe_allow_html=True)
+        <div class="metric-value" style="color:{COLORS['purple']}">{hm.get('best_k', hrf.k)}</div>
+        <div class="metric-label">Optimal Local k</div></div>""", unsafe_allow_html=True)
 
         # Resonance energy profiles
         with st.spinner("Computing resonance energy profiles..."):
@@ -2216,56 +2216,46 @@ with tabs[3]:
         )
         st.plotly_chart(fig_edist33, key='hrf_edist_33', width='stretch')
 
-        # ── Item 34: PCA Eigenspectrum ─────────────────────────────────
-        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">PCA Eigenspectrum (Dimensionality Reduction)</div>', unsafe_allow_html=True)
-        _pca_col1, _pca_col2 = st.columns(2)
-        with _pca_col1:
-            if hrf.pca_components is not None:
-                _n_pc = min(50, hrf.pca_components.shape[0])
-                if hrf.X_train.shape[1] == hrf.pca_components.shape[1]:
-                    _pc_var = np.var(hrf.X_train @ hrf.pca_components[:_n_pc].T, axis=0)
-                else:
-                    _pc_var = np.var(hrf.X_train[:, :_n_pc], axis=0)
-                _pc_var_norm = _pc_var / (_pc_var.sum() + 1e-10)
-                _pc_cum = np.cumsum(_pc_var_norm)
-                fig_eigen34 = go.Figure()
-                fig_eigen34.add_trace(go.Bar(
-                    x=list(range(1, _n_pc + 1)), y=_pc_var_norm,
-                    marker_color=COLORS['blue'], opacity=0.7, name='Individual'
+        # ── Item 34: Evolution Score Trajectory (Golden Grid) ──────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">v15.0 Golden Grid Evolutionary Trajectory</div>', unsafe_allow_html=True)
+        _evolve_col1, _evolve_col2 = st.columns([2, 1])
+        with _evolve_col1:
+            if hasattr(hrf, 'all_evolution_scores') and len(hrf.all_evolution_scores) > 0:
+                _scores34 = [s * 100 for s in hrf.all_evolution_scores]
+                fig_evol34 = go.Figure()
+                fig_evol34.add_trace(go.Scatter(
+                    x=list(range(1, len(_scores34) + 1)), y=_scores34,
+                    mode='lines+markers', line=dict(color=COLORS['blue'], width=2),
+                    marker=dict(size=5, color=COLORS['green']),
+                    name='Accuracy per Generation'
                 ))
-                fig_eigen34.add_trace(go.Scatter(
-                    x=list(range(1, _n_pc + 1)), y=_pc_cum,
-                    mode='lines+markers', line=dict(color=COLORS['green'], width=2),
-                    marker=dict(size=3), name='Cumulative', yaxis='y2'
-                ))
-                fig_eigen34.update_layout(
+                fig_evol34.add_hline(y=max(_scores34), line_color=COLORS['amber'], line_dash='dot',
+                                     annotation_text=f"Peak: {max(_scores34):.2f}%", annotation_font_color=COLORS['amber'])
+                fig_evol34.update_layout(
                     **PLOT_LAYOUT, height=340,
-                    title=f'PCA Eigenspectrum (Top {_n_pc} Components)',
-                    xaxis_title='Principal Component', yaxis_title='Variance Explained',
-                    yaxis2=dict(overlaying='y', side='right', title='Cumulative',
-                                gridcolor='rgba(0,0,0,0)', tickcolor='#3d6b7a', range=[0, 1.05]),
+                    title=f'Evolution Trajectory over {len(_scores34)} Generations',
+                    xaxis_title='Generation (Grid Eval Step)', yaxis_title='Validation Accuracy (%)',
                     legend=dict(bgcolor='rgba(0,0,0,0)')
                 )
-                st.plotly_chart(fig_eigen34, key='hrf_eigen_34', width='stretch')
-        with _pca_col2:
-            if hrf.X_train is not None and len(hrf.X_train) > 0:
-                fig_pca2d34 = go.Figure()
-                _class_map34 = {0: 'Young', 1: 'Middle', 2: 'Old'}
-                _class_clr34 = {0: COLORS['green'], 1: COLORS['amber'], 2: COLORS['red']}
-                for _c in np.unique(hrf.y_train):
-                    _mask = hrf.y_train == _c
-                    fig_pca2d34.add_trace(go.Scatter(
-                        x=hrf.X_train[_mask, 0], y=hrf.X_train[_mask, 1],
-                        mode='markers', marker=dict(size=5, color=_class_clr34.get(_c, COLORS['dim']), opacity=0.6),
-                        name=_class_map34.get(_c, str(_c))
-                    ))
-                fig_pca2d34.update_layout(
-                    **PLOT_LAYOUT, height=340,
-                    title='PCA Projection (PC1 vs PC2) by Age Class',
-                    xaxis_title='PC1', yaxis_title='PC2',
-                    legend=dict(bgcolor='rgba(0,0,0,0)')
-                )
-                st.plotly_chart(fig_pca2d34, key='hrf_pca2d_34', width='stretch')
+                st.plotly_chart(fig_evol34, key='hrf_evolve_34', width='stretch')
+            else:
+                st.markdown('<div class="alert-info">Evolution score history not available. Check dataset size.</div>', unsafe_allow_html=True)
+        with _evolve_col2:
+            _peaks34 = hm.get('top3_evolution_peaks', [0, 0, 0])
+            _peaks34 = list(_peaks34) + [0, 0, 0] # Ensure len >= 3
+            st.markdown(f"""
+            <div class="metric-card" style="height:340px;">
+            <div class="metric-label" style="font-size:0.8rem; margin-bottom:1rem;">Top Milestones</div>
+            <div style="font-size:0.9rem; color:#7eb8c4; line-height:2.0;">
+            <b>v15.0 Golden Grid Optimization</b><br><br>
+            Peak 1: <span style="color:#00e5a0;">{_peaks34[0]*100:.2f}%</span><br>
+            Peak 2: <span style="color:#00b4d8;">{_peaks34[1]*100:.2f}%</span><br>
+            Peak 3: <span style="color:#f0a500;">{_peaks34[2]*100:.2f}%</span><br>
+            <br>
+            <i>Evolved automatically by scanning the resonance interaction landscape.</i>
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
 
         # ── Item 35: Coherence Ratio vs Age Scatter ────────────────────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Coherence Ratio vs Chronological Age</div>', unsafe_allow_html=True)
@@ -2392,7 +2382,7 @@ with tabs[3]:
         st.plotly_chart(fig_heat38, key='hrf_spectrum_heat_38', width='stretch')
 
         # ── Item 39: Age-Class Decision Boundaries (PCA 2D) ────────────
-        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Age-Class Decision Boundaries (PCA Projection)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Age-Class Decision Boundaries (Bipolar Feature Space Projection)</div>', unsafe_allow_html=True)
         if hrf.X_train is not None and hrf.X_train.shape[1] >= 2:
             _x_min39, _x_max39 = hrf.X_train[:, 0].min() - 1, hrf.X_train[:, 0].max() + 1
             _y_min39, _y_max39 = hrf.X_train[:, 1].min() - 1, hrf.X_train[:, 1].max() + 1
@@ -2404,7 +2394,7 @@ with tabs[3]:
             _grid_points39 = np.zeros((_grid_res39 * _grid_res39, hrf.X_train.shape[1]))
             _grid_points39[:, 0] = _xx39.ravel()
             _grid_points39[:, 1] = _yy39.ravel()
-            _grid_preds39 = np.array([hrf._predict_single(_grid_points39[k].astype(np.float32)) for k in range(len(_grid_points39))])
+            _grid_preds39 = hrf._simulate_predict(hrf.X_train, hrf.y_train, _grid_points39.astype(np.float32), hrf.omega_0, hrf.gamma, hrf.k)
             _zz39 = _grid_preds39.reshape(_xx39.shape)
             fig_bound39 = go.Figure()
             fig_bound39.add_trace(go.Contour(
@@ -2428,44 +2418,40 @@ with tabs[3]:
                 ))
             fig_bound39.update_layout(
                 **PLOT_LAYOUT, height=420,
-                title='HRF Decision Boundaries in PCA Space',
-                xaxis_title='PC1', yaxis_title='PC2',
+                title='HRF Decision Boundaries in Bipolar Feature Space',
+                xaxis_title='Bipolar Feature 1', yaxis_title='Bipolar Feature 2',
                 legend=dict(bgcolor='rgba(0,0,0,0)')
             )
             st.plotly_chart(fig_bound39, key='hrf_boundaries_39', width='stretch')
 
         # ── Item 40: Resonance Parameter Sensitivity Grid ──────────────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Resonance Parameter Sensitivity Grid (ω × γ)</div>', unsafe_allow_html=True)
-        _omega_grid40 = [0.1, 1.0, 5.0, 10.0, 20.0, 50.0]
-        _gamma_grid40 = [0.01, 0.1, 0.5, 1.0, 2.0]
+        _omega_grid40 = [10.0, 14.0, 26.0, 30.0, 50.0, 90.0]
+        _gamma_grid40 = [0.1, 0.5, 2.0, 5.0, 10.0]
         _acc_grid40 = np.zeros((len(_gamma_grid40), len(_omega_grid40)))
-        _n_eval40 = min(60, len(hrf.y_train))
-        _eval_idx40 = np.random.RandomState(42).choice(len(hrf.y_train), _n_eval40, replace=False)
-        _orig_omega = hrf.omega_0
-        _orig_gamma = hrf.gamma
+        _n_eval40 = min(100, len(hrf.y_train))
+        
         for _gi, _g in enumerate(_gamma_grid40):
             for _oi, _o in enumerate(_omega_grid40):
-                hrf.omega_0 = _o
-                hrf.gamma = _g
-                _preds40 = [hrf._predict_single(hrf.X_train[k]) for k in _eval_idx40]
-                _acc_grid40[_gi, _oi] = float(np.mean(np.array(_preds40) == hrf.y_train[_eval_idx40]))
-        hrf.omega_0 = _orig_omega
-        hrf.gamma = _orig_gamma
+                if hasattr(hrf, '_simulate_predict'):
+                    _preds40 = hrf._simulate_predict(hrf.X_train, hrf.y_train, hrf.X_train[:_n_eval40], float(_o), float(_g), hrf.k)
+                    _acc_grid40[_gi, _oi] = float(np.mean(_preds40 == hrf.y_train[:_n_eval40]))
+        
         fig_sens40 = go.Figure(go.Heatmap(
             z=_acc_grid40 * 100,
             x=[str(o) for o in _omega_grid40],
             y=[str(g) for g in _gamma_grid40],
-            colorscale=[[0, '#0a1e2a'], [0.5, COLORS['amber']], [1, COLORS['green']]],
-            text=np.around(_acc_grid40 * 100, 1).astype(str), texttemplate='%{text}%',
+            colorscale=[[0, '#0a1e2a'], [0.5, COLORS['amber']], [1, COLORS['green']]] if _acc_grid40.max() > 0 else 'viridis',
+            text=np.around(_acc_grid40 * 100, 1).astype(str) if _acc_grid40.max() > 0 else np.zeros_like(_acc_grid40, dtype=str), 
+            texttemplate='%{text}%',
             textfont=dict(size=10),
             colorbar=dict(title='Accuracy %', tickfont=dict(size=9)),
             hovertemplate='ω=%{x} γ=%{y}<br>Accuracy: %{z:.1f}%<extra></extra>'
         ))
-        _best_gi = np.unravel_index(np.argmax(_acc_grid40), _acc_grid40.shape)
         fig_sens40.update_layout(
             **PLOT_LAYOUT, height=380,
-            title=f'HRF Parameter Sensitivity — Best: ω={_omega_grid40[_best_gi[1]]}, γ={_gamma_grid40[_best_gi[0]]} ({_acc_grid40.max()*100:.1f}%)',
-            xaxis_title='ω₀ (Resonance Frequency)', yaxis_title='γ (Damping Coefficient)'
+            title=f"HRF Parameter Sensitivity (v15.0 Fast Proxy Space)", 
+            xaxis_title='ω (Resonance Frequency)', yaxis_title='γ (Damping Coefficient)'
         )
         st.plotly_chart(fig_sens40, key='hrf_sensitivity_40', width='stretch')
 
