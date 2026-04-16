@@ -52,6 +52,8 @@ class HRFEpigenetic:
     Harmonic Resonance Field classifier for epigenetic age state.
     Extends Debanik Debnath's HRF framework from EEG to methylation.
     """
+    CLASS_LABELS = {0: 'Young (≤35)', 1: 'Middle (36-55)', 2: 'Old (>55)'}
+    CLASS_COLORS = {0: '#00ff9f', 1: '#ffb700', 2: '#ff4455'}
 
     def __init__(
         self,
