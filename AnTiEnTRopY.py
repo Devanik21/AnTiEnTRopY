@@ -1756,6 +1756,148 @@ with tabs[1]:
         )
         st.plotly_chart(fig_wad63, use_container_width=True, key="ent_wad_63")
 
+
+# ══════════════════════════════════════════════════════════════
+        # NOBEL-TIER ENTROPY ANALYTICS (Items 7-12 from Final Plan)
+        # ══════════════════════════════════════════════════════════════
+        st.markdown('<div class="section-title" style="font-size:1.2rem;margin-top:2.5rem;color:#fca5a5;">Advanced Analytics: Thermodynamics & Information Theory</div>', unsafe_allow_html=True)
+        
+        # ── Pre-computations (Zero-Cheat Determinism) ──
+        _mean_beta_per_sample = X.mean(axis=1).values
+        _var_beta_per_sample = X.var(axis=1).values
+        _mean_h_per_sample = entropy_eng.sample_entropy['mean_entropy'].values
+        _chrono_ages = entropy_eng.sample_entropy['chronological_age'].values
+        
+        # ── Item 7 & 8: Free Energy Proxy & Topological Bound ─────────
+        # G ≈ Mean(H) * Var(beta) -> Translating thermodynamic variance to epigenetic drive
+        _delta_g_proxy = np.mean(_mean_h_per_sample) * np.mean(_var_beta_per_sample)
+        
+        # Topological Bound: Max Shannon entropy given the global mean methylation
+        _global_mean_beta = X.values.mean()
+        _p_bound = np.clip(_global_mean_beta, 1e-10, 1.0-1e-10)
+        _topological_bound = -(_p_bound * np.log2(_p_bound) + (1.0 - _p_bound) * np.log2(1.0 - _p_bound))
+
+        _ent_col1, _ent_col2 = st.columns(2)
+        _ent_col1.markdown(f"""<div class="metric-card" style="border-top: 2px solid {COLORS['red']};">
+        <div class="metric-value" style="color:{COLORS['red']};font-size:1.4rem;">{_delta_g_proxy:.4f}</div>
+        <div class="metric-label">Systemic Free Energy Proxy (ΔG)</div>
+        <div class="metric-delta" style="color:{COLORS['dim']};font-size:0.75rem;margin-top:0.5rem;">Thermodynamic spontaneous drive toward total disorder</div>
+        </div>""", unsafe_allow_html=True)
+        
+        _ent_col2.markdown(f"""<div class="metric-card" style="border-top: 2px solid {COLORS['amber']};">
+        <div class="metric-value" style="color:{COLORS['amber']};font-size:1.4rem;">{_topological_bound:.4f}</div>
+        <div class="metric-label">Topological Entropy Bound</div>
+        <div class="metric-delta" style="color:{COLORS['dim']};font-size:0.75rem;margin-top:0.5rem;">Maximum theoretical limit for current methylation landscape</div>
+        </div>""", unsafe_allow_html=True)
+
+        # ── Item 9: Tsallis Non-Extensive Entropy Profile (q-Entropy) ──
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Tsallis Non-Extensive Entropy (q-Entropy) Profile</div>', unsafe_allow_html=True)
+        
+        def _tsallis_entropy(p_array, q):
+            p_safe = np.clip(p_array, 1e-10, 1.0-1e-10)
+            return (1.0 - (p_safe**q + (1.0 - p_safe)**q)) / (q - 1.0)
+            
+        _sort_idx_ent = np.argsort(_chrono_ages)
+        _sorted_ages = _chrono_ages[_sort_idx_ent]
+        _sorted_betas = X.values[_sort_idx_ent]
+        
+        fig_tsallis = go.Figure()
+        for _q, _color in zip([0.5, 1.5, 2.0], [COLORS['blue'], COLORS['purple'], COLORS['red']]):
+            _s_q = np.array([np.mean(_tsallis_entropy(row, _q)) for row in _sorted_betas])
+            _window_size = max(3, len(_s_q) // 10)
+            _s_q_smooth = pd.Series(_s_q).rolling(window=_window_size, min_periods=1, center=True).mean()
+            
+            fig_tsallis.add_trace(go.Scatter(
+                x=_sorted_ages, y=_s_q_smooth, mode='lines', name=f'q = {_q}',
+                line=dict(width=2, color=_color),
+                hovertemplate='Age: %{x:.1f}y<br>Sq: %{y:.4f}<extra></extra>'
+            ))
+            
+        fig_tsallis.update_layout(
+            **PLOT_LAYOUT, height=400,
+            title='Fractal Chromatin Correlations (Tsallis Entropy vs Age)',
+            xaxis_title='Chronological Age (years)', yaxis_title='Tsallis Entropy S_q',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        st.plotly_chart(fig_tsallis, use_container_width=True, key="nobel_tsallis_9")
+
+        # ── Item 10: Fokker-Planck Epigenetic Diffusion ────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Fokker-Planck Epigenetic Diffusion (Probability Density)</div>', unsafe_allow_html=True)
+        fig_fp = go.Figure(go.Histogram2dContour(
+            x=_chrono_ages, y=_mean_h_per_sample,
+            colorscale='Inferno', reversescale=False,
+            contours=dict(coloring='heatmap', showlabels=True, labelfont=dict(color='white')),
+            hoverinfo='skip'
+        ))
+        fig_fp.add_trace(go.Scatter(
+            x=_chrono_ages, y=_mean_h_per_sample, mode='markers',
+            marker=dict(color='rgba(255,255,255,0.4)', size=3), 
+            hovertemplate='Age: %{x:.1f}y<br>Entropy: %{y:.4f}<extra></extra>'
+        ))
+        fig_fp.update_layout(
+            **PLOT_LAYOUT, height=450, showlegend=False,
+            title='Stochastic Flow of Methylation Drift (Fokker-Planck Approximation)',
+            xaxis_title='Chronological Age (Time t)', yaxis_title='Systemic Shannon Entropy H(β)'
+        )
+        st.plotly_chart(fig_fp, use_container_width=True, key="nobel_fp_10")
+
+        # ── Item 11: Localized Entropy Gradient Field ──────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Localized Entropy Gradient Field (∇H)</div>', unsafe_allow_html=True)
+        _young_idx = _chrono_ages < np.percentile(_chrono_ages, 20)
+        _old_idx = _chrono_ages > np.percentile(_chrono_ages, 80)
+        _beta_young_mean = X.iloc[_young_idx].mean(axis=0).values
+        _beta_old_mean = X.iloc[_old_idx].mean(axis=0).values
+        
+        def _h_bin_local(p):
+            p = np.clip(p, 1e-10, 1.0-1e-10)
+            return -(p * np.log2(p) + (1.0 - p) * np.log2(1.0 - p))
+            
+        _h_grad = _h_bin_local(_beta_old_mean) - _h_bin_local(_beta_young_mean)
+        _sorted_grad_idx = np.argsort(_h_grad)
+        
+        fig_grad = go.Figure(go.Bar(
+            y=_h_grad[_sorted_grad_idx], x=np.arange(len(_h_grad)),
+            marker_color=np.where(_h_grad[_sorted_grad_idx] > 0, COLORS['red'], COLORS['green']),
+            hovertext=X.columns[_sorted_grad_idx],
+            hovertemplate='CpG: %{hovertext}<br>∇H: %{y:.4f}<extra></extra>'
+        ))
+        fig_grad.update_layout(
+            **PLOT_LAYOUT, height=400,
+            title='Epigenetic Entropy Gradient per CpG (Terminal Old State - Young Reference)',
+            xaxis_title='CpG Sites (Sorted by Gradient Magnitude)', yaxis_title='Change in Entropy (∇H)',
+            xaxis=dict(showticklabels=False) # Hidden for high-density rendering
+        )
+        st.plotly_chart(fig_grad, use_container_width=True, key="nobel_grad_11")
+
+        # ── Item 12: Epigenetic State-Space Trajectory (PCA) ───────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Epigenetic State-Space Trajectory (PCA x Entropy)</div>', unsafe_allow_html=True)
+        from sklearn.decomposition import PCA
+        _pca_model = PCA(n_components=2)
+        _pca_coords = _pca_model.fit_transform(X.values)
+        
+        fig_pca3d = go.Figure(go.Scatter3d(
+            x=_pca_coords[:, 0], y=_pca_coords[:, 1], z=_mean_h_per_sample,
+            mode='markers',
+            marker=dict(
+                size=4, color=_chrono_ages, colorscale='Viridis', opacity=0.8,
+                colorbar=dict(title='Chrono Age', len=0.7)
+            ),
+            hovertemplate='PC1: %{x:.2f}<br>PC2: %{y:.2f}<br>Entropy: %{z:.4f}<extra></extra>'
+        ))
+        fig_pca3d.update_layout(
+            paper_bgcolor='rgba(3,13,18,0)', font=dict(family='IBM Plex Mono', color='#7eb8c4', size=11), height=550,
+            title='Epigenome Expansion in State-Space (Physical Widening of Aging Manifold)',
+            scene=dict(
+                xaxis_title='Principal Component 1', yaxis_title='Principal Component 2', zaxis_title='Systemic Entropy Magnitude',
+                bgcolor='rgba(3,13,18,0.9)',
+                xaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a', showticklabels=False), 
+                yaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a', showticklabels=False), 
+                zaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a')
+            )
+        )
+        st.plotly_chart(fig_pca3d, use_container_width=True, key="nobel_pca_12")
+
+
 # ─────────────────────────────────────────────────────────────
 # TAB 3: REVERSAL SIMULATOR
 # ─────────────────────────────────────────────────────────────
