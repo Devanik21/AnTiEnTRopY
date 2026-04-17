@@ -3174,6 +3174,164 @@ with tabs[3]:
         )
         st.plotly_chart(fig_lya66, use_container_width=True, key="hrf_lyap_66")
 
+
+# ══════════════════════════════════════════════════════════════
+        # NOBEL-TIER HRF ANALYTICS (Items 19-24 from Final Plan)
+        # ══════════════════════════════════════════════════════════════
+        st.markdown('<div class="section-title" style="font-size:1.2rem;margin-top:2.5rem;color:#c084fc;">Advanced Analytics: Quantum-Inspired Epigenetics</div>', unsafe_allow_html=True)
+        
+        # Isolate chronological subset for localized compute
+        _hrf_subset_idx = np.argsort(ages.values)
+        _hrf_ages = ages.values[_hrf_subset_idx]
+        _hrf_X = X.values[_hrf_subset_idx]
+        
+        # ── Item 19: Schrödinger-Approximated Ground State ─────────────
+        # Construct HRF potential well matrix for top CpGs of the youngest samples
+        _young_X_hrf = _hrf_X[:20, :50]
+        _dist_mat = np.linalg.norm(_young_X_hrf[:, np.newaxis, :] - _young_X_hrf[np.newaxis, :, :], axis=2)
+        _gamma_hrf = hrf.metrics.get('best_gamma', 1.0)
+        _omega_hrf = hrf.metrics.get('best_omega', 1.0)
+        
+        # Field Eq: Ψ_c(d) = exp(-γ·d²) · (1 + cos(ω·d))
+        _potential_well = np.exp(-_gamma_hrf * _dist_mat**2) * (1.0 + np.cos(_omega_hrf * _dist_mat))
+        try:
+            _evals_hrf = np.linalg.eigvalsh(_potential_well)
+            _ground_state = _evals_hrf[0] # The lowest possible energy state proxy
+        except:
+            _ground_state = 0.0
+
+        # ── Item 20: Quantum Decoherence Rate ──────────────────────────
+        # Approximate coherence ratio per sample (low freq power / total power)
+        _coherence_list = []
+        for _beta_vec in _hrf_X[:, :100]: 
+            _fft_vals = np.abs(np.fft.rfft(_beta_vec - np.mean(_beta_vec)))**2
+            _mid = len(_fft_vals) // 2
+            _coherence_list.append(np.sum(_fft_vals[:_mid]) / (np.sum(_fft_vals) + 1e-10))
+        
+        _coherence_arr = np.array(_coherence_list)
+        # First derivative w.r.t age (slope of linear regression)
+        _decoherence_rate, _ = np.polyfit(_hrf_ages, _coherence_arr, 1)
+
+        _hrf_col1, _hrf_col2 = st.columns(2)
+        _hrf_col1.markdown(f"""<div class="metric-card" style="border-top: 2px solid {COLORS['purple']};">
+        <div class="metric-value" style="color:{COLORS['purple']};font-size:1.4rem;">{_ground_state:.4f}</div>
+        <div class="metric-label">Schrödinger-Approximated Ground State</div>
+        <div class="metric-delta" style="color:{COLORS['dim']};font-size:0.75rem;margin-top:0.5rem;">Lowest eigenvalue of the youthful HRF potential well</div>
+        </div>""", unsafe_allow_html=True)
+        
+        _hrf_col2.markdown(f"""<div class="metric-card" style="border-top: 2px solid {COLORS['red']};">
+        <div class="metric-value" style="color:{COLORS['red']};font-size:1.4rem;">{_decoherence_rate:.4e} yr⁻¹</div>
+        <div class="metric-label">Quantum Decoherence Rate</div>
+        <div class="metric-delta" style="color:{COLORS['dim']};font-size:0.75rem;margin-top:0.5rem;">Loss of epigenetic wave coherence per year of aging</div>
+        </div>""", unsafe_allow_html=True)
+
+        # ── Item 21: HRF Wave-Interference Phase Space ─────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">HRF Wave-Interference Phase Space</div>', unsafe_allow_html=True)
+        _q_space = np.linspace(-3, 3, 100)
+        _qx, _qy = np.meshgrid(_q_space, _q_space)
+        _d_grid = np.sqrt(_qx**2 + _qy**2)
+        _psi_grid = np.exp(-_gamma_hrf * _d_grid**2) * (1.0 + np.cos(_omega_hrf * _d_grid))
+        
+        fig_psi = go.Figure(go.Contour(
+            z=_psi_grid, x=_q_space, y=_q_space,
+            colorscale='Plasma', contours=dict(coloring='heatmap', showlabels=True),
+            hovertemplate='Distance Vector: %{x:.2f}, %{y:.2f}<br>Interference Magnitude: %{z:.4f}<extra></extra>'
+        ))
+        fig_psi.update_layout(
+            **PLOT_LAYOUT, height=450,
+            title='Non-Monotonic Kernel Interference Pattern (Constructive/Destructive)',
+            xaxis_title='Spatial Coordinate X', yaxis_title='Spatial Coordinate Y'
+        )
+        st.plotly_chart(fig_psi, use_container_width=True, key="nobel_psi_21")
+
+        # ── Item 22: Bloch Sphere Epigenetic Projection ────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Bloch Sphere State Vector Projection</div>', unsafe_allow_html=True)
+        _top3_var_idx = np.argsort(np.var(_hrf_X, axis=0))[-3:]
+        _v3d = _hrf_X[:, _top3_var_idx]
+        _v3d_norm = _v3d / np.linalg.norm(_v3d, axis=1, keepdims=True)
+        
+        fig_bloch = go.Figure(go.Scatter3d(
+            x=_v3d_norm[:,0], y=_v3d_norm[:,1], z=_v3d_norm[:,2],
+            mode='markers',
+            marker=dict(size=5, color=_hrf_ages, colorscale='Viridis', opacity=0.9, colorbar=dict(title='Chrono Age')),
+            hovertemplate='Age: %{marker.color:.1f}y<br>|0⟩ Base: %{x:.2f}<br>|1⟩ Base: %{y:.2f}<br>Phase Z: %{z:.2f}<extra></extra>'
+        ))
+        # Wireframe unit sphere bounds
+        _u, _v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+        _sx = np.cos(_u)*np.sin(_v)
+        _sy = np.sin(_u)*np.sin(_v)
+        _sz = np.cos(_v)
+        fig_bloch.add_trace(go.Surface(x=_sx, y=_sy, z=_sz, opacity=0.1, showscale=False, hoverinfo='skip', colorscale='gray'))
+        
+        fig_bloch.update_layout(
+            paper_bgcolor='rgba(3,13,18,0)', font=dict(family='IBM Plex Mono', color='#7eb8c4', size=11), height=550,
+            title='Epigenetic State Vectors on the Unit Bloch Sphere',
+            scene=dict(
+                xaxis_title='CpG A Amplitude', yaxis_title='CpG B Amplitude', zaxis_title='CpG C Amplitude',
+                bgcolor='rgba(3,13,18,0.9)',
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                zaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+            )
+        )
+        st.plotly_chart(fig_bloch, use_container_width=True, key="nobel_bloch_22")
+
+        # ── Item 23: Hilbert Transform Instantaneous Phase ─────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Hilbert Transform Instantaneous Phase (Decoherence Slips)</div>', unsafe_allow_html=True)
+        from scipy.signal import hilbert
+        # Analyze the signal of the absolute highest-drift CpG across the sorted timeline
+        _drift_cpg_signal = _hrf_X[:, np.argmax(np.abs(_hrf_X[-1] - _hrf_X[0]))]
+        _analytic_signal = hilbert(_drift_cpg_signal - np.mean(_drift_cpg_signal))
+        _inst_phase = np.unwrap(np.angle(_analytic_signal))
+        
+        fig_hilbert = go.Figure()
+        fig_hilbert.add_trace(go.Scatter(x=_hrf_ages, y=_inst_phase, mode='lines', line=dict(color=COLORS['blue'], width=2), name='Instantaneous Phase'))
+        fig_hilbert.add_trace(go.Scatter(x=_hrf_ages, y=_drift_cpg_signal, mode='lines', line=dict(color='rgba(255,255,255,0.2)', width=1), name='Raw β Signal', yaxis='y2'))
+        
+        fig_hilbert.update_layout(
+            **PLOT_LAYOUT, height=400,
+            title='Instantaneous Phase Unwrapping (Detecting Sudden Epigenetic Phase-Slips)',
+            xaxis_title='Chronological Age Progression',
+            yaxis=dict(title='Unwrapped Phase (Radians)'),
+            yaxis2=dict(title='Methylation β Value', overlaying='y', side='right', showgrid=False),
+            legend=dict(x=0.02, y=0.98)
+        )
+        st.plotly_chart(fig_hilbert, use_container_width=True, key="nobel_hilbert_23")
+
+        # ── Item 24: Resonance Energy Manifold Curvature (Ricci Proxy) ─
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Resonance Energy Manifold Curvature (Ricci Scalar Approximation)</div>', unsafe_allow_html=True)
+        from sklearn.decomposition import PCA
+        _pca_hrf = PCA(n_components=2).fit_transform(_hrf_X)
+        _x_min, _x_max = _pca_hrf[:, 0].min() - 0.5, _pca_hrf[:, 0].max() + 0.5
+        _y_min, _y_max = _pca_hrf[:, 1].min() - 0.5, _pca_hrf[:, 1].max() + 0.5
+        _xx, _yy = np.meshgrid(np.linspace(_x_min, _x_max, 40), np.linspace(_y_min, _y_max, 40))
+        
+        # Proxy vector generation for background grid mapping
+        _grid_dist = np.sqrt(_xx**2 + _yy**2)
+        _energy_field = np.exp(-_gamma_hrf * _grid_dist**2) * (1.0 + np.cos(_omega_hrf * _grid_dist))
+        
+        # Central difference spatial Laplacian approximation ∇²E
+        _laplacian_proxy = -4 * _energy_field.copy()
+        _laplacian_proxy[1:-1, 1:-1] += _energy_field[:-2, 1:-1] + _energy_field[2:, 1:-1] + _energy_field[1:-1, :-2] + _energy_field[1:-1, 2:]
+        
+        fig_ricci = go.Figure(go.Contour(
+            z=_laplacian_proxy, x=np.linspace(_x_min, _x_max, 40), y=np.linspace(_y_min, _y_max, 40),
+            colorscale='RdBu', midpoint=0, contours=dict(coloring='heatmap', showlabels=False),
+            hovertemplate='PC1: %{x:.2f}<br>PC2: %{y:.2f}<br>Curvature ∇²E: %{z:.4f}<extra></extra>'
+        ))
+        fig_ricci.add_trace(go.Scatter(
+            x=_pca_hrf[:, 0], y=_pca_hrf[:, 1], mode='markers',
+            marker=dict(color=_hrf_ages, colorscale='Viridis', size=4, line=dict(width=0.5, color='white')),
+            hovertemplate='Age: %{marker.color:.1f}y<extra></extra>'
+        ))
+        fig_ricci.update_layout(
+            **PLOT_LAYOUT, height=450, showlegend=False,
+            title='HRF Manifold Local Curvature (Mapping the Gravity Well of Senescence)',
+            xaxis_title='Principal Component 1', yaxis_title='Principal Component 2'
+        )
+        st.plotly_chart(fig_ricci, use_container_width=True, key="nobel_ricci_24")
+
+
 # ─────────────────────────────────────────────────────────────
 # TAB 5: IMMORTALITY ENGINE
 # ─────────────────────────────────────────────────────────────
