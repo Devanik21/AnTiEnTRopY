@@ -26,7 +26,7 @@ warnings.filterwarnings('ignore')
 from scipy.stats import ks_2samp, mannwhitneyu, ttest_ind, norm
 import hashlib
 import scipy.signal as signal
-
+import pywt
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AntiEntropy | Epigenetic Age Reversal",
@@ -1026,10 +1026,13 @@ with tabs[0]:
         _cent_y = np.abs(_evecs_y[:, np.argmax(_evals_y)]) + 1e-6
         _cent_o = np.abs(_evecs_o[:, np.argmax(_evals_o)]) + 1e-6
         
-        # Assign 3D positions (roughly a sphere based on eigen embeddings or just random for aesthetics)
-        np.random.seed(42)
-        _pos3d = np.random.randn(_n_net_cpgs, 3) 
-        _pos3d /= np.linalg.norm(_pos3d, axis=1)[:, np.newaxis]
+        # Assign 3D positions 
+        #np.random.seed(42)
+        # Strict Spectral Embedding: Assign 3D positions using the graph's Laplacian eigenvectors
+        # (Using the 2nd, 3rd, and 4th eigenvectors corresponding to the Fiedler vector space)
+        _pos3d = np.vstack((_evecs_y[:, -2], _evecs_y[:, -3], _evecs_y[:, -4])).T
+        _pos3d /= (np.linalg.norm(_pos3d, axis=1)[:, np.newaxis] + 1e-10)
+        
         
         # Build edges
         _ex_y, _ey_y, _ez_y = [], [], []
@@ -1134,9 +1137,18 @@ with tabs[0]:
 
         # ── Item 4: L1 Regularization Path Trajectory (Lasso Decay) ────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">L1 Regularization Path Trajectory (Isolating the Immortal Core)</div>', unsafe_allow_html=True)
-        _sim_alphas = np.logspace(-4, 0, 50)
-        _top_100_coefs = clock.cpg_coefs.nlargest(100, 'abs_coef')['coefficient'].values
-        _path_matrix = np.zeros((100, len(_sim_alphas)))
+        from sklearn.linear_model import enet_path
+        # Compute the mathematically exact ElasticNet path directly from the scaled training data
+        _X_scaled = clock.scaler.transform(X[clock.feature_names].fillna(0.5).astype(np.float32))
+        _sim_alphas, _coefs_path, _ = enet_path(
+            _X_scaled, ages.values.astype(np.float32), 
+            l1_ratio=m['l1_ratio'], n_alphas=50
+        )
+        # Isolate paths for the top 100 features
+        _top_100_indices = np.argsort(np.abs(clock.model.coef_))[-100:]
+        _path_matrix = _coefs_path[_top_100_indices, :]
+        _top_100_coefs = clock.model.coef_[_top_100_indices]
+      
         for i, a in enumerate(_sim_alphas):
             # Soft-thresholding simulation to visualize mathematically exact lasso decay
             _path_matrix[:, i] = np.sign(_top_100_coefs) * np.maximum(0, np.abs(_top_100_coefs) - a * 0.5)
@@ -2436,9 +2448,12 @@ with tabs[2]:
             _linear_path_accel.append(clock.predict(_df_lin)[0] - float(ages.iloc[sel_idx]))
             
             # 2. Optimal path (non-linear action)
+            # 2. Optimal Control path (Energy-minimized)
+            # Prioritizes reverting high-drift CpGs earlier in the trajectory using a sigmoid activation
             _drift = np.abs(_op_beta_young - _op_beta_old)
-            _dynamic_alpha = np.power(_alpha, np.exp(-2.0 * (_drift - _drift.min()) / (_drift.max() - _drift.min() + 1e-6)))
-            _b_opt = _op_beta_old + _dynamic_alpha * (_op_beta_young - _op_beta_old)
+            _drift_weights = _drift / (_drift.max() + 1e-6)
+            _opt_progress = 1.0 / (1.0 + np.exp(-10.0 * (_alpha - (1.0 - _drift_weights))))
+            _b_opt = _op_beta_old + _opt_progress * (_op_beta_young - _op_beta_old)
             _optimal_path_entropy.append(entropy_eng.get_sample_entropy_at(_b_opt)['mean_entropy'])
             
             # FIX: Wrap NumPy array in a DataFrame with column names for the Clock
@@ -3122,7 +3137,7 @@ with tabs[3]:
 
         # ── Item 65: Continuous Wavelet Transform (CWT) Spectrogram ────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">CWT Epigenetic Spectrogram (Morlet Wavelet)</div>', unsafe_allow_html=True)
-        import pywt
+       
         _cwt_widths = np.arange(1, 31)
         # Note: Scipy's Morlet wavelet expects widths to be evaluated.
         _cwt_mat, _ = pywt.cwt(wave_beta, _cwt_widths, 'cmor1.5-1.0')
@@ -3853,11 +3868,20 @@ with tabs[4]:
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Markov Chain Epigenetic State Transitions</div>', unsafe_allow_html=True)
         # States: Hypermethylated (>0.7), Hemimethylated (0.3-0.7), Hypomethylated (<0.3)
         # Empirical drift probabilities based on cohort
-        _markov_mat = np.array([
-            [0.85, 0.10, 0.05],
-            [0.15, 0.70, 0.15],
-            [0.05, 0.10, 0.85]
-        ])
+        # Compute empirical Markov transition matrix live across age-sorted samples
+        _sort_m_idx = np.argsort(ages.values)
+        _sorted_X_m = X.values[_sort_m_idx]
+        _markov_mat = np.zeros((3, 3))
+        
+        # Discretize: 0=Hypo(<0.3), 1=Hemi(0.3-0.7), 2=Hyper(>0.7)
+        _states_m = np.digitize(_sorted_X_m, bins=[0.3, 0.7]) 
+        
+        for i in range(len(_sorted_X_m) - 1):
+            for c_idx in range(min(1000, _sorted_X_m.shape[1])):  # Use top 1k for speed
+                _markov_mat[_states_m[i, c_idx], _states_m[i+1, c_idx]] += 1
+                
+        _row_sums_m = _markov_mat.sum(axis=1, keepdims=True)
+        _markov_mat = np.divide(_markov_mat, _row_sums_m, out=np.zeros_like(_markov_mat), where=_row_sums_m!=0)
         # Find steady state
         _evals, _evecs = np.linalg.eig(_markov_mat.T)
         _steady_state = _evecs[:, np.isclose(_evals, 1)].flatten()
@@ -3932,8 +3956,14 @@ with tabs[4]:
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Stochastic Biological Trajectories (Ornstein-Uhlenbeck SDE)</div>', unsafe_allow_html=True)
         _t_steps = 50
         _dt = 1.0
-        _theta = 0.1  # Mean reversion strength
-        _sigma = 1.5  # Stochastic volatility (Brownian noise)
+        
+        # Derive empirical OU parameters from Age Acceleration Residuals
+        _residuals = age_accel_df['age_acceleration'].sort_values()
+        _sigma = np.std(np.diff(_residuals)) / np.sqrt(_dt) # Brownian volatility
+        _autocorr = _residuals.autocorr(lag=1)
+        _theta = -np.log(max(abs(_autocorr), 1e-5)) / _dt # Mean reversion rate
+        _theta = np.clip(_theta, 0.05, 0.4) # Bounded for visual stability
+        
         _mu = _age_rate * 100.0  # Drift baseline
         
         _paths = 20
