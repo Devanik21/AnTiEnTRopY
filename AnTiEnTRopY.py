@@ -3,7 +3,7 @@ app.py — AntiEntropy: Epigenetic Age Reversal Platform
 A Nobel-tier research interface for biological aging analysis.
 
 Architecture:
-  clock.py       → BiologicalClock (ElasticNet)
+  clock.py       → BiologicalClock (ElasticNet)       
   entropy.py     → EpigeneticEntropy (methylation disorder) 
   reversal.py    → ReversalSimulator (partial reprogramming) 
   hrf_epigenetic → HRFEpigenetic (wave interference classifier)
