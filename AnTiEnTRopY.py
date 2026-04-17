@@ -2710,9 +2710,10 @@ with tabs[3]:
         # ── Item 65: Continuous Wavelet Transform (CWT) Spectrogram ────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">CWT Epigenetic Spectrogram (Morlet Wavelet)</div>', unsafe_allow_html=True)
         import scipy.signal as signal
+        import pywt
         _cwt_widths = np.arange(1, 31)
         # Note: Scipy's Morlet wavelet expects widths to be evaluated.
-        _cwt_mat = signal.cwt(wave_beta, signal.morlet2, _cwt_widths)
+        _cwt_mat, _ = pywt.cwt(wave_beta, _cwt_widths, 'cmor1.5-1.0')
         _cwt_power = np.abs(_cwt_mat)**2
         
         fig_cwt65 = go.Figure(go.Heatmap(
