@@ -88,8 +88,9 @@ class BiologicalClock:
         )
         cv_scores = cross_val_score(
             best_model, X_scaled, y_arr,
-            cv=5, scoring='neg_mean_absolute_error'
+            cv=3, scoring='neg_mean_absolute_error'
         )
+        self.cv_scores = -cv_scores
 
         self.metrics = {
             'train_mae': float(mean_absolute_error(y_arr, y_pred)),
