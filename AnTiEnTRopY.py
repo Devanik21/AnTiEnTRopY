@@ -7,7 +7,7 @@ Architecture:
   entropy.py     → EpigeneticEntropy (methylation disorder) 
   reversal.py    → ReversalSimulator (partial reprogramming) 
   hrf_epigenetic → HRFEpigenetic (wave interference classifier)
-  immortality.py → ImmortalityEngine (escape velocity)  
+  immortality.py → ImmortalityEngine (escape velocity)   
 """
 
 # ── Replace your imports (around line 12) ──────────────────────────────────────
