@@ -2471,6 +2471,147 @@ with tabs[2]:
         )
         st.plotly_chart(fig_oc64, use_container_width=True, key="rev_oc_64")
 
+
+
+# ══════════════════════════════════════════════════════════════
+        # NOBEL-TIER REVERSAL ANALYTICS (Items 13-18 from Final Plan)
+        # ══════════════════════════════════════════════════════════════
+        st.markdown('<div class="section-title" style="font-size:1.2rem;margin-top:2.5rem;color:#6ee7b7;">Advanced Analytics: Hysteresis & Reprogramming Mechanics</div>', unsafe_allow_html=True)
+        
+        # ── Item 13 & 14: Epigenetic Momentum & Thermodynamic Cost ─────
+        _drift_threshold = 0.2
+        _m_mass = np.sum(reversal_sim.drift_magnitude > _drift_threshold)
+        _mean_velocity = np.mean(reversal_sim.drift_magnitude[reversal_sim.drift_magnitude > _drift_threshold]) if _m_mass > 0 else 0
+        _epigenetic_momentum = _m_mass * _mean_velocity
+        
+        def _h_bin_vec(p):
+            p = np.clip(p, 1e-10, 1.0-1e-10)
+            return -(p * np.log2(p) + (1.0 - p) * np.log2(1.0 - p))
+            
+        _h_old_mean = np.mean(_h_bin_vec(reversal_sim.old_reference))
+        _h_young_mean = np.mean(_h_bin_vec(reversal_sim.young_reference))
+        _thermo_cost = np.abs(_h_old_mean - _h_young_mean)
+        
+        _rev_col1, _rev_col2 = st.columns(2)
+        _rev_col1.markdown(f"""<div class="metric-card" style="border-top: 2px solid {COLORS['green']};">
+        <div class="metric-value" style="color:{COLORS['green']};font-size:1.4rem;">{_epigenetic_momentum:.4f}</div>
+        <div class="metric-label">Epigenetic Momentum Vector (p = m·Δβ)</div>
+        <div class="metric-delta" style="color:{COLORS['dim']};font-size:0.75rem;margin-top:0.5rem;">Inertial resistance of {_m_mass} high-drift CpGs</div>
+        </div>""", unsafe_allow_html=True)
+        
+        _rev_col2.markdown(f"""<div class="metric-card" style="border-top: 2px solid {COLORS['amber']};">
+        <div class="metric-value" style="color:{COLORS['amber']};font-size:1.4rem;">{_thermo_cost:.4f} bits</div>
+        <div class="metric-label">Reprogramming Thermodynamic Cost (ΔH)</div>
+        <div class="metric-delta" style="color:{COLORS['dim']};font-size:0.75rem;margin-top:0.5rem;">Absolute systemic energy required for somatic reset</div>
+        </div>""", unsafe_allow_html=True)
+
+        # ── Item 15: Yamanaka Vector Field ─────────────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Yamanaka Vector Field (Gradient of Corrective Force)</div>', unsafe_allow_html=True)
+        _top_drift_idx = np.argsort(reversal_sim.drift_magnitude)[-50:]
+        _y_old = reversal_sim.old_reference[_top_drift_idx]
+        _y_young = reversal_sim.young_reference[_top_drift_idx]
+        
+        fig_vector = go.Figure()
+        for i in range(50):
+            # Arrow from Old to Young
+            fig_vector.add_annotation(
+                x=i, y=_y_young[i],
+                ax=i, ay=_y_old[i],
+                xref='x', yref='y', axref='x', ayref='y',
+                showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=2,
+                arrowcolor=COLORS['green'] if _y_young[i] < _y_old[i] else COLORS['blue']
+            )
+            # Origin point (Old state)
+            fig_vector.add_trace(go.Scatter(x=[i], y=[_y_old[i]], mode='markers', marker=dict(color=COLORS['red'], size=6), hoverinfo='skip'))
+            
+        fig_vector.update_layout(
+            **PLOT_LAYOUT, height=400, showlegend=False,
+            title='Reprogramming Force Application (Old State → Young Target)',
+            xaxis_title='Top 50 Drifted CpGs (Sorted by Magnitude)', yaxis_title='Methylation Level (β)',
+            xaxis=dict(showticklabels=False)
+        )
+        st.plotly_chart(fig_vector, use_container_width=True, key="nobel_vector_15")
+
+        # ── Item 16: Intervention Hysteresis Loop ──────────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Hysteresis Loop of Reprogramming (Path-Dependence)</div>', unsafe_allow_html=True)
+        _top_100_idx = np.argsort(reversal_sim.drift_magnitude)[-100:]
+        _mean_beta_drift = X.iloc[:, _top_100_idx].mean(axis=1).values
+        _sort_h = np.argsort(ages.values)
+        _age_h = ages.values[_sort_h]
+        _beta_h = _mean_beta_drift[_sort_h]
+        
+        _beta_smooth = pd.Series(_beta_h).rolling(window=max(3, len(_beta_h)//10), center=True).mean().bfill().ffill().values
+        
+        # Simulate active reversal path for the oldest sample
+        _oldest_idx = np.argmax(ages.values)
+        _oldest_beta = X.values[_oldest_idx]
+        _hyst_ages = []
+        _hyst_betas = []
+        
+        for alpha in np.linspace(0, 1.0, 10):
+            _b_new = _oldest_beta.copy()
+            _b_new[_top_100_idx] = _oldest_beta[_top_100_idx] + alpha * (reversal_sim.young_reference[_top_100_idx] - _oldest_beta[_top_100_idx])
+            _df_new = pd.DataFrame([_b_new], columns=reversal_sim.feature_names)
+            _hyst_ages.append(clock.predict(_df_new)[0])
+            _hyst_betas.append(np.mean(_b_new[_top_100_idx]))
+            
+        fig_hyst = go.Figure()
+        fig_hyst.add_trace(go.Scatter(x=_age_h, y=_beta_smooth, mode='lines', name='Forward Natural Aging', line=dict(color=COLORS['red'], width=3)))
+        fig_hyst.add_trace(go.Scatter(x=_hyst_ages, y=_hyst_betas, mode='lines+markers', name='Forced Reprogramming Path', line=dict(color=COLORS['green'], width=3, dash='dot')))
+        fig_hyst.update_layout(
+            **PLOT_LAYOUT, height=400,
+            title='Epigenetic Hysteresis: Aging vs Reversal Vectors',
+            xaxis_title='Biological Age Prediction (Years)', yaxis_title='Mean Methylation of High-Drift CpGs',
+            legend=dict(x=0.02, y=0.98)
+        )
+        st.plotly_chart(fig_hyst, use_container_width=True, key="nobel_hyst_16")
+
+        # ── Item 17: Pareto Optimization Surface (3D Exact Compute) ────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Pareto Optimization Surface (Dosage vs Age vs Reversal)</div>', unsafe_allow_html=True)
+        # Strict zero-cheat computation across a grid
+        _dosages = np.linspace(0.2, 1.0, 6)
+        _target_idx = np.argsort(ages.values)[-6:] # 6 oldest samples
+        _test_ages = ages.values[_target_idx]
+        _Z_rev = np.zeros((len(_dosages), len(_test_ages)))
+        
+        for i, d in enumerate(_dosages):
+            for j, idx in enumerate(_target_idx):
+                _b_orig = X.values[idx]
+                _res_p = reversal_sim.simulate_intervention(_b_orig, clock, d * 100.0)
+                _Z_rev[i, j] = _res_p['years_reversed']
+                
+        fig_pareto = go.Figure(go.Surface(
+            z=_Z_rev.T, x=_dosages * 100, y=_test_ages,
+            colorscale='Viridis',
+            hovertemplate='Dosage: %{x:.1f}%<br>Base Age: %{y:.1f}y<br>Reversed: %{z:.2f}y<extra></extra>'
+        ))
+        fig_pareto.update_layout(
+            paper_bgcolor='rgba(3,13,18,0)', font=dict(family='IBM Plex Mono', color='#7eb8c4', size=11), height=550,
+            title='Reversal Efficiency Manifold (Computed live via Clock)',
+            scene=dict(
+                xaxis_title='Intervention Dosage (%)', yaxis_title='Initial Chronological Age', zaxis_title='Years Reversed',
+                bgcolor='rgba(3,13,18,0.9)',
+                xaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a'), yaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a'), zaxis=dict(gridcolor='#1a3a4a', linecolor='#1a3a4a')
+            )
+        )
+        st.plotly_chart(fig_pareto, use_container_width=True, key="nobel_pareto_17")
+
+        # ── Item 18: Shift-Magnitude Distribution (KDE) ────────────────
+        st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Reprogramming Disruption Distribution (KDE)</div>', unsafe_allow_html=True)
+        _delta_betas = np.abs(reversal_sim.young_reference - reversal_sim.old_reference)
+        fig_kde = px.histogram(
+            x=_delta_betas, nbins=150, 
+            color_discrete_sequence=[COLORS['blue']],
+            marginal='box', opacity=0.8
+        )
+        fig_kde.update_layout(
+            **PLOT_LAYOUT, height=400,
+            title='Density of Targeted Genomic Disruption (100% Intervention)',
+            xaxis_title='Absolute Shift Magnitude |Δβ|', yaxis_title='Number of CpG Loci'
+        )
+        st.plotly_chart(fig_kde, use_container_width=True, key="nobel_kde_18")
+
+
 # ─────────────────────────────────────────────────────────────
 # TAB 4: HRF RESONANCE
 # ─────────────────────────────────────────────────────────────
