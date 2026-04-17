@@ -1160,8 +1160,6 @@ with tabs[0]:
         _top_100_coefs = clock.model.coef_[_top_100_indices]
       
         for i, a in enumerate(_sim_alphas):
-            # Soft-thresholding simulation to visualize mathematically exact lasso decay
-            _path_matrix[:, i] = np.sign(_top_100_coefs) * np.maximum(0, np.abs(_top_100_coefs) - a * 0.5)
           # Use true ElasticNet path (no artificial shrinkage)
             _path_matrix = _coefs_path[_top_100_indices, :]
             
