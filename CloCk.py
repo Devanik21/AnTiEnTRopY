@@ -46,6 +46,7 @@ class BiologicalClock:
         self.metrics = {}
         self.cpg_coefs = None
         self.horvath_overlap = []
+        self.cv_scores = None
 
     def _select_features(self, X: pd.DataFrame) -> pd.DataFrame:
         variances = X.var(axis=0)
