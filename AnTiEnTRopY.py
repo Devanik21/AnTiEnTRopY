@@ -27,6 +27,7 @@ from scipy.stats import ks_2samp, mannwhitneyu, ttest_ind, norm
 import hashlib
 import scipy.signal as signal
 import pywt
+from sklearn.linear_model import enet_path
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AntiEntropy | Epigenetic Age Reversal",
