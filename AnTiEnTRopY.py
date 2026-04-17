@@ -25,6 +25,7 @@ warnings.filterwarnings('ignore')
 
 from scipy.stats import ks_2samp, mannwhitneyu, ttest_ind, norm
 import hashlib
+import scipy.signal as signal
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -2709,7 +2710,6 @@ with tabs[3]:
 
         # ── Item 65: Continuous Wavelet Transform (CWT) Spectrogram ────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">CWT Epigenetic Spectrogram (Morlet Wavelet)</div>', unsafe_allow_html=True)
-        import scipy.signal as signal
         import pywt
         _cwt_widths = np.arange(1, 31)
         # Note: Scipy's Morlet wavelet expects widths to be evaluated.
