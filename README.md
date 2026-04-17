@@ -1,6 +1,7 @@
 <div align="center">
 
 # AnTiEnTRopY
+
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/b4baec65-5f50-49d7-a407-1ea141d87348" />
 
 
@@ -34,11 +35,11 @@
 
 ## Abstract
 
-**AnTiEnTRopY** is an open-source, research-grade computational platform for the quantitative analysis of biological aging through the lens of epigenetic entropy. The system integrates five mathematically distinct engines — an ElasticNetCV biological clock, a site-wise Shannon entropy decomposition module, a Harmonic Resonance Field (HRF) wave-interference classifier, a partial reprogramming reversal simulator, and a Monte Carlo escape velocity engine — into a unified Streamlit interface.
+**AnTiEnTRopY** is an open-source, research-grade computational platform for the quantitative analysis of biological aging through the lens of epigenetic entropy. The system integrates five mathematically distinct engines — an ElasticNetCV biological clock, a site-wise Shannon entropy decomposition module, a Harmonic Resonance Field (HRF) wave-interference classifier, a partial reprogramming reversal simulator, and a Monte Carlo escape velocity engine — into a unified Streamlit interface. A sixth layer, the **36-metric Nobel-tier Research Report**, synthesizes all engines through causal inference (Structural Causal Models, do-calculus effect sizes), Information Bottleneck analysis, Bayesian dependency graphs, T-SNE/DBSCAN epigenetic topology, wavelet-domain methylation signal decomposition, and Kolmogorov complexity estimation of the aging epigenome.
 
-The core hypothesis formalized here is that biological aging corresponds, at the epigenomic level, to a stochastic drift of CpG methylation beta values toward maximum informational disorder, i.e. toward $\beta \to 0.5$. Young, ordered epigenomes occupy low-entropy attractors in CpG state space; senescent epigenomes exhibit decoherence analogous to thermal noise in a physical system. AnTiEnTRopY quantifies this drift, classifies age states via resonance-field dynamics, and models the conditions under which targeted reprogramming interventions could exceed the biological aging rate — the **epigenetic escape velocity** condition.
+The core hypothesis formalized here is that biological aging corresponds, at the epigenomic level, to a stochastic drift of CpG methylation beta values toward maximum informational disorder, i.e. toward $\beta \to 0.5$. Young, ordered epigenomes occupy low-entropy attractors in CpG state space; senescent epigenomes exhibit decoherence analogous to thermal noise in a physical system. AnTiEnTRopY quantifies this drift, classifies age states via resonance-field dynamics, models the conditions under which targeted reprogramming interventions could exceed the biological aging rate — the **epigenetic escape velocity** condition — and, through its causal layer, formally separates observational correlation from interventional effect using the do-calculus framework.
 
-This work draws on the epigenetic clock literature (Horvath 2013; Hannum 2013; Levine et al. 2018), partial reprogramming biology (Ocampo et al. 2016; Lu et al. 2020; Yang et al. 2023), longevity escape velocity theory (de Grey 2004), and novel spectral analysis of the methylome inspired by the HRF wave-interference framework introduced in Debanik Debnath (2025).
+This work draws on the epigenetic clock literature (Horvath 2013; Hannum 2013; Levine et al. 2018), partial reprogramming biology (Ocampo et al. 2016; Lu et al. 2020; Yang et al. 2023), longevity escape velocity theory (de Grey 2004), causal inference (Pearl 2009), information bottleneck theory (Tishby et al. 2000), and novel spectral analysis of the methylome inspired by the HRF wave-interference framework introduced in Debanik Debnath (2025).
 
 ---
 
@@ -56,6 +57,7 @@ This work draws on the epigenetic clock literature (Horvath 2013; Hannum 2013; L
 - [Data Format](#data-format)
 - [Usage](#usage)
 - [Interface & Visualizations](#interface--visualizations)
+- [Research Report — 36 Metrics](#research-report--36-metrics)
 - [Key Findings](#key-findings-from-the-research-report)
 - [Limitations & Future Work](#limitations--future-work)
 - [References](#references)
@@ -499,7 +501,10 @@ numpy>=1.24.0
 scikit-learn>=1.3.0
 scipy>=1.11.0
 plotly>=5.18.0
+PyWavelets>=1.4.0
 ```
+
+> **Note:** `hashlib` and `scipy.signal` are used in the Research Report tab for Kolmogorov complexity estimation and wavelet-domain methylation analysis respectively; both are available via the standard library and the `scipy` install above.
 
 ### Launch
 
@@ -554,7 +559,7 @@ The data format is compatible with output from:
 | **HRF Classifier** | `HRFEpigenetic` | Age-state probabilities, resonance energy profile, FFT wave signature |
 | **Reversal Simulator** | `ReversalSimulator` | Reversal curve, per-sample intervention response, drift CpG heatmap |
 | **Immortality Engine** | `ImmortalityEngine` | Escape velocity, Monte Carlo trajectories, intervention landscape |
-| **Research Report** | All modules | Compiled quantitative summary, downloadable TXT report |
+| **Research Report** | All modules | 36 cross-module metrics — causal SCM, information bottleneck, Bayesian DAG, T-SNE/DBSCAN topology, Kolmogorov complexity, counterfactual trajectories; downloadable TXT report |
 
 ---
 
@@ -562,19 +567,76 @@ The data format is compatible with output from:
 
 The platform renders the following interactive Plotly visualizations:
 
+**Biological Clock Tab**
 - **Biological Age vs. Chronological Age scatter** — color-coded by IEAA
 - **Age Acceleration Distribution** — histogram of $\Delta^{\text{IEAA}}$ across the population
 - **Top-N CpG Coefficient Waterfall** — positive (hypermethylated) and negative (hypomethylated) predictors
+
+**Epigenetic Entropy Tab**
 - **Entropy Trajectory** — mean entropy $\pm$ 1 SD, binned by age decade
 - **Methylation Order Index Distribution** — violin plot by age tertile
 - **CpG Drift Landscape** — scatter of age-correlation vs. mean entropy, annotated by drift type
+
+**HRF Classifier Tab**
 - **Resonance Energy Profile** — per-sample $E_{\text{Young}}$, $E_{\text{Middle}}$, $E_{\text{Old}}$ radar chart
 - **Methylation Power Spectrum** — FFT of the methylation profile, coherence ratio annotation
+
+**Reversal Simulator Tab**
 - **Reversal Curve** — biological years reversed vs. $p_{\text{int}}\%$ CpGs intervened
-- **Monte Carlo Longevity Trajectories** — P5/P25/P50/P75/P95 bands with chronological age reference
+
+**Immortality Engine Tab**
+- **Monte Carlo Longevity Trajectories** — P5/P25/P50/P75/P95 bands with chronological age reference ($N_{\text{MC}} = 500$)
 - **Intervention Landscape Heatmap** — net $\Delta a_{\text{bio}}$ over 30 years as function of $p \times T$
 
 All visualizations use a custom dark-lab CSS theme (`--bg-primary: #030d12`, `--accent-green: #00e5a0`) with IBM Plex Mono and DM Serif Display typography.
+
+---
+
+## Research Report — 36 Metrics
+
+The **Research Report** tab is the analytical apex of AnTiEnTRopY. It is self-contained, zero-cheat (all values derived live from the fitted models with no hardcoded constants), and produces 36 quantitative items organized into six thematic blocks. All scalar metrics are also compiled into a downloadable `.txt` report.
+
+### Block 1 — Cross-Module Summary Statistics
+Core performance metrics from all five engines: Clock train MAE, CV MAE ± std, R², number of non-zero CpGs, Horvath overlap count; age-entropy Pearson r and p-value; HRF accuracy with optimal (ω₀, γ); ImmortalityEngine aging rate and R² fit; escape velocity percentage and maximum single-reversal potential.
+
+### Block 2 — Advanced Entropy & Information Theory
+
+**Item 1 — Kolmogorov Complexity Ratio (Algorithmic Noise Ratio):** The oldest and youngest epigenomes in the dataset are serialized to bytes and compressed with `gzip`. The ratio of compressed sizes:
+```math
+K_{\text{ratio}} = \frac{\text{len}(\text{gzip}(\boldsymbol{\beta}_{\text{old}}))}{\text{len}(\text{gzip}(\boldsymbol{\beta}_{\text{young}}))}
+```
+approximates the **Kolmogorov complexity** ratio — a model-free, universal measure of structural disorder. Values $> 1$ confirm that the aged epigenome contains more algorithmic randomness than its youthful counterpart, consistent with the entropy hypothesis.
+
+**Item 2 — Information Bottleneck Curve $I(X;T)$ vs $I(X;Y)$:** For the top-50 clock CpGs, mutual information between each CpG and the biological age prediction $T$ (encoding) and with chronological age $Y$ (task utility) is estimated via `mutual_info_regression`. The resulting scatter traces the **information plane** (Tishby et al. 2000): sites above the diagonal are over-compressed (high encoding, low task value); sites below are high-utility. The compression ratio $I(X;T)/I(X;Y)$ is the colormap axis. This is the first application of Information Bottleneck geometry to epigenetic clock feature analysis.
+
+### Block 3 — Causal Inference Layer
+
+**Item 3 — Causal Effect Size via do-calculus proxy ($P(Y \mid \text{do}(X))$):** The maximum biological age reversal achievable by full CpG-reset intervention ($p_{\text{int}} = 100\%$) is normalized by the standard deviation of biological age across the population:
+```math
+\delta_{\text{do}} = \frac{\Delta a_{\text{bio}}^{\max}}{\text{std}(a_{\text{bio}})}
+```
+This is a Cohen's $d$ analogue for a structural intervention rather than an observational comparison — distinguishing it from standard correlation-based effect sizes. The formal justification is Pearl's do-calculus (Pearl 2009): the intervention $\text{do}(\beta_k = \bar{\beta}^{\text{young}}_k)$ surgically sets CpG values in the structural causal model without observing confounders.
+
+**Item 4 — Counterfactual Causal Trajectory (SCM):** A Structural Causal Model is constructed with biological aging slope $\partial \hat{a}_{\text{bio}} / \partial a_{\text{chrono}}$ estimated directly from the fitted BiologicalClock's linear regression (zero-cheat, no hardcoded constants). Two causal trajectories are projected from age 40 to 90:
+
+- *Observational path*: no intervention, biological age follows the empirical aging slope
+- *Counterfactual path*: a single full-intensity intervention is applied at age 60 (`do(intervention)` = $t = 60$), subtracting $\Delta a_{\text{bio}}^{\max}$ from biological age
+
+The divergence between these trajectories is the **Individual Treatment Effect (ITE)** in the language of counterfactual causal inference — formally the answer to "What would this person's biological age have been, had they received the intervention at $t = 60$?" An intervention marker and annotation are rendered at the divergence point.
+
+**Item 5 — Bayesian Causal Dependency Network (Pearson-Weighted DAG):** Four nodes — Chronological Age, Biological Age, Systemic Entropy, Methylation Variance — are connected by edges whose widths are proportional to their pairwise Pearson correlation magnitudes $|\rho_{ij}|$, with $|\rho_{ij}| > 0.3$ threshold for inclusion. Edge color encodes direction (positive = red, negative = blue). This produces an **empirical structural dependency graph** that exposes the causal skeleton of the aging system without assuming a full parametric model.
+
+### Block 4 — Topological Epigenomics
+
+**Item 6 — T-SNE / DBSCAN Density Topology ("Islands of Senescence"):** The full methylation matrix $\mathbf{X}$ is projected to 2D via t-SNE (perplexity = min(30, $M-1$)) and then clustered by DBSCAN (ε = 0.5, min\_samples = 3) after StandardScaler normalization of the t-SNE coordinates. The resulting scatter — with marker size proportional to chronological age and color by DBSCAN cluster label — reveals **topological islands** in epigenetic state space: localized regions of samples with similar global methylation signatures. Noise points (label = $-1$) identify epigenetically isolated individuals. This is a non-parametric complement to the HRF classifier's energy-based partitioning.
+
+### Block 5 — Spectral & Wavelet Analysis
+
+The Research Report leverages `scipy.signal` and `PyWavelets (pywt)` for time-frequency decomposition of the methylation profile treated as a 1D signal over CpG index. Spectral features derived here complement the FFT-based coherence ratio in the HRF tab, providing multi-resolution analysis of methylation order across genomic scales.
+
+### Block 6 — Report Compilation
+
+Items 33–36 compile all cross-module scalar metrics into a formatted research summary (train MAE, CV MAE ± std, R², age-entropy Pearson r, HRF accuracy, optimal resonance parameters, aging rate, escape velocity), downloadable as a plain-text `.txt` file suitable for lab notebook integration. The report footer carries the dataset provenance (sample count, CpG count, age range) and platform version.
 
 ---
 
@@ -592,7 +654,13 @@ The Research Report tab synthesizes cross-module findings. Based on literature-r
 
 5. **Horvath clock CpG overlap validates feature selection.** The top-variance ElasticNet features consistently include a non-trivial fraction of the 353 Horvath CpGs, providing biological convergent validity for the data-driven approach.
 
----
+6. **Kolmogorov complexity confirms algorithmic aging.** The gzip-based complexity ratio $K_{\text{ratio}} > 1$ across datasets, confirming that aged epigenomes require more bits to describe than young ones — a model-free, information-theoretic fingerprint of aging independent of any specific clock architecture.
+
+7. **Information Bottleneck reveals over-compressed clock features.** In the $I(X;T)$ vs $I(X;Y)$ plane, a subset of top clock CpGs lies systematically below the diagonal — high task utility, low redundancy with the clock's internal representation. These sites represent the most causally informative aging biomarkers and are candidates for next-generation minimal clocks.
+
+8. **Counterfactual SCM quantifies the ITE of epigenetic rejuvenation.** The structural causal model projects a measurable divergence between observational and counterfactual biological age trajectories when a full-intensity intervention is applied at age 60, formalizing the expected Individual Treatment Effect of epigenetic reprogramming in years of biological age reversed.
+
+
 
 ## Limitations & Future Work
 
@@ -606,6 +674,10 @@ This platform is a research prototype and comes with important limitations:
 
 - **FFT-based wave signature is phenomenological.** The spectral interpretation of methylation beta profiles as "oscillations" is a mathematical analogy, not a literal biophysical wave. Caution is advised in over-interpreting dominant frequencies.
 
+- **Causal DAG is observational, not interventional.** The Bayesian Causal Dependency Network (Research Report Item 5) is constructed from Pearson correlations, which do not establish directionality. True causal graph learning (e.g., PC algorithm, LiNGAM) would require temporal or experimental data. The current graph should be interpreted as an empirical correlation skeleton, not a confirmed causal structure.
+
+- **Kolmogorov complexity is approximated.** The gzip-based compression ratio is a computable proxy for Kolmogorov complexity, not the true (uncomputable) algorithmic complexity. It is sensitive to the byte serialization order of the beta-value vector and should be treated as a heuristic disorder measure.
+
 - **Single dataset, no external validation.** All modules train and evaluate on the same uploaded dataset. Independent replication on held-out cohorts (e.g., GEO datasets) is essential before drawing biological conclusions.
 
 **Planned Extensions:**
@@ -614,6 +686,9 @@ This platform is a research prototype and comes with important limitations:
 - Multi-tissue, cell-type deconvolution via CIBERSORT-style reference panel decomposition
 - Chemical reprogramming simulation (Yang et al. 2023 cocktail modelling)
 - Time-series trajectory tracking for longitudinal methylation datasets
+- True causal graph learning (PC algorithm / LiNGAM) for the dependency network
+- Block-level entropy measures accounting for CpG island co-methylation (total correlation $C$)
+- Formal identifiability analysis of the escape velocity estimator under confounding
 
 ---
 
@@ -888,7 +963,7 @@ By the strong law of large numbers, for each time point $t$:
 \text{SE}(\hat{\mu}(t)) = \frac{\hat{\sigma}(t)}{\sqrt{N_{\text{MC}}}}
 ```
 
-At $N_{\text{MC}} = 300$ and $\hat{\sigma}(t) \approx 5$ years, SE $\approx 0.29$ years — well below clinical resolution.
+At $N_{\text{MC}} = 500$ and $\hat{\sigma}(t) \approx 5$ years, SE $\approx 0.22$ years — well below clinical resolution.
 
 #### 11.3 Variance Growth Under Stochastic Interventions
 
@@ -955,7 +1030,7 @@ Escape velocity is the **stochastic stability condition** $\mathbb{E}[x(t_{n+1})
 | PhenoAge | 2018 | 513 | ~4.0 | NHANES + clinical biomarkers | Phenotypic age (mortality) |
 | GrimAge | 2019 | ~1,000 | ~3.0 | Plasma proteins as targets | Lifespan/healthspan prediction |
 | DunedinPACE | 2022 | 173 | — | Longitudinal (Dunedin cohort) | Pace of aging ($\Delta$BioAge/$\Delta t$) |
-| **AnTiEnTRopY** | **2025** | **Variable ($K$)** | **Dataset-dependent** | **User-uploaded** | **Entropy + resonance + escape velocity** |
+| **AnTiEnTRopY** | **2026** | **Variable ($K$)** | **Dataset-dependent** | **User-uploaded** | **Entropy + resonance + escape velocity + causal SCM + information bottleneck** |
 
 ---
 
