@@ -3881,14 +3881,29 @@ with tabs[4]:
         # ══════════════════════════════════════════════════════════════
         st.markdown('<div class="section-title" style="font-size:1.2rem;margin-top:2.5rem;color:#facc15;">Advanced Analytics: Actuarial Survival & Stochastic Trajectories</div>', unsafe_allow_html=True)
         
-        # Safe extraction of base parameters (Zero-Cheat Determinism)
-        _age_rate = immortality_eng.aging_rate if immortality_eng.aging_rate is not None else 0.05
-        if immortality_eng.reversal_curve_data is not None and not immortality_eng.reversal_curve_data.empty:
-            _max_rev = float(immortality_eng.reversal_curve_data['years_reversed'].max())
-            _interv_years = 10.0 # Assumed decadal intervention cycle
-        else:
-            _max_rev = 0.0
-            _interv_years = 10.0
+        # ── Zero-Cheat Deterministic Parameter Extraction ──────────────
+        _interv_years = 10.0 # Assumed decadal intervention cycle
+        
+        try:
+            # Try to use the pre-instantiated immortality engine if it exists
+            _age_rate = immortality_eng.aging_rate if immortality_eng.aging_rate is not None else 0.05
+            if immortality_eng.reversal_curve_data is not None and not immortality_eng.reversal_curve_data.empty:
+                _max_rev = float(immortality_eng.reversal_curve_data['years_reversed'].max())
+            else:
+                _max_rev = 0.0
+        except NameError:
+            # Fallback: Deterministically compute strictly from existing core engines
+            from scipy.stats import linregress
+            # 1. Compute aging rate directly from Entropy Engine drift
+            _mean_h = entropy_eng.sample_entropy['mean_entropy'].values
+            _slope, _, _, _, _ = linregress(ages.values, _mean_h)
+            _age_rate = float(_slope) if _slope > 0 else 0.05
+            
+            # 2. Compute max reversal directly using the Reversal Simulator & Clock on the oldest sample
+            _oldest_idx = np.argmax(ages.values)
+            _b_orig = X.values[_oldest_idx]
+            _res_p = reversal_sim.simulate_intervention(_b_orig, clock, 100.0)
+            _max_rev = float(_res_p['years_reversed'])
             
         # ── Item 25: Escape Velocity Integral Margin ───────────────────
         # Area under curve = ∫(R - A)dt. Positive means surplus life per cycle.
@@ -3896,7 +3911,6 @@ with tabs[4]:
         
         # ── Item 26: Absolute Actuarial Ruin Probability ───────────────
         # Approximation of biological exhaustion (death) before the next cycle
-        # Using a simplified Gompertz hazard integration over the cycle T
         _oldest_bio = ages.values.max()
         _base_hazard = 0.0001 * np.exp(0.08 * _oldest_bio)
         _ruin_prob = 1.0 - np.exp(-_base_hazard * _interv_years)
@@ -3930,7 +3944,6 @@ with tabs[4]:
         for i in range(1, _t_steps):
             _dW = np.random.normal(0, np.sqrt(_dt), _paths)
             # OU Process: dX_t = θ(μ - X_t)dt + σdW_t
-            # Modified to include a deterministic intervention drop every 10 steps
             _intervention_drop = _max_rev if i % 10 == 0 else 0
             _sde_paths[:, i] = _sde_paths[:, i-1] + _theta * (_mu - _sde_paths[:, i-1]) * _dt + _sigma * _dW - _intervention_drop
 
@@ -3940,7 +3953,6 @@ with tabs[4]:
                 x=_sde_time, y=_sde_paths[p, :], mode='lines', 
                 line=dict(color='rgba(250, 204, 21, 0.2)', width=1), hoverinfo='skip'
             ))
-        # Add mean path
         fig_sde.add_trace(go.Scatter(x=_sde_time, y=np.mean(_sde_paths, axis=0), mode='lines', line=dict(color=COLORS['amber'], width=3), name='Mean Stochastic Path'))
         fig_sde.update_layout(
             **PLOT_LAYOUT, height=450, showlegend=False,
@@ -3954,9 +3966,7 @@ with tabs[4]:
         _sim_ages = np.linspace(20, 100, 100)
         _a_gomp, _b_gomp = 0.0001, 0.08
         
-        # Base derivative: dh/dt = a*b*exp(b*t)
         _dh_dt_base = _a_gomp * _b_gomp * np.exp(_b_gomp * _sim_ages)
-        # Intervention derivative: mathematically shifts the age back by _max_rev
         _dh_dt_interv = _a_gomp * _b_gomp * np.exp(_b_gomp * (_sim_ages - _max_rev))
         
         fig_hazard = go.Figure()
@@ -3982,7 +3992,6 @@ with tabs[4]:
             _effective_rev = (_max_rev * (dosage / 100.0))
             for j, t in enumerate(_grid_ages):
                 _effective_age = max(20, t - _effective_rev)
-                # S(t) = exp( -(a/b) * (exp(b*t) - 1) )
                 _S_matrix[i, j] = np.exp(-(_a_gomp/_b_gomp) * (np.exp(_b_gomp * _effective_age) - 1))
                 
         fig_km3d = go.Figure(go.Surface(
@@ -4003,22 +4012,19 @@ with tabs[4]:
 
         # ── Item 30: Markov Chain Spectral Gap ─────────────────────────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Epigenetic Markov Chain Spectral Gap Analysis</div>', unsafe_allow_html=True)
-        # Quantize the methylation landscape of the 50 most variable CpGs into binary states (Hyper > 0.5 vs Hypo < 0.5)
         _top_var_idx = np.argsort(X.var(axis=0))[-50:]
         _binary_X = (X.iloc[:, _top_var_idx] > 0.5).astype(int)
         
-        # Calculate transition matrix P across chronological age sorts
         _sort_m = np.argsort(ages.values)
         _sorted_bin = _binary_X.values[_sort_m]
         
-        _P_matrix = np.zeros((2, 2)) # State 0 (Hypo), State 1 (Hyper)
+        _P_matrix = np.zeros((2, 2))
         for i in range(len(_sorted_bin) - 1):
             for cpg_idx in range(50):
                 _from_state = _sorted_bin[i, cpg_idx]
                 _to_state = _sorted_bin[i+1, cpg_idx]
                 _P_matrix[_from_state, _to_state] += 1
                 
-        # Normalize to probabilities
         _P_row_sums = _P_matrix.sum(axis=1, keepdims=True)
         _P_matrix = np.divide(_P_matrix, _P_row_sums, out=np.zeros_like(_P_matrix), where=_P_row_sums!=0)
         
