@@ -749,7 +749,13 @@ with tabs[0]:
 
         # ── Item 3: Cross-Validation Fold Comparison ───────────────────
         st.markdown('<div class="section-title" style="font-size:1rem;margin-top:1.5rem;">Cross-Validation Performance by Fold</div>', unsafe_allow_html=True)
-        _cv_scores3 = clock.cv_scores if hasattr(clock, 'cv_scores') and clock.cv_scores is not None else np.array([m['cv_mae']] * 5)
+        _cv_scores3 = clock.cv_scores
+        if _cv_scores3 is None:
+          st.error("Cross-validation scores missing. Ensure BiologicalClock computes cv_scores.")
+          st.stop()
+          
+    
+    
         _n_folds = len(_cv_scores3)
         _fold_labels3 = [f'Fold {i+1}' for i in range(_n_folds)]
         fig_cv3 = go.Figure()
@@ -1156,6 +1162,8 @@ with tabs[0]:
         for i, a in enumerate(_sim_alphas):
             # Soft-thresholding simulation to visualize mathematically exact lasso decay
             _path_matrix[:, i] = np.sign(_top_100_coefs) * np.maximum(0, np.abs(_top_100_coefs) - a * 0.5)
+          # Use true ElasticNet path (no artificial shrinkage)
+            _path_matrix = _coefs_path[_top_100_indices, :]
             
         fig_lasso = go.Figure()
         for c_idx in range(100):
