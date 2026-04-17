@@ -2155,19 +2155,24 @@ with tabs[2]:
         
         for _i in range(_t_steps + 1):
             _alpha = _i / _t_steps
-            # Linear path
+            # 1. Linear path
             _b_lin = _op_beta_old + _alpha * (_op_beta_young - _op_beta_old)
             _linear_path_entropy.append(entropy_eng.get_sample_entropy_at(_b_lin)['mean_entropy'])
-            _linear_path_accel.append(clock.predict(_b_lin.reshape(1,-1))[0] - float(ages.iloc[sel_idx]))
             
-            # Optimal path (simulated minimal action curving through lower entropy regions early)
-            # In true calculus of variations, we would solve Euler-Lagrange. 
-            # We approximate this by prioritizing high-drift CpGs earlier (non-linear interpolation).
+            # FIX: Wrap NumPy array in a DataFrame with column names for the Clock
+            _df_lin = pd.DataFrame([_b_lin], columns=reversal_sim.feature_names)
+            _linear_path_accel.append(clock.predict(_df_lin)[0] - float(ages.iloc[sel_idx]))
+            
+            # 2. Optimal path (non-linear action)
             _drift = np.abs(_op_beta_young - _op_beta_old)
             _dynamic_alpha = np.power(_alpha, np.exp(-2.0 * (_drift - _drift.min()) / (_drift.max() - _drift.min() + 1e-6)))
             _b_opt = _op_beta_old + _dynamic_alpha * (_op_beta_young - _op_beta_old)
             _optimal_path_entropy.append(entropy_eng.get_sample_entropy_at(_b_opt)['mean_entropy'])
-            _optimal_path_accel.append(clock.predict(_b_opt.reshape(1,-1))[0] - float(ages.iloc[sel_idx]))
+            
+            # FIX: Wrap NumPy array in a DataFrame with column names for the Clock
+            _df_opt = pd.DataFrame([_b_opt], columns=reversal_sim.feature_names)
+            _optimal_path_accel.append(clock.predict(_df_opt)[0] - float(ages.iloc[sel_idx]))
+          
             
         fig_oc64 = go.Figure()
         fig_oc64.add_trace(go.Scatter(
