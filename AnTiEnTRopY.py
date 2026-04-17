@@ -3316,7 +3316,7 @@ with tabs[3]:
         
         fig_ricci = go.Figure(go.Contour(
             z=_laplacian_proxy, x=np.linspace(_x_min, _x_max, 40), y=np.linspace(_y_min, _y_max, 40),
-            colorscale='RdBu', midpoint=0, contours=dict(coloring='heatmap', showlabels=False),
+            colorscale='RdBu', zmid=0, contours=dict(coloring='heatmap', showlabels=False),
             hovertemplate='PC1: %{x:.2f}<br>PC2: %{y:.2f}<br>Curvature ∇²E: %{z:.4f}<extra></extra>'
         ))
         fig_ricci.add_trace(go.Scatter(
