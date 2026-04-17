@@ -95,7 +95,7 @@ class BiologicalClock:
         self.metrics = {
             'train_mae': float(mean_absolute_error(y_arr, y_pred)),
             'train_r2': float(r2_score(y_arr, y_pred)),
-            'cv_mae': float(-cv_scores.mean()),
+            'cv_mae': float(cv_scores.mean()),
             'cv_mae_std': float(cv_scores.std()),
             'n_cpgs_total': len(self.feature_names),
             'n_cpgs_nonzero': int(np.sum(self.model.coef_ != 0)),
