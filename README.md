@@ -610,7 +610,7 @@ approximates the **Kolmogorov complexity** ratio — a model-free, universal mea
 
 ### Block 3 — Causal Inference Layer
 
-**Item 3 — Causal Effect Size via do-calculus proxy ($P(Y \mid \text{do}(X))$):** The maximum biological age reversal achievable by full CpG-reset intervention ($`p_{\text{int}} = 100\%`$) is normalized by the standard deviation of biological age across the population:
+**Item 3 — Causal Effect Size via do-calculus proxy ( $P(Y \mid \text{do}(X))$ ):** The maximum biological age reversal achievable by full CpG-reset intervention ($`p_{\text{int}} = 100\%`$) is normalized by the standard deviation of biological age across the population:
 ```math
 \delta_{\text{do}} = \frac{\Delta a_{\text{bio}}^{\max}}{\text{std}(a_{\text{bio}})}
 ```
@@ -1014,7 +1014,7 @@ In the limit $`\omega_c \to 0`$, the energy reduces to:
 E_c(\mathbf{q})\big|_{\omega_c=0} = 2\sum_{i=1}^{k} \exp(-\gamma\,\|\mathbf{q} - \mathbf{x}_i^{(c)}\|^2)
 ```
 
-— exactly a **Gaussian kernel density estimate** of the class-conditional density. Classification by $`\arg\max_c E_c`$ then approximates Gaussian Naive Bayes in the low-$\omega$ limit.
+— exactly a **Gaussian kernel density estimate** of the class-conditional density. Classification by $`\arg\max_c E_c`$ then approximates Gaussian Naive Bayes in the low-$`\omega_L`$ limit.
 
 #### 12.2 Constructive and Destructive Interference Zones
 
@@ -1054,7 +1054,7 @@ Escape velocity is the **stochastic stability condition** $`\mathbb{E}[x(t_{n+1}
 | Hannum (blood) | 2013 | 71 | ~3.9 | 656 whole-blood samples | Blood-specific accuracy |
 | PhenoAge | 2018 | 513 | ~4.0 | NHANES + clinical biomarkers | Phenotypic age (mortality) |
 | GrimAge | 2019 | ~1,000 | ~3.0 | Plasma proteins as targets | Lifespan/healthspan prediction |
-| DunedinPACE | 2022 | 173 | — | Longitudinal (Dunedin cohort) | Pace of aging ($\Delta$BioAge/$\Delta t$) |
+| DunedinPACE | 2022 | 173 | — | Longitudinal (Dunedin cohort) |Pace of aging ($`\Delta\text{BioAge} / \Delta t`$) |
 | **AnTiEnTRopY** | **2026** | **Variable ($K$)** | **Dataset-dependent** | **User-uploaded** | **Entropy + resonance + escape velocity + causal SCM + information bottleneck** |
 
 ---
