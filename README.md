@@ -114,7 +114,7 @@ H(\beta) = -\tilde{\beta}\log_2(\tilde{\beta}) - (1-\tilde{\beta})\log_2(1-\tild
 
 #### 1.2 Methylation Order Index (MOI)
 
-For a sample with $N$ measured CpG sites $\{\beta_1, \beta_2, \ldots, \beta_N\}$, the **Methylation Order Index** is defined as:
+For a sample with $N$ measured CpG sites $`\{\beta_1, \beta_2, \ldots, \beta_N\}`$, the **Methylation Order Index** is defined as:
 
 ```math
 \text{MOI} = 1 - \frac{1}{N}\sum_{i=1}^{N} H(\beta_i)
@@ -124,7 +124,7 @@ The MOI ranges in $[0,1]$: a perfectly ordered (youthful) epigenome achieves $\t
 
 #### 1.3 Age-Entropy Regression
 
-Across $M$ samples with chronological ages $\{a_1, \ldots, a_M\}$ and mean entropies $\{\bar{H}_1, \ldots, \bar{H}_M\}$, the entropy-aging rate is estimated by ordinary least squares:
+Across $M$ samples with chronological ages $`\{a_1, \ldots, a_M\}`$ and mean entropies $`\{\bar{H}_1, \ldots, \bar{H}_M\}`$, the entropy-aging rate is estimated by ordinary least squares:
 
 ```math
 \bar{H}_j = \alpha + \lambda \cdot a_j + \varepsilon_j, \qquad \lambda = \frac{\text{Cov}(\bar{H}, a)}{\text{Var}(a)}
@@ -140,7 +140,7 @@ For each CpG site $k$, the Pearson correlation of its beta value with chronologi
 r_k = \frac{\sum_{j=1}^{M}(\beta_{kj} - \bar{\beta}_k)(a_j - \bar{a})}{\sqrt{\sum_{j=1}^{M}(\beta_{kj}-\bar{\beta}_k)^2}\sqrt{\sum_{j=1}^{M}(a_j-\bar{a})^2}}
 ```
 
-is computed via vectorized matrix operations (complexity $\mathcal{O}(MN)$ in a single pass). Sites with $|r_k| > 0.3$ are classified as **drift CpGs**, further subdivided into hypermethylated ($r_k > 0.3$) and hypomethylated ($r_k < -0.3$) with age.
+is computed via vectorized matrix operations (complexity $\mathcal{O}(MN)$ in a single pass). Sites with $`|r_k| > 0.3`$ are classified as **drift CpGs**, further subdivided into hypermethylated ($`r_k > 0.3`$) and hypomethylated ($`r_k < -0.3`$) with age.
 
 #### 1.5 Chaos Fraction and Ordered Fraction
 
@@ -154,7 +154,7 @@ f_{\text{chaos}} = \frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[0.4 < \beta_i < 0.6]
 f_{\text{ordered}} = \frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[\beta_i < 0.2 \;\text{or}\; \beta_i > 0.8]
 ```
 
-where $\mathbf{1}[\cdot]$ is the indicator function. $f_{\text{chaos}}$ quantifies the fraction of sites near maximum entropy; $f_{\text{ordered}}$ quantifies those in fully committed methylation states.
+where $\mathbf{1}[\cdot]$ is the indicator function. $`f_{\text{chaos}}`$ quantifies the fraction of sites near maximum entropy; $`f_{\text{ordered}}`$ quantifies those in fully committed methylation states.
 
 ---
 
@@ -170,11 +170,11 @@ From the full CpG matrix $\mathbf{X} \in \mathbb{R}^{M \times N}$, the top $K$ C
 \hat{\sigma}^2_k = \frac{1}{M-1}\sum_{j=1}^{M}\left(\beta_{kj} - \bar{\beta}_k\right)^2, \qquad \mathcal{S} = \underset{k}{\arg\text{top-}K}\;\hat{\sigma}^2_k
 ```
 
-The default is $K = 5{,}000$, representing the highest-variance CpGs over the population.
+The default is $`K = 5{,}000`$, representing the highest-variance CpGs over the population.
 
 #### 2.2 Elastic Net Regression
 
-The reduced feature matrix $\mathbf{X}_\mathcal{S} \in \mathbb{R}^{M \times K}$ is standardized ($\mu = 0$, $\sigma = 1$ per feature), and the biological age predictor is fit by ElasticNet:
+The reduced feature matrix $`\mathbf{X}_\mathcal{S} \in \mathbb{R}^{M \times K}`$ is standardized ($`\mu = 0`$, $`\sigma = 1`$ per feature), and the biological age predictor is fit by ElasticNet:
 
 ```math
 \hat{\boldsymbol{w}} = \underset{\boldsymbol{w}}{\arg\min}\;\left[\frac{1}{2M}\|\mathbf{X}_\mathcal{S}\boldsymbol{w} - \mathbf{y}\|_2^2 + \alpha\left(\frac{1-\rho}{2}\|\boldsymbol{w}\|_2^2 + \rho\|\boldsymbol{w}\|_1\right)\right]
@@ -192,7 +192,7 @@ The L1 penalty ($\rho \to 1$) promotes sparsity, selecting only the most predict
 
 #### 2.3 Intrinsic Age Acceleration
 
-Raw predicted biological age $\hat{a}_{\text{bio}}$ is correlated with chronological age $a_{\text{chrono}}$ by construction of the regression. To remove this dependency and isolate true epigenetic dysregulation, intrinsic **age acceleration** is computed as the residual of the linear regression $\hat{a}_{\text{bio}} \sim a_{\text{chrono}}$:
+Raw predicted biological age $`\hat{a}_{\text{bio}}`$ is correlated with chronological age $`a_{\text{chrono}}`$ by construction of the regression. To remove this dependency and isolate true epigenetic dysregulation, intrinsic **age acceleration** is computed as the residual of the linear regression $`\hat{a}_{\text{bio}} \sim a_{\text{chrono}}`$:
 
 ```math
 \hat{a}_{\text{bio},j} = \gamma_0 + \gamma_1 a_{\text{chrono},j} + \delta_j
@@ -224,7 +224,7 @@ The HRF framework, originally introduced by Debanik Debnath (2025) for EEG-based
 | Brain state (sleep, wake, etc.) | Biological age class (Young, Middle, Old) |
 | Signal coherence | Methylation order (MOI) |
 | Phase noise | Epigenetic entropy ($\bar{H}$) |
-| Resonance frequency | Age-class-specific $\omega_c$ |
+| Resonance frequency | Age-class-specific $`\omega_c`$ |
 
 A young epigenome exhibits **coherent**, low-entropy methylation patterns — analogous to a standing wave at a class-specific resonance frequency. A senescent epigenome exhibits **phase decoherence** — analogous to high-frequency noise overwhelming the structured signal.
 
@@ -240,11 +240,11 @@ The methylation matrix $\mathbf{X} \in \mathbb{R}^{M \times N}$ (standardized) i
 \mathbf{Z} = \mathbf{X}_{\text{centered}}\,\mathbf{V}_{:d}^\top \in \mathbb{R}^{M \times d}
 ```
 
-The default $d = 200$ components capture the majority of variance while reducing the distance computation from $N \sim 10^4$–$10^5$ dimensions to a tractable subspace.
+The default $d = 200$ components capture the majority of variance while reducing the distance computation from $`N \sim 10^4\text{--}10^5`$ dimensions to a tractable subspace.
 
 #### 3.3 Resonance Energy Function
 
-Given a query sample $\mathbf{q} \in \mathbb{R}^d$ and the $k$ nearest training samples from class $c$, denoted $\{\mathbf{x}^{(c)}_i\}_{i=1}^{k}$, the **resonance energy** for class $c$ is:
+Given a query sample $\mathbf{q} \in \mathbb{R}^d$ and the $k$ nearest training samples from class $c$, denoted $`\{\mathbf{x}^{(c)}_i\}_{i=1}^{k}`$, the **resonance energy** for class $c$ is:
 
 ```math
 E_c(\mathbf{q}) = \sum_{i=1}^{k} \underbrace{\exp\!\left(-\gamma\,\|\mathbf{q} - \mathbf{x}^{(c)}_i\|_2^2\right)}_{\text{Gaussian envelope}} \cdot \underbrace{\left(1 + \cos\!\left(\omega_c\,\|\mathbf{q} - \mathbf{x}^{(c)}_i\|_2\right)\right)}_{\text{wave interference term}}
@@ -252,7 +252,7 @@ E_c(\mathbf{q}) = \sum_{i=1}^{k} \underbrace{\exp\!\left(-\gamma\,\|\mathbf{q} -
 
 where:
 - $\gamma > 0$ is the **spatial damping coefficient**, controlling how rapidly the influence of a training point decays with distance
-- $\omega_c = \omega_0 \cdot (c+1)$ is the **class-specific resonance frequency**, with $c \in \{0, 1, 2\}$ for Young, Middle, and Old
+- $`\omega_c = \omega_0 \cdot (c+1)`$ is the **class-specific resonance frequency**, with $c \in \{0, 1, 2\}$ for Young, Middle, and Old
 - $k$ is the number of nearest oscillators per class (default $k = 5$)
 
 The Gaussian envelope implements **locality** — only nearby epigenomes contribute meaningfully to the resonance energy. The cosine term implements **wave interference** — when the query lies at a resonant distance from a training point, the energy is amplified; at anti-resonant distances, it is suppressed.
@@ -277,7 +277,7 @@ These probabilities provide graded age-state confidence, visualizable as a radar
 
 #### 3.6 Hyperparameter Auto-Evolution
 
-The parameters $(\omega_0, \gamma)$ are optimized via grid search evaluated on a random leave-some-out subsample of size $n \leq 100$:
+The parameters $`(\omega_0, \gamma)`$ are optimized via grid search evaluated on a random leave-some-out subsample of size $`n \leq 100`$:
 
 ```math
 (\hat{\omega}_0, \hat{\gamma}) = \underset{\omega_0 \in \Omega,\;\gamma \in \Gamma}{\arg\max}\;\frac{1}{n}\sum_{i=1}^{n}\mathbf{1}\!\left[\hat{c}(\mathbf{z}_i) = y_i\right]
@@ -287,13 +287,13 @@ over the grid $\Omega = \{0.1, 1, 5, 10, 20, 50\}$ and $\Gamma = \{0.01, 0.1, 0.
 
 #### 3.7 Methylation Wave Signature (FFT Analysis)
 
-For spectral analysis of the methylation profile, the beta-value vector of a sample (truncated to the top-$K$ variable CpGs) is treated as a 1D signal and decomposed via the Real Fast Fourier Transform:
+For spectral analysis of the methylation profile, the beta-value vector of a sample (truncated to the top-$`K`$ variable CpGs) is treated as a 1D signal and decomposed via the Real Fast Fourier Transform:
 
 ```math
 \hat{\beta}_\ell = \sum_{n=0}^{K-1}(\beta_n - \bar{\beta})\,e^{-2\pi i \ell n / K}, \qquad \ell = 0, 1, \ldots, \lfloor K/2 \rfloor
 ```
 
-The **power spectrum** $P_\ell = |\hat{\beta}_\ell|^2$ is analyzed for:
+The **power spectrum** $`P_\ell = |\hat{\beta}_\ell|^2`$ is analyzed for:
 
 ```math
 \text{Coherence Ratio} = \frac{\sum_{\ell < L/2} P_\ell}{\sum_{\ell} P_\ell}
@@ -331,7 +331,7 @@ The per-site **drift magnitude** is:
 
 #### 4.2 Intervention Model
 
-Partial reprogramming is modeled as a targeted reset of the highest-drift CpG sites toward the young reference. Given an intervention at level $p_{\text{int}} \in [0, 100]\%$, the top $\lfloor N \cdot p_{\text{int}} / 100 \rfloor$ sites by drift magnitude are selected:
+Partial reprogramming is modeled as a targeted reset of the highest-drift CpG sites toward the young reference. Given an intervention at level $`p_{\text{int}} \in [0, 100]\%`$, the top $`\lfloor N \cdot p_{\text{int}} / 100 \rfloor`$ sites by drift magnitude are selected:
 
 ```math
 \mathcal{I} = \underset{k}{\arg\text{top-}n}\;\Delta_k, \qquad n = \left\lfloor \frac{N \cdot p_{\text{int}}}{100}\right\rfloor
@@ -359,7 +359,7 @@ This formulation is mathematically analogous to the partial reprogramming interv
 
 #### 4.3 Reversal Curve
 
-A sweep over $p_{\text{int}} \in [1\%, 100\%]$ generates the full **reversal curve** — biological years reversed as a function of CpG intervention fraction. This non-linear curve typically exhibits diminishing returns at high intervention levels and a steep initial slope when targeting the highest-drift sites first, consistent with the experimental observation that partial reprogramming (even with a small number of Yamanaka factors) achieves substantial epigenetic rejuvenation (Lu et al. 2020).
+A sweep over $`p_{\text{int}} \in [1\%, 100\%]`$ generates the full **reversal curve** — biological years reversed as a function of CpG intervention fraction. This non-linear curve typically exhibits diminishing returns at high intervention levels and a steep initial slope when targeting the highest-drift sites first, consistent with the experimental observation that partial reprogramming (even with a small number of Yamanaka factors) achieves substantial epigenetic rejuvenation (Lu et al. 2020).
 
 ---
 
@@ -375,7 +375,7 @@ The entropy-based aging rate is calibrated from population data:
 \lambda = \frac{d\bar{H}}{dt}  \quad \text{(H units/year)}
 ```
 
-estimated from the slope of the age-entropy regression (Section I.3). The **biological entropy age** $\bar{H}(a) = \bar{H}_0 + \lambda a$ provides a linear model of epigenomic aging.
+estimated from the slope of the age-entropy regression (Section I.3). The **biological entropy age** $`\bar{H}(a) = \bar{H}_0 + \lambda a`$ provides a linear model of epigenomic aging.
 
 #### 5.2 Escape Velocity Condition
 
@@ -385,7 +385,7 @@ Consider an individual receiving reprogramming interventions at regular interval
 \Delta a_{\text{net}}(p, T) = T - R(p)
 ```
 
-The system is at **epigenetic escape velocity** when $\Delta a_{\text{net}} \leq 0$, i.e. when the reversal rate matches or exceeds the aging rate:
+The system is at **epigenetic escape velocity** when $`\Delta a_{\text{net}} \leq 0`$, i.e. when the reversal rate matches or exceeds the aging rate:
 
 ```math
 R(p^*) \geq T \implies \frac{R(p^*)}{T} \geq 1
@@ -401,29 +401,29 @@ This condition is the epigenetic analogue of Aubrey de Grey's longevity escape v
 
 #### 5.3 Monte Carlo Longevity Trajectories
 
-Stochastic biological age trajectories are simulated via Monte Carlo integration. For each of $N_{\text{MC}}$ trials, biological age evolves in discrete time steps $\Delta t = 0.5$ years:
+Stochastic biological age trajectories are simulated via Monte Carlo integration. For each of $`N_{\text{MC}}`$ trials, biological age evolves in discrete time steps $\Delta t = 0.5$ years:
 
 ```math
 a_{\text{bio}}(t + \Delta t) = a_{\text{bio}}(t) + (1 + \eta)\,\Delta t, \qquad \eta \sim \mathcal{N}(0,\; \sigma_{\text{noise}}^2 \cdot (\Delta t)^2)
 ```
 
-where $\sigma_{\text{noise}} = 2.0$ years reflects the known inter-individual variability in aging rate. At each scheduled intervention at time $t = n \cdot T$, a stochastic reversal is applied:
+where $`\sigma_{\text{noise}} = 2.0`$ years reflects the known inter-individual variability in aging rate. At each scheduled intervention at time $t = n \cdot T$, a stochastic reversal is applied:
 
 ```math
 a_{\text{bio}}(t^+) = \max\!\left(18,\; a_{\text{bio}}(t) - \max\!\left(0,\; R(p) + \xi\right)\right), \qquad \xi \sim \mathcal{N}(0,\; 0.01 \cdot R(p)^2)
 ```
 
-The floor at age 18 reflects the constraint that epigenetic reprogramming is not expected to revert to a pre-adult developmental state. The ensemble of $N_{\text{MC}} = 300$–$500$ trajectories yields posterior percentile bands (P5, P25, P50, P75, P95) for biological age as a function of time.
+The floor at age 18 reflects the constraint that epigenetic reprogramming is not expected to revert to a pre-adult developmental state. The ensemble of $`N_{\text{MC}} = 300\text{--}500`$ trajectories yields posterior percentile bands (P5, P25, P50, P75, P95) for biological age as a function of time.
 
 #### 5.4 Intervention Landscape
 
-A 2D sweep over intervention intensity $p \in [5\%, 100\%]$ and interval $T \in [1, 10]$ years computes the **net biological age change** over a fixed 30-year horizon:
+A 2D sweep over intervention intensity $`p \in [5\%, 100\%]`$ and interval $`T \in [1, 10]`$ years computes the **net biological age change** over a fixed 30-year horizon:
 
 ```math
 \Delta a_{\text{bio}}^{\text{net}}(p, T) = 30 - R(p) \cdot \left\lfloor \frac{30}{T} \right\rfloor
 ```
 
-Green regions of the resulting heatmap ($\Delta a^{\text{net}} < 0$) identify $(p, T)$ pairs achieving escape velocity; red regions indicate net aging accumulation.
+Green regions of the resulting heatmap ($`\Delta a^{\text{net}} < 0`$) identify $(p, T)$ pairs achieving escape velocity; red regions indicate net aging accumulation.
 
 ---
 
@@ -472,7 +472,7 @@ AnTiEnTRopY/
 | `HRFEpigenetic` — PCA | Truncated SVD | $\mathcal{O}(M^2 d)$ |
 | `HRFEpigenetic` — resonance | KNN + energy per sample | $\mathcal{O}(M \cdot k \cdot d)$ |
 | `ReVeRsAL` — reversal curve | 20-step intervention sweep | $\mathcal{O}(20 \cdot K)$ |
-| `ImMoRtAlItY` — Monte Carlo | 300–500 trajectory simulations | $\mathcal{O}(N_{\text{MC}} \cdot T/\Delta t)$ |
+| `ImMoRtAlItY` — Monte Carlo | 300–500 trajectory simulations | $`\mathcal{O}(N_{\text{MC}} \cdot T/\Delta t)`$ |
 
 ---
 
@@ -577,15 +577,15 @@ The platform renders the following interactive Plotly visualizations:
 - **CpG Drift Landscape** — scatter of age-correlation vs. mean entropy, annotated by drift type
 
 **HRF Classifier Tab**
-- **Resonance Energy Profile** — per-sample $E_{\text{Young}}$, $E_{\text{Middle}}$, $E_{\text{Old}}$ radar chart
+- **Resonance Energy Profile** — per-sample $`E_{\text{Young}}`$, $`E_{\text{Middle}}`$, $`E_{\text{Old}}`$ radar chart
 - **Methylation Power Spectrum** — FFT of the methylation profile, coherence ratio annotation
 
 **Reversal Simulator Tab**
-- **Reversal Curve** — biological years reversed vs. $p_{\text{int}}\%$ CpGs intervened
+- **Reversal Curve** — biological years reversed vs. $`p_{\text{int}}\%`$ CpGs intervened
 
 **Immortality Engine Tab**
-- **Monte Carlo Longevity Trajectories** — P5/P25/P50/P75/P95 bands with chronological age reference ($N_{\text{MC}} = 500$)
-- **Intervention Landscape Heatmap** — net $\Delta a_{\text{bio}}$ over 30 years as function of $p \times T$
+- **Monte Carlo Longevity Trajectories** — P5/P25/P50/P75/P95 bands with chronological age reference ($`N_{\text{MC}} = 500`$)
+- **Intervention Landscape Heatmap** — net $`\Delta a_{\text{bio}}`$ over 30 years as function of $p \times T$
 
 All visualizations use a custom dark-lab CSS theme (`--bg-primary: #030d12`, `--accent-green: #00e5a0`) with IBM Plex Mono and DM Serif Display typography.
 
@@ -610,20 +610,20 @@ approximates the **Kolmogorov complexity** ratio — a model-free, universal mea
 
 ### Block 3 — Causal Inference Layer
 
-**Item 3 — Causal Effect Size via do-calculus proxy ($P(Y \mid \text{do}(X))$):** The maximum biological age reversal achievable by full CpG-reset intervention ($p_{\text{int}} = 100\%$) is normalized by the standard deviation of biological age across the population:
+**Item 3 — Causal Effect Size via do-calculus proxy ($P(Y \mid \text{do}(X))$):** The maximum biological age reversal achievable by full CpG-reset intervention ($`p_{\text{int}} = 100\%`$) is normalized by the standard deviation of biological age across the population:
 ```math
 \delta_{\text{do}} = \frac{\Delta a_{\text{bio}}^{\max}}{\text{std}(a_{\text{bio}})}
 ```
-This is a Cohen's $d$ analogue for a structural intervention rather than an observational comparison — distinguishing it from standard correlation-based effect sizes. The formal justification is Pearl's do-calculus (Pearl 2009): the intervention $\text{do}(\beta_k = \bar{\beta}^{\text{young}}_k)$ surgically sets CpG values in the structural causal model without observing confounders.
+This is a Cohen's $d$ analogue for a structural intervention rather than an observational comparison — distinguishing it from standard correlation-based effect sizes. The formal justification is Pearl's do-calculus (Pearl 2009): the intervention $`\text{do}(\beta_k = \bar{\beta}^{\text{young}}_k)`$ surgically sets CpG values in the structural causal model without observing confounders.
 
-**Item 4 — Counterfactual Causal Trajectory (SCM):** A Structural Causal Model is constructed with biological aging slope $\partial \hat{a}_{\text{bio}} / \partial a_{\text{chrono}}$ estimated directly from the fitted BiologicalClock's linear regression (zero-cheat, no hardcoded constants). Two causal trajectories are projected from age 40 to 90:
+**Item 4 — Counterfactual Causal Trajectory (SCM):** A Structural Causal Model is constructed with biological aging slope $`\partial \hat{a}_{\text{bio}} / \partial a_{\text{chrono}}`$ estimated directly from the fitted BiologicalClock's linear regression (zero-cheat, no hardcoded constants). Two causal trajectories are projected from age 40 to 90:
 
 - *Observational path*: no intervention, biological age follows the empirical aging slope
-- *Counterfactual path*: a single full-intensity intervention is applied at age 60 (`do(intervention)` = $t = 60$), subtracting $\Delta a_{\text{bio}}^{\max}$ from biological age
+- *Counterfactual path*: a single full-intensity intervention is applied at age 60 (`do(intervention)` = $t = 60$), subtracting $`\Delta a_{\text{bio}}^{\max}`$ from biological age
 
 The divergence between these trajectories is the **Individual Treatment Effect (ITE)** in the language of counterfactual causal inference — formally the answer to "What would this person's biological age have been, had they received the intervention at $t = 60$?" An intervention marker and annotation are rendered at the divergence point.
 
-**Item 5 — Bayesian Causal Dependency Network (Pearson-Weighted DAG):** Four nodes — Chronological Age, Biological Age, Systemic Entropy, Methylation Variance — are connected by edges whose widths are proportional to their pairwise Pearson correlation magnitudes $|\rho_{ij}|$, with $|\rho_{ij}| > 0.3$ threshold for inclusion. Edge color encodes direction (positive = red, negative = blue). This produces an **empirical structural dependency graph** that exposes the causal skeleton of the aging system without assuming a full parametric model.
+**Item 5 — Bayesian Causal Dependency Network (Pearson-Weighted DAG):** Four nodes — Chronological Age, Biological Age, Systemic Entropy, Methylation Variance — are connected by edges whose widths are proportional to their pairwise Pearson correlation magnitudes $`|\rho_{ij}|`$, with $`|\rho_{ij}| > 0.3`$ threshold for inclusion. Edge color encodes direction (positive = red, negative = blue). This produces an **empirical structural dependency graph** that exposes the causal skeleton of the aging system without assuming a full parametric model.
 
 ### Block 4 — Topological Epigenomics
 
@@ -643,17 +643,17 @@ Items 33–36 compile all cross-module scalar metrics into a formatted research 
 
 The Research Report tab synthesizes cross-module findings. Based on literature-representative Illumina 450K datasets, the following patterns are consistently observed:
 
-1. **Linear entropy accumulation with age.** Mean CpG entropy increases at approximately $1$–$5 \times 10^{-4}$ H units per year (Pearson $r \approx 0.6$–$0.9$, $p < 10^{-10}$), confirming the epigenetic drift hypothesis. This is consistent with the stochastic epigenetic reprogramming model of Issa (2014) and the entropy landscape described in Hannum et al. (2013).
+1. **Linear entropy accumulation with age.** Mean CpG entropy increases at approximately $1\text{--}5 \times 10^{-4}$ H units per year (Pearson $r \approx 0.6\text{--}0.9$, $p < 10^{-10}$), confirming the epigenetic drift hypothesis. This is consistent with the stochastic epigenetic reprogramming model of Issa (2014) and the entropy landscape described in Hannum et al. (2013).
 
 2. **Non-linear reversal response.** The reversal curve $R(p)$ is concave — the first 20–30% of CpG sites intervened (highest drift sites) yields disproportionately large biological age reduction. This is mechanistically explained by the fact that clock-associated CpGs are heavily enriched at high-drift sites, and that the ElasticNet clock assigns large coefficients to precisely those sites.
 
 3. **HRF resonance is age-state-specific.** Young epigenomes ($\leq 35$ years) exhibit significantly higher coherence ratios (low-frequency spectral power dominance) and lower spectral entropy compared to Old epigenomes ($> 55$ years), confirming that the wave-interference interpretation of methylation patterns carries discriminative biological signal.
 
-4. **Escape velocity is mathematically achievable under realistic assumptions.** At intervention intervals of $T = 1$–$2$ years, escape velocity is typically achievable at $p^* \approx 30$–$60\%$ CpG reset intensity, depending on the dataset's reversal curve saturation point.
+4. **Escape velocity is mathematically achievable under realistic assumptions.** At intervention intervals of $T = 1\text{--}2$ years, escape velocity is typically achievable at $p^* \approx 30\text{--}60\%$ CpG reset intensity, depending on the dataset's reversal curve saturation point.
 
 5. **Horvath clock CpG overlap validates feature selection.** The top-variance ElasticNet features consistently include a non-trivial fraction of the 353 Horvath CpGs, providing biological convergent validity for the data-driven approach.
 
-6. **Kolmogorov complexity confirms algorithmic aging.** The gzip-based complexity ratio $K_{\text{ratio}} > 1$ across datasets, confirming that aged epigenomes require more bits to describe than young ones — a model-free, information-theoretic fingerprint of aging independent of any specific clock architecture.
+6. **Kolmogorov complexity confirms algorithmic aging.** The gzip-based complexity ratio $`K_{\text{ratio}} > 1`$ across datasets, confirming that aged epigenomes require more bits to describe than young ones — a model-free, information-theoretic fingerprint of aging independent of any specific clock architecture.
 
 7. **Information Bottleneck reveals over-compressed clock features.** In the $I(X;T)$ vs $I(X;Y)$ plane, a subset of top clock CpGs lies systematically below the diagonal — high task utility, low redundancy with the clock's internal representation. These sites represent the most causally informative aging biomarkers and are candidates for next-generation minimal clocks.
 
@@ -807,9 +807,9 @@ The following literature informs the mathematical and biological foundations of 
 
 #### 6.1 The Methylome as a Thermodynamic System
 
-From a statistical mechanics perspective, each CpG site can be modeled as a two-state system with states $\{0_{\text{unmethylated}},\; 1_{\text{methylated}}\}$. The measured beta value $\beta \in [0,1]$ is the ensemble-average occupancy of the methylated state across cells in the sample — directly analogous to mean magnetization in an Ising spin system.
+From a statistical mechanics perspective, each CpG site can be modeled as a two-state system with states $`\{0_{\text{unmethylated}},\; 1_{\text{methylated}}\}`$. The measured beta value $\beta \in [0,1]$ is the ensemble-average occupancy of the methylated state across cells in the sample — directly analogous to mean magnetization in an Ising spin system.
 
-The per-site configurational entropy contribution (up to a factor of $k_B \ln 2$) is exactly $H(\beta)$. A CpG in an ordered state ($\beta \approx 0$ or $1$) occupies a free-energy minimum; a CpG drifting toward $\beta \approx 0.5$ climbs toward the free-energy maximum of that two-state system. **Aging, in this model, is a gradual free-energy increase in the methylation manifold** — a slow thermalization of the epigenomic "crystal" toward a disordered liquid state.
+The per-site configurational entropy contribution (up to a factor of $`k_B \ln 2`$) is exactly $H(\beta)$. A CpG in an ordered state ($\beta \approx 0$ or $1$) occupies a free-energy minimum; a CpG drifting toward $\beta \approx 0.5$ climbs toward the free-energy maximum of that two-state system. **Aging, in this model, is a gradual free-energy increase in the methylation manifold** — a slow thermalization of the epigenomic "crystal" toward a disordered liquid state.
 
 The total informational entropy produced per decade is:
 
@@ -817,7 +817,7 @@ The total informational entropy produced per decade is:
 \Delta S_{\text{decade}} = N \cdot \lambda_H \cdot 10 \quad \text{(bits)}
 ```
 
-where $\lambda_H$ is the entropy rate from Section I.3 and $N$ is the number of CpG sites. For $N \approx 450{,}000$ and $\lambda_H \approx 3 \times 10^{-4}$ H/year, this represents approximately $\Delta S \approx 1{,}350$ bits of informational order lost per decade.
+where $`\lambda_H`$ is the entropy rate from Section I.3 and $N$ is the number of CpG sites. For $N \approx 450{,}000$ and $`\lambda_H \approx 3 \times 10^{-4}`$ H/year, this represents approximately $`\Delta S \approx 1{,}350`$ bits of informational order lost per decade.
 
 #### 6.2 Negentropy Gradient and Reprogramming as Maxwell's Demon
 
@@ -833,7 +833,7 @@ The rate of negentropy loss:
 \frac{dJ}{dt} = -N\lambda_H < 0
 ```
 
-is the fundamental thermodynamic aging rate. Partial reprogramming, in this framework, acts as a biological **Maxwell's Demon** — investing metabolic work (OSKM transcription, chromatin remodeling) to restore local order in specific CpGs, reducing entropy at high-drift sites. The minimum thermodynamic work required to reset $n$ sites from $\beta_k^{\text{old}}$ to $\beta_k^{\text{young}}$ is bounded below by the Landauer limit:
+is the fundamental thermodynamic aging rate. Partial reprogramming, in this framework, acts as a biological **Maxwell's Demon** — investing metabolic work (OSKM transcription, chromatin remodeling) to restore local order in specific CpGs, reducing entropy at high-drift sites. The minimum thermodynamic work required to reset $n$ sites from $`\beta_k^{\text{old}}`$ to $`\beta_k^{\text{young}}`$ is bounded below by the Landauer limit:
 
 ```math
 W_{\min} \geq k_B T \ln 2 \cdot \sum_{k \in \mathcal{I}} \left[H(\beta_k^{\text{old}}) - H(\beta_k^{\text{young}})\right]
@@ -847,19 +847,19 @@ This provides a theoretical lower bound on the metabolic cost of epigenetic reju
 
 #### 7.1 Ornstein-Uhlenbeck Dynamics per CpG
 
-The time evolution of a CpG site's population-level beta value can be modeled as a continuous-time stochastic process. Let $\beta_k(t)$ denote the mean methylation at site $k$ in a cell population at age $t$. Under stochastic DNMT maintenance errors and age-associated DNMT3A/3B dysregulation, the dynamics follow an Itô SDE:
+The time evolution of a CpG site's population-level beta value can be modeled as a continuous-time stochastic process. Let $`\beta_k(t)`$ denote the mean methylation at site $k$ in a cell population at age $t$. Under stochastic DNMT maintenance errors and age-associated DNMT3A/3B dysregulation, the dynamics follow an Itô SDE:
 
 ```math
 d\beta_k = \kappa_k\left[\theta_k(t) - \beta_k\right]dt + \sigma_k\,dW_t
 ```
 
-where $W_t$ is a standard Wiener process, $\theta_k(t) = \theta_k^0 + \gamma_k t$ is the age-dependent drift attractor, $\kappa_k > 0$ is the mean-reversion speed, and $\sigma_k$ is the site-specific noise amplitude. This is an **Ornstein-Uhlenbeck process** with a linearly shifting mean. Its stationary variance is:
+where $`W_t`$ is a standard Wiener process, $`\theta_k(t) = \theta_k^0 + \gamma_k t`$ is the age-dependent drift attractor, $`\kappa_k > 0`$ is the mean-reversion speed, and $`\sigma_k`$ is the site-specific noise amplitude. This is an **Ornstein-Uhlenbeck process** with a linearly shifting mean. Its stationary variance is:
 
 ```math
 \hat{\sigma}^2_k = \frac{\sigma_k^2}{2\kappa_k}
 ```
 
-The ensemble mean entropy $\bar{H}(t) = \frac{1}{N}\sum_k \mathbb{E}[H(\beta_k(t))]$ increases with time, recovering the empirically observed linear aging trajectory.
+The ensemble mean entropy $`\bar{H}(t) = \frac{1}{N}\sum_k \mathbb{E}[H(\beta_k(t))]`$ increases with time, recovering the empirically observed linear aging trajectory.
 
 #### 7.2 Site Independence Assumption and Total Correlation
 
@@ -904,7 +904,7 @@ The effective model complexity of the elastic net fit is:
 \text{df}(\hat{\boldsymbol{w}}) \approx \text{tr}\!\left[\mathbf{X}_{\mathcal{A}}\left(\mathbf{X}_{\mathcal{A}}^\top \mathbf{X}_{\mathcal{A}} + \alpha(1-\rho)\mathbf{I}\right)^{-1}\mathbf{X}_{\mathcal{A}}^\top\right]
 ```
 
-where $\mathcal{A} = \{k : \hat{w}_k \neq 0\}$. This is always less than $|\mathcal{A}|$ — the L2 term compresses the effective parameter count below the number of non-zero CpGs.
+where $`\mathcal{A} = \{k : \hat{w}_k \neq 0\}`$. This is always less than $|\mathcal{A}|$ — the L2 term compresses the effective parameter count below the number of non-zero CpGs.
 
 ---
 
@@ -918,7 +918,7 @@ High-dimensional methylation data $\mathbf{X} \in \mathbb{R}^{M \times N}$ (with
 \mathbf{X}_{\text{centered}} = \mathbf{U}_{:d}\mathbf{\Sigma}_{:d}\mathbf{V}_{:d}^\top + \mathbf{E}
 ```
 
-captures the $d = 200$ directions of maximum variance. The explained variance ratio for component $\ell$ is:
+captures the $d = 200$ directions of maximum variance. The explained variance ratio for component $`\ell`$ is:
 
 ```math
 \text{EVR}_\ell = \frac{\sigma_\ell^2}{\sum_{\ell'} \sigma_{\ell'}^2}
@@ -934,7 +934,7 @@ If the epigenetic manifold is approximately smooth and Riemannian, biological ag
 \boldsymbol{z}(t) = \boldsymbol{z}_{\text{young}} + \frac{t}{T_{\max}}\left(\boldsymbol{z}_{\text{old}} - \boldsymbol{z}_{\text{young}}\right) + \boldsymbol{\epsilon}(t)
 ```
 
-where $\boldsymbol{\epsilon}(t)$ is stochastic deviation from the mean aging trajectory. Partial reprogramming corresponds to moving a sample's PCA projection back toward $\boldsymbol{z}_{\text{young}}$ — a displacement against the aging geodesic.
+where $\boldsymbol{\epsilon}(t)$ is stochastic deviation from the mean aging trajectory. Partial reprogramming corresponds to moving a sample's PCA projection back toward $`\boldsymbol{z}_{\text{young}}`$ — a displacement against the aging geodesic.
 
 ---
 
@@ -958,7 +958,7 @@ Because many CpG sites carry correlated age information, the aggregate mutual in
 I(\boldsymbol{\beta}_\mathcal{S};\, A) \leq \sum_{k \in \mathcal{S}} I(\beta_k;\, A)
 ```
 
-The excess is the **redundancy** $\mathcal{R} = \sum_k I(\beta_k; A) - I(\boldsymbol{\beta}_\mathcal{S}; A) \geq 0$. The elastic net implicitly manages this by jointly shrinking correlated predictors, preventing double-counting of shared age information.
+The excess is the **redundancy** $`\mathcal{R} = \sum_k I(\beta_k; A) - I(\boldsymbol{\beta}_\mathcal{S}; A) \geq 0`$. The elastic net implicitly manages this by jointly shrinking correlated predictors, preventing double-counting of shared age information.
 
 #### 10.3 Clock Precision as an Information Rate
 
@@ -988,7 +988,7 @@ By the strong law of large numbers, for each time point $t$:
 \text{SE}(\hat{\mu}(t)) = \frac{\hat{\sigma}(t)}{\sqrt{N_{\text{MC}}}}
 ```
 
-At $N_{\text{MC}} = 500$ and $\hat{\sigma}(t) \approx 5$ years, SE $\approx 0.22$ years — well below clinical resolution.
+At $`N_{\text{MC}} = 500`$ and $\hat{\sigma}(t) \approx 5$ years, SE $\approx 0.22$ years — well below clinical resolution.
 
 #### 11.3 Variance Growth Under Stochastic Interventions
 
@@ -998,7 +998,7 @@ The predictive interval width grows with time due to variance accumulation:
 \text{Var}(a_{\text{bio}}(t)) \approx \sigma_{\text{noise}}^2 \cdot t + \left\lfloor\frac{t}{T}\right\rfloor \cdot \sigma_{\text{reversal}}^2
 ```
 
-where $\sigma_{\text{reversal}}^2 = 0.01 \cdot R(p)^2$ is the intervention noise variance.
+where $`\sigma_{\text{reversal}}^2 = 0.01 \cdot R(p)^2`$ is the intervention noise variance.
 
 ---
 
@@ -1006,19 +1006,19 @@ where $\sigma_{\text{reversal}}^2 = 0.01 \cdot R(p)^2$ is the intervention noise
 
 #### 12.1 Gabor-Kernel Interpretation
 
-Each resonance basis function $\phi_{c,i}(\mathbf{q}) = e^{-\gamma \|\mathbf{q}-\mathbf{x}_i\|^2}(1+\cos(\omega_c\|\mathbf{q}-\mathbf{x}_i\|))$ is a **Gabor-like function** — the product of a Gaussian envelope and an oscillatory term — providing simultaneous localization in both position and frequency. The HRF classifier is therefore a **Gabor-kernel machine** applied to the epigenomic PCA manifold.
+Each resonance basis function $`\phi_{c,i}(\mathbf{q}) = e^{-\gamma \|\mathbf{q}-\mathbf{x}_i\|^2}(1+\cos(\omega_c\|\mathbf{q}-\mathbf{x}_i\|))`$ is a **Gabor-like function** — the product of a Gaussian envelope and an oscillatory term — providing simultaneous localization in both position and frequency. The HRF classifier is therefore a **Gabor-kernel machine** applied to the epigenomic PCA manifold.
 
-In the limit $\omega_c \to 0$, the energy reduces to:
+In the limit $`\omega_c \to 0`$, the energy reduces to:
 
 ```math
 E_c(\mathbf{q})\big|_{\omega_c=0} = 2\sum_{i=1}^{k} \exp(-\gamma\,\|\mathbf{q} - \mathbf{x}_i^{(c)}\|^2)
 ```
 
-— exactly a **Gaussian kernel density estimate** of the class-conditional density. Classification by $\arg\max_c E_c$ then approximates Gaussian Naive Bayes in the low-$\omega$ limit.
+— exactly a **Gaussian kernel density estimate** of the class-conditional density. Classification by $`\arg\max_c E_c`$ then approximates Gaussian Naive Bayes in the low-$\omega$ limit.
 
 #### 12.2 Constructive and Destructive Interference Zones
 
-**Constructive interference** occurs when the query sits at resonant distances from training samples: $\omega_c \cdot r_i = 2\pi n$, $n \in \mathbb{Z}^+$. **Destructive interference** occurs at $\omega_c \cdot r_i = \pi(2n+1)$. The class-specific frequencies $\omega_c = \omega_0(c+1)$ mean the Young, Middle, and Old classes resonate at distinct spatial scales in the PCA space, creating non-overlapping zones of maximum energy — the geometric basis for the classifier's discriminative power.
+**Constructive interference** occurs when the query sits at resonant distances from training samples: $`\omega_c \cdot r_i = 2\pi n`$, $n \in \mathbb{Z}^+$. **Destructive interference** occurs at $`\omega_c \cdot r_i = \pi(2n+1)`$. The class-specific frequencies $`\omega_c = \omega_0(c+1)`$ mean the Young, Middle, and Old classes resonate at distinct spatial scales in the PCA space, creating non-overlapping zones of maximum energy — the geometric basis for the classifier's discriminative power.
 
 ---
 
@@ -1032,17 +1032,17 @@ The Intrinsic Epigenetic Age Acceleration $\Delta^{\text{IEAA}}$ connects to mor
 h(a, \Delta) = h_0(a) \cdot \exp(\theta \cdot \Delta)
 ```
 
-Empirical estimates (Chen et al. 2016; Marioni et al. 2015) suggest $\theta \approx 0.04$–$0.10$, meaning a 10-year epigenetic age acceleration confers approximately $e^{1.0} \approx 2.7\times$ elevated all-cause mortality hazard.
+Empirical estimates (Chen et al. 2016; Marioni et al. 2015) suggest $\theta \approx 0.04\text{--}0.10$, meaning a 10-year epigenetic age acceleration confers approximately $e^{1.0} \approx 2.7\times$ elevated all-cause mortality hazard.
 
 #### 13.2 Escape Velocity as a Stochastic Control Problem
 
-Define biological age as state $x(t) = a_{\text{bio}}(t)$ and intervention reversal as control $u_n = R(p)$ applied at discrete times $t_n = nT$. The controlled system is:
+Define biological age as state $`x(t) = a_{\text{bio}}(t)`$ and intervention reversal as control $`u_n = R(p)`$ applied at discrete times $`t_n = nT`$. The controlled system is:
 
 ```math
 x(t_{n+1}) = x(t_n) + T - u_n + w_n, \qquad w_n \sim \mathcal{N}(0, \sigma_w^2)
 ```
 
-Escape velocity is the **stochastic stability condition** $\mathbb{E}[x(t_{n+1}) - x(t_n)] \leq 0$, i.e. $T - R(p) \leq 0$. The minimum escape intensity $p^*$ is thus the **minimum-effort stabilizing controller** for this one-dimensional stochastic system. The intervention landscape heatmap visualizes the **controllability region** in $(p, T)$ parameter space, with the escape boundary $\{(p,T) : R(p) = T\}$ delineating stable (controlled) from unstable (uncontrolled) biological aging dynamics.
+Escape velocity is the **stochastic stability condition** $`\mathbb{E}[x(t_{n+1}) - x(t_n)] \leq 0`$, i.e. $`T - R(p) \leq 0`$. The minimum escape intensity $p^*$ is thus the **minimum-effort stabilizing controller** for this one-dimensional stochastic system. The intervention landscape heatmap visualizes the **controllability region** in $(p, T)$ parameter space, with the escape boundary $\{(p,T) : R(p) = T\}$ delineating stable (controlled) from unstable (uncontrolled) biological aging dynamics.
 
 ---
 
@@ -1081,7 +1081,7 @@ Escape velocity is the **stochastic stability condition** $\mathbb{E}[x(t_{n+1})
 | **PRC2** | Polycomb Repressive Complex 2; deposits H3K27me3 at developmental gene promoters |
 | **Spectral entropy** | Shannon entropy of the normalized FFT power spectrum; measures methylation signal disorder |
 | **Total correlation** $C$ | Excess of summed marginal entropies over joint entropy; measures CpG co-methylation redundancy |
-| **Landauer limit** | Minimum thermodynamic work to erase one bit of information: $k_B T \ln 2 \approx 2.85 \times 10^{-21}$ J at 310 K |
+| **Landauer limit** | Minimum thermodynamic work to erase one bit of information: $`k_B T \ln 2 \approx 2.85 \times 10^{-21}`$ J at 310 K |
 | **do-calculus** | Pearl's formal language for interventional causal reasoning; $P(Y \mid \text{do}(X))$ differs from $P(Y \mid X)$ by eliminating backdoor confounding |
 | **SCM** | Structural Causal Model; a DAG with functional equations defining how each variable is generated from its parents and noise |
 | **ITE** | Individual Treatment Effect; counterfactual difference in outcome for a specific individual under treatment vs. control |
