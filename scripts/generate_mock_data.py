@@ -19,9 +19,9 @@ def main():
     ages = np.random.uniform(20, 80, args.samples)
     data = {"age": ages}
 
+    # Simulate some drift
+    drift = (ages - 20) / 60.0 * 0.2
     for i in range(args.cpgs):
-        # Simulate some drift
-        drift = (ages - 20) / 60.0 * 0.2
         beta = np.random.uniform(0.1, 0.9, args.samples)
         # Adding simple age correlation to ~10% of CpGs
         if i < args.cpgs * 0.1:
