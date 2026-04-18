@@ -29,6 +29,7 @@ def main():
         data[f"cg{i:08d}"] = beta
 
     df = pd.DataFrame(data)
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
     df.to_csv(args.output, index=False)
     print(f"Generated mock data at {args.output}")
 
