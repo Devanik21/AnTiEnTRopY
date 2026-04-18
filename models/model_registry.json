@@ -1,0 +1,11 @@
+{
+  "models": [
+    {
+      "id": "clock_v1",
+      "type": "ElasticNetCV",
+      "description": "Baseline biological clock trained on 5000 high-variance CpGs.",
+      "file": "pretrained/clock_v1.pkl",
+      "created_at": "2024-05-20"
+    }
+  ]
+}
