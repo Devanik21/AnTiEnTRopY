@@ -7,6 +7,7 @@ Creates a small mock dataset for testing AnTiEnTRopY.
 import pandas as pd
 import numpy as np
 import argparse
+import os
 
 def main():
     parser = argparse.ArgumentParser(description="Generate mock methylation data")
