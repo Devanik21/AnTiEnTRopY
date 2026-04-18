@@ -1,0 +1,15 @@
+# Default System Configuration
+app:
+  title: "AnTiEnTRopY"
+  version: "1.0.0"
+  theme: "dark"
+  port: 8501
+
+ui:
+  colors:
+    primary: "#030d12"
+    accent: "#00e5a0"
+    text: "#e0e0e0"
+  fonts:
+    main: "IBM Plex Mono"
+    header: "DM Serif Display"
