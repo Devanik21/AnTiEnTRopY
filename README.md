@@ -1,7 +1,6 @@
 <div align="center">
 
 # AnTiEnTRopY
-
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/b4baec65-5f50-49d7-a407-1ea141d87348" />
 
 
@@ -746,9 +745,31 @@ The following literature informs the mathematical and biological foundations of 
 
 > Zhang, W. et al. (2023). Aging clocks, entropy, and the limits of age-reversal. *Developmental Cell*, 58(4), 227–237.
 
+**Causal Inference**
+
+> Pearl, J. (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9780511803161
+
+> Pearl, J., Glymour, M. & Jewell, N. P. (2016). *Causal Inference in Statistics: A Primer*. Wiley.
+
+**Information Bottleneck**
+
+> Tishby, N., Pereira, F. C. & Bialek, W. (2000). The information bottleneck method. *Proceedings of the 37th Annual Allerton Conference on Communication, Control, and Computing*, 368–377. arXiv:physics/0004057
+
+> Tishby, N. & Schwartz-Ziv, R. (2017). Opening the black box of deep neural networks via information. arXiv:1703.00810
+
+**Topological Data Analysis**
+
+> Ester, M., Kriegel, H.-P., Sander, J. & Xu, X. (1996). A density-based algorithm for discovering clusters in large spatial databases with noise. *Proceedings of KDD-96*, 226–231.
+
+> van der Maaten, L. & Hinton, G. (2008). Visualizing data using t-SNE. *Journal of Machine Learning Research*, 9(86), 2579–2605.
+
+**Algorithmic Complexity**
+
+> Li, M. & Vitányi, P. (2008). *An Introduction to Kolmogorov Complexity and Its Applications* (3rd ed.). Springer. https://doi.org/10.1007/978-0-387-49820-1
+
 **HRF Framework (Original)**
 
-> Debnath, D. (2025). Harmonic Resonance Field: A wave-interference framework for neural state classification. *(Preprint / Working Paper)*
+> Debnath, D. (2025). Harmonic Resonance Field: A wave-interference framework for neural state classification. Zenodo. https://doi.org/10.5281/zenodo.18173940
 
 ---
 
@@ -756,9 +777,13 @@ The following literature informs the mathematical and biological foundations of 
 
 <div align="center">
 
-**Devanik21 (Debanik)**
+**Devanik21 (Devanik Debnath)**
 
-*Research in computational biology, epigenetic aging, and novel ML frameworks for biomedical signal analysis.*
+*Final-year B.Tech ECE, NIT Agartala · Samsung ISWDP Grade I Fellow (Cohort 7, 98.58th percentile) · NAOJ Research Affiliate*
+
+*Research in computational biology, epigenetic aging, novel ML architectures, and biomedical signal analysis.*
+
+*Author of the Harmonic Resonance Forest (HRF) framework · arXiv:2412.20091 (GRB light curve reconstruction, NAOJ) · Zenodo DOI: 10.5281/zenodo.18173940*
 
 [![GitHub](https://img.shields.io/badge/GitHub-Devanik21-181717?style=flat-square&logo=github)](https://github.com/Devanik21)
 
@@ -1057,12 +1082,19 @@ Escape velocity is the **stochastic stability condition** $\mathbb{E}[x(t_{n+1})
 | **Spectral entropy** | Shannon entropy of the normalized FFT power spectrum; measures methylation signal disorder |
 | **Total correlation** $C$ | Excess of summed marginal entropies over joint entropy; measures CpG co-methylation redundancy |
 | **Landauer limit** | Minimum thermodynamic work to erase one bit of information: $k_B T \ln 2 \approx 2.85 \times 10^{-21}$ J at 310 K |
+| **do-calculus** | Pearl's formal language for interventional causal reasoning; $P(Y \mid \text{do}(X))$ differs from $P(Y \mid X)$ by eliminating backdoor confounding |
+| **SCM** | Structural Causal Model; a DAG with functional equations defining how each variable is generated from its parents and noise |
+| **ITE** | Individual Treatment Effect; counterfactual difference in outcome for a specific individual under treatment vs. control |
+| **Information Bottleneck** | Principle (Tishby 2000) for finding a compressed representation $T$ of input $X$ that maximally preserves information about target $Y$ |
+| **Kolmogorov complexity** $K(x)$ | Minimum description length of object $x$; approximated here by gzip compression of serialized beta vectors |
+| **DBSCAN** | Density-Based Spatial Clustering of Applications with Noise; identifies arbitrarily shaped clusters and marks outliers as noise |
+| **t-SNE** | t-Distributed Stochastic Neighbor Embedding; non-linear dimensionality reduction for visualization of high-dimensional manifolds |
 
 ---
 
 <div align="center">
 
-*AnTiEnTRopY — because entropy only wins if you let it.*
+*AnTiEnTRopY v1.0 — because entropy only wins if you let it.*
 
 *Apache 2.0 License | Open to collaboration and extension*
 
